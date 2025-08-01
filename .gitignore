@@ -6,6 +6,21 @@
 # Node artifact files
 node_modules/
 dist/
+build/
+develop-eggs/
+.eggs/
+*.manifest
+*.spec
+pip-log.txt
+htmlcov/
+.tox/
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+.mypy_cache/
+.dmypy.json
+.pyre/
 
 # Compiled Java class files
 *.class
