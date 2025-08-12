@@ -1,0 +1,6 @@
+/* Solo aplica dentro del Inline de Graduación */
+.inline-group fieldset .form-row input[type="text"],
+.inline-group fieldset .form-row input[type="number"] {
+  min-width: 80px;
+  width: 80px !important;
+}
