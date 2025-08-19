@@ -21,7 +21,7 @@ class SubCategoriaAdmin(admin.ModelAdmin):
 @admin.register(Producto)
 class ProductoAdmin(admin.ModelAdmin):
     list_display = ['codigo', 'nombre', 'categoria', 'sub_categoria','marca', 'stock', 'precio_costo']
-    fields = [('codigo', 'nombre'), 'descripcion', ('categoria', 'sub_categoria'), ('stock', 'precio_costo', 'precio_venta')]
+    fields = [('codigo', 'nombre'), 'descripcion', ('categoria', 'sub_categoria', 'marca'), ('stock', 'precio_costo', 'precio_venta')]
     readonly_fields = ['precio_venta']
     search_fields = ['codigo', 'nombre', 'descripcion']
     autocomplete_fields = ['marca', 'categoria', 'sub_categoria']

@@ -24,21 +24,47 @@ class ClienteAdmin(admin.ModelAdmin):
     autocomplete_fields = ['obra_social']
     inlines = [ConsultaInline]
 
+class DetalleVentaForm(forms.ModelForm):
+    class Meta:
+        model = DetalleVenta
+        fields = '__all__'
+
+    def clean(self):
+        cleaned_data = super().clean()
+        producto = cleaned_data.get('producto')
+        cantidad = cleaned_data.get('cantidad')
+
+        if producto and cantidad:
+            if producto.stock < cantidad:
+                raise forms.ValidationError({
+                    'cantidad': f"Stock insuficiente para {producto.nombre}. Stock actual: {producto.stock}"
+                })
+        return cleaned_data
+
 class DetalleVentaInline(admin.TabularInline):
     model = DetalleVenta
-    fields = ['producto', 'cantidad', 'porcentaje_ganancia', 'precio_unitario', 'subtotal_item']
-    readonly_fields = ('precio_unitario', 'subtotal_item',)
+    form = DetalleVentaForm
+    fields = ['producto', 'cantidad', 'precio_costo','porcentaje_ganancia', 'precio_unitario', 'subtotal_item']
+    readonly_fields = ('precio_unitario', 'subtotal_item', 'precio_costo')
     autocomplete_fields = ['producto']
     extra = 1
-
+    
+    @admin.display(description="Precio Costo")
+    def precio_costo(self, obj):
+        if obj.pk:
+            return obj.producto.precio_costo
+        else:
+            return 0
+    
 @admin.register(Venta)
 class VentaAdmin(admin.ModelAdmin):
     fields = ['fecha', 'cliente',  'forma_pago', 'total_venta', 'entrego', 'saldo']
+    readonly_fields = ['total_venta', 'saldo']
+    list_display = ['fecha', 'cliente', 'forma_pago', 'total_venta']
     inlines = [DetalleVentaInline]
     autocomplete_fields = ['cliente']
 
     def save_formset(self, request, form, formset, change):
-        import pdb; pdb.set_trace()
         # Primero, se guardan los objetos del inline
         super().save_formset(request, form, formset, change)
         
@@ -48,6 +74,8 @@ class VentaAdmin(admin.ModelAdmin):
             # Aca va el calculo de 
             total_venta = sum(detalle.subtotal_item for detalle in venta.detalles_ventas.all())
             venta.total_venta = total_venta
+            # Calculamos el saldo
+            venta.saldo = venta.total_venta - venta.entrego
             venta.save()
 
 @admin.register(ObraSocial)

@@ -37,7 +37,7 @@ class Producto(models.Model):
     sub_categoria = models.ForeignKey(SubCategoria, null=True, on_delete=models.SET_NULL, blank=True)
     stock = models.PositiveIntegerField()
     precio_costo = models.DecimalField("Precio de costo", max_digits=10, decimal_places=2)
-    precio_venta = models.DecimalField("Precio de venta", max_digits=10, decimal_places=2)
+    precio_venta = models.DecimalField("Precio de venta", max_digits=10, decimal_places=2, null=True)
 
     def __str__(self):
         return f"{self.codigo}-{self.nombre}"

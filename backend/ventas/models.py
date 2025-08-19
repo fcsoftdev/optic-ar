@@ -49,8 +49,8 @@ class Venta(models.Model):
     forma_pago = models.CharField(
         "Forma de pago", max_length=2, choices=FORMA_PAGO_CHOICES, default='CO')
     entrego = models.DecimalField("entregó", max_digits=10, decimal_places=2)
-    total_venta = models.DecimalField("Total", max_digits=10, decimal_places=2)
-    saldo = models.DecimalField(max_digits=10, decimal_places=2)
+    total_venta = models.DecimalField("Total", max_digits=10, decimal_places=2, default=0, editable=False)
+    saldo = models.DecimalField(max_digits=10, decimal_places=2, default=0, editable=False)
 
     def __str__(self):
         return f"{self.fecha}-{self.cliente.nombre_apellido}"
@@ -86,6 +86,12 @@ class DetalleVenta(models.Model):
                 
         # 4. Calcula el subtotal antes de guardar
         self.subtotal = self.cantidad * self.precio_unitario
+        
+        # 5. Calculamos el precio unitario (precio_costo * porcentaje_venta)
+        self.precio_unitario = self.producto.precio_costo * (1 + (self.porcentaje_ganancia / 100))
+        
+        # 6. Calculamos el subtotal_item (precio_unitario * cantidad)
+        self.subtotal_item = self.precio_unitario * self.cantidad
         
         # Llama al save original para guardar la instancia de DetalleCompra
         super().save(*args, **kwargs)
