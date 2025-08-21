@@ -1,5 +1,7 @@
+from urllib.parse import parse_qs
 from django import forms
 from django.contrib import admin
+from django.urls import reverse
 
 from ventas.models import Cliente, Consulta, Graduacion, ObraSocial, Venta, DetalleVenta
 from django.utils.html import format_html
@@ -19,10 +21,17 @@ class ConsultaInline(admin.TabularInline):
     
 @admin.register(Cliente)
 class ClienteAdmin(admin.ModelAdmin):
-    list_display = ['dni', 'nombre_apellido', 'nro_afiliado', 'obra_social']
+    list_display = ['dni', 'nombre_apellido', 'nro_afiliado', 'obra_social', 'ver_historia_clinica']
     search_fields = ['nombre_apellido', 'dni']
     autocomplete_fields = ['obra_social']
-    inlines = [ConsultaInline]
+    
+    @admin.display(description="Historia Clínica")
+    def ver_historia_clinica(self, obj):
+        url = (
+            reverse("admin:ventas_consulta_changelist")
+            + f"?cliente={obj.id}"
+        )
+        return format_html('<a class="button" href="{}">Ver historia clínica</a>', url)
 
 class DetalleVentaForm(forms.ModelForm):
     class Meta:
@@ -126,3 +135,20 @@ class ConsultaAdmin(admin.ModelAdmin):
             return format_html('<span style="color: green;">✓</span>')
         else:
             return format_html('<span style="color: red;">✗</span>')
+        
+    def get_changeform_initial_data(self, request):
+        initial = super().get_changeform_initial_data(request)
+        
+        # Chequear si viene el filtro del changelist
+        filtros = request.GET.get("_changelist_filters")
+        if filtros:
+            params = parse_qs(filtros)
+            cliente_id = params.get("cliente", [None])[0]
+            if cliente_id:
+                initial["cliente"] = cliente_id
+
+        # O si viene directo por GET ?cliente=...
+        if "cliente" in request.GET:
+            initial["cliente"] = request.GET["cliente"]
+
+        return initial
