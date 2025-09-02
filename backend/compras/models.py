@@ -64,3 +64,12 @@ class DetalleCompra(models.Model):
         
         # Llama al save original para guardar la instancia de DetalleCompra
         super().save(*args, **kwargs)
+        
+class Gasto(models.Model):
+    """Modelo para registrar el detalle de gastos varios."""
+    fecha = models.DateField(default=date.today)
+    descripcion = models.CharField(max_length=50)
+    total = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
+    
+    def __str__(self):
+        return f"{self.fecha}-{self.descripcion}-{self.total}"

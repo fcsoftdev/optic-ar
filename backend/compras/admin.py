@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from compras.models import Compra, DetalleCompra, Proveedor
+from compras.models import Compra, DetalleCompra, Gasto, Proveedor
 
 class DetalleCompraInline(admin.TabularInline):
     model = DetalleCompra
@@ -32,3 +32,9 @@ class CompraAdmin(admin.ModelAdmin):
 class ProveedorAdmin(admin.ModelAdmin):
     search_fields = ['nombre', 'direccon']
     fields = [('nombre', 'direccion'), ('telefono', 'alias')]
+
+@admin.register(Gasto)
+class GastoAdmin(admin.ModelAdmin):
+    fields = ['fecha', 'descripcion', 'total']
+    list_display = ['fecha', 'descripcion', 'total']
+
