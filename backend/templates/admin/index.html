@@ -1,0 +1,19 @@
+{% extends "admin/index.html" %} {% block content %}
+
+<div id="content-main">
+  {{ block.super }}
+  <div class="app-contabilidad module">
+    <table style="width: 100%">
+      <caption class="section" title="Contabilidad" style="width: 100%">
+        Contabilidad
+      </caption>
+      <tr>
+        <th scope="row">
+          <a href="{% url 'admin:reporte-caja' %}">Reporte de Caja</a>
+        </th>
+        <td></td>
+      </tr>
+    </table>
+  </div>
+</div>
+{% endblock %}
