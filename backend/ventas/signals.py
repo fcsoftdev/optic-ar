@@ -3,6 +3,7 @@ from django.dispatch import receiver
 
 from ventas.models import DetalleVenta, Venta
 
+
 # ------------------- ELIMINACIÓN -------------------
 @receiver(pre_delete, sender=Venta)
 def devolver_stock_al_eliminar_venta(sender, instance, **kwargs):

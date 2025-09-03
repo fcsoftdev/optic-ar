@@ -4,19 +4,8 @@ from django.shortcuts import render
 from datetime import date
 from .services import obtener_movimientos_caja
 
-def reporte_caja_view(request):
-    # desde = request.GET.get("desde", str(date.today()))
-    # hasta = request.GET.get("hasta", str(date.today()))
-    # movimientos = obtener_movimientos_caja(desde, hasta)
 
-    # context = dict(
-    #     admin.site.each_context(request),
-    #     title="Reporte de Caja",
-    #     movimientos=movimientos,
-    #     desde=desde,
-    #     hasta=hasta,
-    # )
-    # return render(request, "admin/contabilidad/reporte_caja.html", context)
+def reporte_caja_view(request):
     desde = request.GET.get("desde", str(date.today()))
     hasta = request.GET.get("hasta", str(date.today()))
     forma_pago = request.GET.get("forma_pago", "")
@@ -33,7 +22,7 @@ def reporte_caja_view(request):
     total_egreso = sum([m.egreso for m in movimientos])
 
     # 🔹 Balance (solo si es un día exacto)
-    mostrar_balance = (desde == hasta)
+    mostrar_balance = desde == hasta
     balance = total_ingreso - total_egreso if mostrar_balance else None
 
     context = dict(
@@ -55,9 +44,15 @@ def reporte_caja_view(request):
 # --- FIX PARA EVITAR RECURSION ---
 old_get_urls = admin.site.get_urls
 
+
 def get_custom_urls():
     return [
-        path("reporte-caja/", admin.site.admin_view(reporte_caja_view), name="reporte-caja"),
+        path(
+            "reporte-caja/",
+            admin.site.admin_view(reporte_caja_view),
+            name="reporte-caja",
+        ),
     ] + old_get_urls()
+
 
 admin.site.get_urls = get_custom_urls

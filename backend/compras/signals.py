@@ -3,6 +3,7 @@ from django.dispatch import receiver
 
 from compras.models import Compra
 
+
 # ------------------- ELIMINACIÓN -------------------
 @receiver(pre_delete, sender=Compra)
 def descontar_stock_al_eliminar_compra(sender, instance, **kwargs):
