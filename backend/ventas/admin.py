@@ -3,6 +3,7 @@ from django import forms
 from django.contrib import admin
 from django.urls import reverse
 
+from productos.models import Producto
 from ventas.models import Cliente, Consulta, Graduacion, ObraSocial, Venta, DetalleVenta
 from django.utils.html import format_html
 
@@ -58,6 +59,27 @@ class DetalleVentaForm(forms.ModelForm):
         return cleaned_data
 
 
+class ProductoWidget(forms.Select):
+    def create_option(
+        self, name, value, label, selected, index, subindex=None, attrs=None
+    ):
+        option = super().create_option(
+            name, value, label, selected, index, subindex=subindex, attrs=attrs
+        )
+        # Asegurarnos de que value sea un número válido
+        pk_value = getattr(value, "value", value)
+
+        if pk_value:
+            try:
+                prod = Producto.objects.get(pk=pk_value)
+                option["attrs"]["data-precio-costo"] = str(prod.precio_costo)
+                option["attrs"]["data-stock-actual"] = str(prod.stock)
+            except Producto.DoesNotExist:
+                pass
+
+        return option
+
+
 class DetalleVentaInline(admin.TabularInline):
     model = DetalleVenta
     form = DetalleVentaForm
@@ -72,6 +94,17 @@ class DetalleVentaInline(admin.TabularInline):
     readonly_fields = ("precio_unitario", "subtotal_item", "precio_costo")
     autocomplete_fields = ["producto"]
     extra = 1
+
+    class Media:
+        js = (
+            "admin/js/jquery.init.js",  # asegura que django.jQuery esté disponible
+            "ventas/js/detalle_venta.js",
+        )
+
+    def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
+        if db_field.name == "producto":
+            kwargs["widget"] = ProductoWidget
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
     @admin.display(description="Precio Costo")
     def precio_costo(self, obj):
