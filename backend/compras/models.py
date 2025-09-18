@@ -42,7 +42,7 @@ class DetalleCompra(models.Model):
     producto = models.ForeignKey(Producto, null=True, on_delete=models.SET_NULL)
     cantidad = models.PositiveIntegerField()
     precio_unitario = models.DecimalField(
-        "Precio unitario", max_digits=10, decimal_places=2
+        "Precio unitario", max_digits=10, decimal_places=2, default=0
     )
     subtotal = models.DecimalField(max_digits=10, decimal_places=2, editable=False)
 

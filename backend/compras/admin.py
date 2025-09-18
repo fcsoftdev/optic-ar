@@ -5,10 +5,16 @@ from compras.models import Compra, DetalleCompra, Gasto, Proveedor
 
 class DetalleCompraInline(admin.TabularInline):
     model = DetalleCompra
-    fields = ["producto", "cantidad", "precio_unitario"]
+    fields = ["producto", "cantidad", "precio_unitario", "subtotal"]
     autocomplete_fields = ["producto"]
     readonly_fields = ["subtotal"]
     extra = 1
+
+    class Media:
+        js = (
+            "admin/js/jquery.init.js",  # asegura que django.jQuery esté disponible
+            "compras/js/detalle_compra.js",
+        )
 
 
 @admin.register(Compra)
