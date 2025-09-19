@@ -13,8 +13,4 @@ def get_subcategorias(request):
             )
         )
 
-    # 👀 Debug: esto lo vas a ver en la consola del servidor
-    print("Categoria ID:", categoria_id)
-    print("Subcategorias filtradas:", subcategorias)
-
     return JsonResponse({"subcategorias": subcategorias})
