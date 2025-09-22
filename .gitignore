@@ -66,3 +66,4 @@ Thumbs.db
 .gitignore.orig
 .vscode/
 backend/db.sqlite3
+*/staticfiles/
