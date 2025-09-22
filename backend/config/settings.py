@@ -32,6 +32,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    "config.apps.OpticArConfig",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -122,6 +123,13 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = "static/"
+
+# Carpeta donde Django juntará los archivos estáticos al hacer collectstatic
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+
+STATICFILES_DIRS = [
+    BASE_DIR / "static",  # 👈 carpeta global de estáticos
+]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

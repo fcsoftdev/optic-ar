@@ -1,0 +1,23 @@
+{% extends "admin/base.html" %} 
+{% load static %} 
+{% block title %}{{site_title|default:_('Django site admin') }}{% endblock %} {% block extrahead %}
+{{ block.super }}
+<!-- favicon -->
+<link
+  rel="shortcut icon"
+  href="{% static 'images/favicon.ico' %}"
+  type="image/x-icon"
+/>
+{% endblock %} 
+{% block branding %}
+<h1 id="site-name" style="color: #FFFFFF">
+  <img
+    src="{% static 'images/logo.png' %}"
+    alt="Logo"
+    style="height: 45px; vertical-align: middle; margin-right: 6px"
+  />
+  {{ site_header|default:_('Django administration') }}
+</h1>
+{% endblock %}
+
+
