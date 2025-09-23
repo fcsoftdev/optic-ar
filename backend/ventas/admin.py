@@ -99,6 +99,7 @@ class DetalleVentaInline(admin.TabularInline):
         js = (
             "admin/js/jquery.init.js",  # asegura que django.jQuery esté disponible
             "ventas/js/detalle_venta.js",
+            "ventas/js/generar_presupuesto_pdf.js",
         )
 
     def formfield_for_foreignkey(self, db_field, request=None, **kwargs):

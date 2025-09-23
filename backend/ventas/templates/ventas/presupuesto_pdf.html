@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Presupuesto de Venta</title>
+    <style>
+      @page {
+        size: A4;
+        margin: 6mm;
+        background: url("{{ STATIC_URL }}images/presupuesto-bg.png");
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-position: center center;
+
+        @frame footer {
+          -pdf-frame-content: footerContent;
+          bottom: 0cm;
+          margin-left: 2cm;
+          margin-right: 2cm;
+          height: 1cm;
+        }
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th,
+      td {
+        border: 1px solid #333;
+        padding: 5px;
+        text-align: left;
+      }
+      th {
+        background: #eee;
+      }
+      .h1 {
+        padding-top: 5px;
+      }
+      .contenido {
+        padding-top: 150px;
+      }
+      .fecha,
+      .total {
+        text-align: right;
+        font-weight: bold;
+        font-size: 16pt; /* tamaño más grande */
+        margin: 5px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="contenido">
+      <p class="fecha">Fecha: {{ data.fecha }}</p>
+      <table>
+        <thead>
+          <tr>
+            <th>Producto</th>
+            <th>Cantidad</th>
+            <th>Precio Unitario</th>
+            <th>Subtotal</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in data.productos %}
+          <tr>
+            <td>{{ item.nombre }}</td>
+            <td>{{ item.cantidad }}</td>
+            <td>$ {{ item.precio_unitario }}</td>
+            <td>$ {{ item.subtotal }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <p class="total">Total: $ {{ data.total }}</p>
+    </div>
+    <!-- Footer real -->
+    <div id="footerContent">
+      <hr />
+      <p style="text-align: center; font-size: 12px; color: #555">
+        Óptica Punto de Vista · Bv. Gral. Roca 889, Río Cuarto, Córdoba · Tel:
+        3584654766
+      </p>
+    </div>
+  </body>
+</html>
