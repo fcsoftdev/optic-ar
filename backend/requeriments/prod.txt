@@ -1,0 +1,3 @@
+-r common.txt
+xhtml2pdf
+mysqlclient
