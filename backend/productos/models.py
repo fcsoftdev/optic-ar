@@ -61,4 +61,15 @@ class Producto(models.Model):
     )
 
     def __str__(self):
-        return f"{self.codigo}-{self.nombre}"
+        marca_str = self.marca.nombre if self.marca else ""
+
+        if self.codigo:
+            if marca_str:
+                return f"{self.codigo} - {self.nombre} - {marca_str}"
+            else:
+                return f"{self.codigo} - {self.nombre}"
+        else:
+            if marca_str:
+                return f"{self.nombre} - {marca_str}"
+            else:
+                return self.nombre
