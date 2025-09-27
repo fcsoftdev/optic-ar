@@ -2,10 +2,133 @@ from urllib.parse import parse_qs
 from django import forms
 from django.contrib import admin
 from django.urls import reverse
+from decimal import Decimal, InvalidOperation
 
 from productos.models import Producto
 from ventas.models import Cliente, Consulta, Graduacion, ObraSocial, Venta, DetalleVenta
 from django.utils.html import format_html
+
+
+class DecimalFormatWidget(forms.TextInput):
+    """Widget personalizado para mostrar valores decimales con formato."""
+
+    def format_value(self, value):
+        """Formatea el valor para mostrar el símbolo + en positivos."""
+        if value is None or value == "":
+            return ""
+        try:
+            decimal_value = Decimal(str(value))
+            if decimal_value > 0:
+                return f"+{decimal_value}"
+            else:
+                return str(decimal_value)
+        except (InvalidOperation, ValueError):
+            return str(value)
+
+
+class GraduacionForm(forms.ModelForm):
+    class Meta:
+        model = Graduacion
+        fields = "__all__"
+        widgets = {
+            # Campos esféricos - usar TextInput personalizado
+            "od_lejos_esferico": DecimalFormatWidget(
+                attrs={"placeholder": "ej: +2.50 o -1.75", "class": "decimal-field"}
+            ),
+            "od_lejos_cilindrico": DecimalFormatWidget(
+                attrs={"placeholder": "ej: +1.25 o -0.50", "class": "decimal-field"}
+            ),
+            "oi_lejos_esferico": DecimalFormatWidget(
+                attrs={"placeholder": "ej: +2.50 o -1.75", "class": "decimal-field"}
+            ),
+            "oi_lejos_cilindrico": DecimalFormatWidget(
+                attrs={"placeholder": "ej: +1.25 o -0.50", "class": "decimal-field"}
+            ),
+            "od_cerca_esferico": DecimalFormatWidget(
+                attrs={"placeholder": "ej: +2.50 o -1.75", "class": "decimal-field"}
+            ),
+            "od_cerca_cilindrico": DecimalFormatWidget(
+                attrs={"placeholder": "ej: +1.25 o -0.50", "class": "decimal-field"}
+            ),
+            "oi_cerca_esferico": DecimalFormatWidget(
+                attrs={"placeholder": "ej: +2.50 o -1.75", "class": "decimal-field"}
+            ),
+            "oi_cerca_cilindrico": DecimalFormatWidget(
+                attrs={"placeholder": "ej: +1.25 o -0.50", "class": "decimal-field"}
+            ),
+            # Los campos de eje con NumberInput
+            "od_lejos_eje": forms.NumberInput(
+                attrs={"min": 0, "max": 180, "placeholder": "0-180°"}
+            ),
+            "oi_lejos_eje": forms.NumberInput(
+                attrs={"min": 0, "max": 180, "placeholder": "0-180°"}
+            ),
+            "od_cerca_eje": forms.NumberInput(
+                attrs={"min": 0, "max": 180, "placeholder": "0-180°"}
+            ),
+            "oi_cerca_eje": forms.NumberInput(
+                attrs={"min": 0, "max": 180, "placeholder": "0-180°"}
+            ),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Aplicar formato a los valores iniciales si existe una instancia
+        if self.instance and self.instance.pk:
+            decimal_fields = [
+                "od_lejos_esferico",
+                "od_lejos_cilindrico",
+                "oi_lejos_esferico",
+                "oi_lejos_cilindrico",
+                "od_cerca_esferico",
+                "od_cerca_cilindrico",
+                "oi_cerca_esferico",
+                "oi_cerca_cilindrico",
+            ]
+            for field_name in decimal_fields:
+                value = getattr(self.instance, field_name, None)
+                if value is not None:
+                    if value > 0:
+                        self.initial[field_name] = f"+{value}"
+
+    def clean(self):
+        """Validación personalizada para asegurar que los valores decimales sean válidos."""
+        cleaned_data = super().clean()
+
+        # Campos decimales que necesitan validación
+        decimal_fields = [
+            "od_lejos_esferico",
+            "od_lejos_cilindrico",
+            "oi_lejos_esferico",
+            "oi_lejos_cilindrico",
+            "od_cerca_esferico",
+            "od_cerca_cilindrico",
+            "oi_cerca_esferico",
+            "oi_cerca_cilindrico",
+        ]
+
+        for field_name in decimal_fields:
+            value = cleaned_data.get(field_name)
+            if value is not None and value != "":
+                try:
+                    # Si es string, convertir a Decimal
+                    if isinstance(value, str):
+                        # Remover el símbolo + si está presente para la conversión
+                        clean_value = (
+                            value.replace("+", "") if value.startswith("+") else value
+                        )
+                        cleaned_data[field_name] = Decimal(clean_value)
+                    # Si ya es un Decimal, dejarlo como está
+                    elif not isinstance(value, Decimal):
+                        cleaned_data[field_name] = Decimal(str(value))
+                except (InvalidOperation, ValueError):
+                    raise forms.ValidationError(
+                        {
+                            field_name: f"Valor inválido: {value}. Use formato decimal (ej: +2.50 o -1.75)"
+                        }
+                    )
+
+        return cleaned_data
 
 
 class GraduacionInline(admin.TabularInline):
@@ -150,6 +273,9 @@ class ObraSocialAdmin(admin.ModelAdmin):
 
 class GraduacionInline(admin.StackedInline):
     model = Graduacion
+    form = GraduacionForm
+    can_delete = False
+    extra = 1
     fieldsets = (
         (
             "Lejos - Ojo Derecho (OD)",
@@ -157,6 +283,7 @@ class GraduacionInline(admin.StackedInline):
                 "fields": (
                     ("od_lejos_esferico", "od_lejos_cilindrico", "od_lejos_eje"),
                 ),
+                "description": "Valores esféricos y cilíndricos: use + para positivos, - para negativos. Eje: 0° a 180°",
             },
         ),
         (
@@ -165,6 +292,7 @@ class GraduacionInline(admin.StackedInline):
                 "fields": (
                     ("oi_lejos_esferico", "oi_lejos_cilindrico", "oi_lejos_eje"),
                 ),
+                "description": "Valores esféricos y cilíndricos: use + para positivos, - para negativos. Eje: 0° a 180°",
             },
         ),
         (
@@ -173,6 +301,7 @@ class GraduacionInline(admin.StackedInline):
                 "fields": (
                     ("od_cerca_esferico", "od_cerca_cilindrico", "od_cerca_eje"),
                 ),
+                "description": "Valores esféricos y cilíndricos: use + para positivos, - para negativos. Eje: 0° a 180°",
             },
         ),
         (
@@ -181,12 +310,14 @@ class GraduacionInline(admin.StackedInline):
                 "fields": (
                     ("oi_cerca_esferico", "oi_cerca_cilindrico", "oi_cerca_eje"),
                 ),
+                "description": "Valores esféricos y cilíndricos: use + para positivos, - para negativos. Eje: 0° a 180°",
             },
         ),
     )
 
     class Media:
         css = {"all": ("ventas/css/graduacion_inline.css",)}
+        js = ("ventas/js/graduacion_format.js",)
 
 
 @admin.register(Consulta)

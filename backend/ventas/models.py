@@ -1,5 +1,6 @@
 from datetime import date
 from django.db import models
+from django.core.validators import MaxValueValidator
 from productos.models import Producto
 
 
@@ -129,6 +130,9 @@ class Consulta(models.Model):
 class Graduacion(models.Model):
     """Modelo para la registracion de las Graduaciones de lentes."""
 
+    from decimal import Decimal
+    from typing import Union
+
     consulta = models.OneToOneField(
         Consulta, on_delete=models.CASCADE, related_name="graduacion"
     )
@@ -140,7 +144,12 @@ class Graduacion(models.Model):
     od_lejos_cilindrico = models.DecimalField(
         "OD Lejos Cilíndrico", max_digits=5, decimal_places=2, null=True, blank=True
     )
-    od_lejos_eje = models.PositiveIntegerField("OD Lejos Eje", null=True, blank=True)
+    od_lejos_eje = models.PositiveSmallIntegerField(
+        "OD Lejos Eje",
+        validators=[MaxValueValidator(180)],
+        null=True,
+        blank=True,
+    )
 
     oi_lejos_esferico = models.DecimalField(
         "OI Lejos Esférico", max_digits=5, decimal_places=2, null=True, blank=True
@@ -148,7 +157,12 @@ class Graduacion(models.Model):
     oi_lejos_cilindrico = models.DecimalField(
         "OI Lejos Cilíndrico", max_digits=5, decimal_places=2, null=True, blank=True
     )
-    oi_lejos_eje = models.PositiveIntegerField("OI Lejos Eje", null=True, blank=True)
+    oi_lejos_eje = models.PositiveSmallIntegerField(
+        "OI Lejos Eje",
+        validators=[MaxValueValidator(180)],
+        null=True,
+        blank=True,
+    )
 
     # Cerca
     od_cerca_esferico = models.DecimalField(
@@ -157,18 +171,64 @@ class Graduacion(models.Model):
     od_cerca_cilindrico = models.DecimalField(
         "OD Cerca Cilíndrico", max_digits=5, decimal_places=2, null=True, blank=True
     )
-    od_cerca_eje = models.PositiveIntegerField("OD Cerca Eje", null=True, blank=True)
-
+    od_cerca_eje = models.PositiveSmallIntegerField(
+        "OD Cerca Eje",
+        validators=[MaxValueValidator(180)],
+        null=True,
+        blank=True,
+    )
     oi_cerca_esferico = models.DecimalField(
         "OI Cerca Esférico", max_digits=5, decimal_places=2, null=True, blank=True
     )
     oi_cerca_cilindrico = models.DecimalField(
         "OI Cerca Cilíndrico", max_digits=5, decimal_places=2, null=True, blank=True
     )
-    oi_cerca_eje = models.PositiveIntegerField("OI Cerca Eje", null=True, blank=True)
+    oi_cerca_eje = models.PositiveSmallIntegerField(
+        "OI Cerca Eje",
+        validators=[MaxValueValidator(180)],
+        null=True,
+        blank=True,
+    )
 
-    class Meta:
-        verbose_name_plural = "Graduaciones"
+    def format_valor(self, valor: Union[Decimal, float, None]) -> str:
+        """Formatea el valor añadiendo el símbolo + para números positivos y - para negativos.
+
+        Args:
+            valor: El valor decimal a formatear
+
+        Returns:
+            str: El valor formateado con el signo correspondiente
+        """
+        if valor is None:
+            return ""
+        return f"+{valor}" if valor > 0 else str(valor)
+
+    def get_od_lejos_esferico_display(self) -> str:
+        return self.format_valor(self.od_lejos_esferico)
+
+    def get_od_lejos_cilindrico_display(self) -> str:
+        return self.format_valor(self.od_lejos_cilindrico)
+
+    def get_oi_lejos_esferico_display(self) -> str:
+        return self.format_valor(self.oi_lejos_esferico)
+
+    def get_oi_lejos_cilindrico_display(self) -> str:
+        return self.format_valor(self.oi_lejos_cilindrico)
+
+    def get_od_cerca_esferico_display(self) -> str:
+        return self.format_valor(self.od_cerca_esferico)
+
+    def get_od_cerca_cilindrico_display(self) -> str:
+        return self.format_valor(self.od_cerca_cilindrico)
+
+    def get_oi_cerca_esferico_display(self) -> str:
+        return self.format_valor(self.oi_cerca_esferico)
+
+    def get_oi_cerca_cilindrico_display(self) -> str:
+        return self.format_valor(self.oi_cerca_cilindrico)
 
     def __str__(self):
         return f"Graduación - {self.consulta.cliente} ({self.consulta.fecha})"
+
+    class Meta:
+        verbose_name_plural = "Graduaciones"
