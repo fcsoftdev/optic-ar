@@ -30,7 +30,7 @@ class Compra(models.Model):
     )
 
     def __str__(self):
-        return f"{self.fecha}-{self.proveedor}-{self.total}"
+        return f"{self.fecha}-{self.proveedor or ''}-{self.total}"
 
 
 class DetalleCompra(models.Model):
@@ -51,28 +51,28 @@ class DetalleCompra(models.Model):
         verbose_name_plural = "Detalle de Compras"
 
     def __str__(self):
-        return f"{self.cantidad}-{self.producto.nombre}-{self.precio_unitario}"
+        producto_nombre = self.producto.nombre if self.producto else "Sin producto"
+        return f"{self.cantidad}-{producto_nombre}-{self.precio_unitario}"
 
     def save(self, *args, **kwargs):
-        # 1. Obtenemos el valor anterior de la cantidad si el objeto ya existe
-        try:
-            detalle_viejo = DetalleCompra.objects.get(pk=self.pk)
-            diferencia_stock = self.cantidad - detalle_viejo.cantidad
-        except DetalleCompra.DoesNotExist:
-            # Si el objeto es nuevo, la diferencia es la cantidad total
-            diferencia_stock = self.cantidad
-
-        # 2. Actualizamos el stock del producto con la diferencia
-        self.producto.stock += diferencia_stock
-
-        # 3. Actualizamos el precio de costo del producto
-        self.producto.precio_costo = self.precio_unitario
-        self.producto.save()
-
-        # 4. Calcula el subtotal antes de guardar
+        # 1. Calcular el subtotal
         self.subtotal = self.cantidad * self.precio_unitario
 
-        # Llama al save original para guardar la instancia de DetalleCompra
+        # 2. Si hay un producto asociado, actualizamos su stock y precio
+        if self.producto:
+            try:
+                detalle_viejo = DetalleCompra.objects.get(pk=self.pk)
+                diferencia_stock = self.cantidad - detalle_viejo.cantidad
+            except DetalleCompra.DoesNotExist:
+                # Si el objeto es nuevo, la diferencia es la cantidad total
+                diferencia_stock = self.cantidad
+
+            # Actualizamos el stock y precio del producto
+            self.producto.stock += diferencia_stock
+            self.producto.precio_costo = self.precio_unitario
+            self.producto.save()
+
+        # 3. Guardar el detalle de compra
         super().save(*args, **kwargs)
 
 
