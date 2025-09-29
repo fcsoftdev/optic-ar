@@ -57,7 +57,7 @@
             fecha: new Date().toLocaleDateString(),
           };
           // Enviar por AJAX
-          fetch("/admin/ventas/generar_presupuesto_pdf/", {
+          fetch("/ventas/generar-presupuesto-pdf/", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",

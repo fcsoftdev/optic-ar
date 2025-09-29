@@ -20,8 +20,6 @@ from django.urls import include, path
 
 urlpatterns = [
     path("productos/", include("productos.urls")),
-    path("admin/ventas/generar_presupuesto_pdf/", 
-         __import__('ventas.views').views.GenerarPresupuestoPDFView.as_view(),
-    ),
+    path("ventas/", include("ventas.urls")),
     path("admin/", admin.site.urls),
 ]

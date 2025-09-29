@@ -21,6 +21,7 @@ coverage.xml
 .mypy_cache/
 .dmypy.json
 .pyre/
+.coverage
 
 # Compiled Java class files
 *.class
@@ -67,3 +68,4 @@ Thumbs.db
 .vscode/
 backend/db.sqlite3
 */staticfiles/
+.github/
