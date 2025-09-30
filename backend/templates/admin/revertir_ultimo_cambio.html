@@ -1,0 +1,219 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block branding %}
+<h1 id="site-name"><a href="{% url 'admin:index' %}">Óptica AR - Admin</a></h1>
+{% endblock %}
+
+{% block content %}
+<div class="module">
+  <h1>{{ title }}</h1>
+  {% if subtitle %}
+  <p class="help">{{ subtitle }}</p>
+  {% endif %}
+
+  <form method="post">
+    {% csrf_token %}
+
+    <!-- Hidden inputs to keep action context -->
+    <input type="hidden" name="action" value="revertir_ultimo_cambio" />
+    {% for info in productos_info %}
+    <input
+      type="hidden"
+      name="_selected_action"
+      value="{{ info.producto.pk }}"
+    />
+    {% endfor %}
+
+    <div class="form-row">
+      <h3>Vista previa de reversión</h3>
+      <div class="table-container">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th>Precio Actual</th>
+              <th>Precio Anterior</th>
+              <th>Último Cambio</th>
+              <th>Fecha</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for info in productos_info %}
+            <tr
+              class="{% if not info.puede_revertir %}no-revertible{% endif %}"
+            >
+              <td>
+                <strong>{{ info.producto.nombre }}</strong><br />
+                <small>{{ info.producto.codigo|default:"Sin código" }}</small>
+              </td>
+              <td class="precio-actual">
+                ${{ info.precio_actual|floatformat:2|default:"No definido" }}
+              </td>
+              <td class="precio-anterior">
+                {% if info.precio_anterior %}
+                  ${{ info.precio_anterior|floatformat:2 }}
+                {% else %}
+                  -
+                {% endif %}
+              </td>
+              <td>
+                {% if info.tipo_cambio %}
+                  {{ info.tipo_cambio }}
+                  {% if info.porcentaje %}
+                    <br><small>{{ info.porcentaje|floatformat:2 }}%</small>
+                  {% endif %}
+                {% else %}
+                  -
+                {% endif %}
+              </td>
+              <td>
+                {% if info.fecha %}
+                  {{ info.fecha|date:"d/m/Y H:i" }}
+                {% else %}
+                  -
+                {% endif %}
+              </td>
+              <td>
+                {% if info.sin_historial %}
+                <span class="badge badge-warning">Sin historial</span>
+                {% elif info.puede_revertir %}
+                <span class="badge badge-success">✓ Revertible</span>
+                {% else %}
+                <span class="badge badge-error">No revertible</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    {% if productos_info %}
+    <div class="form-row">
+      <div class="field-box">
+        <label for="{{ form.confirmacion.id_for_label }}"
+          >{{ form.confirmacion.label }}:</label
+        >
+        {{ form.confirmacion }} {% if form.confirmacion.help_text %}
+        <p class="help">{{ form.confirmacion.help_text }}</p>
+        {% endif %} {% if form.confirmacion.errors %}
+        <ul class="errorlist">
+          {% for error in form.confirmacion.errors %}
+          <li>{{ error }}</li>
+          {% endfor %}
+        </ul>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="submit-row">
+      <input type="submit" value="Cancelar" name="cancel" class="cancel-link" />
+      {% if productos_info %}
+      <input
+        type="submit"
+        value="Confirmar Reversión"
+        name="apply"
+        class="default"
+      />
+      {% endif %}
+    </div>
+  </form>
+</div>
+
+<style>
+  .table-container {
+    max-height: 500px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 20px;
+  }
+
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0;
+  }
+
+  .table th,
+  .table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+  }
+
+  .table th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .table tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+
+  .table tr:hover {
+    background-color: #f5f5f5;
+  }
+
+  .no-revertible {
+    opacity: 0.6;
+    background-color: #ffeaea !important;
+  }
+
+  .no-revertible:hover {
+    background-color: #ffdddd !important;
+  }
+
+  .precio-actual,
+  .precio-anterior {
+    font-family: monospace;
+    font-weight: bold;
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.85em;
+    font-weight: bold;
+    text-align: center;
+  }
+
+  .badge-success {
+    background-color: #d4edda;
+    color: #155724;
+  }
+
+  .badge-warning {
+    background-color: #fff3cd;
+    color: #856404;
+  }
+
+  .badge-error {
+    background-color: #f8d7da;
+    color: #721c24;
+  }
+
+  .cancel-link {
+    background: #79aec8;
+    color: white;
+  }
+
+  .field-box {
+    margin-top: 20px;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #f9f9f9;
+  }
+</style>
+{% endblock %}

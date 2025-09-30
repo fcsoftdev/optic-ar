@@ -1,9 +1,18 @@
 from decimal import Decimal
+from typing import Any, Dict, List, Optional
 from django import forms
 from django.contrib import admin, messages
+from django.db.models import QuerySet
+from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 
-from productos.models import Categoria, Marca, Producto, SubCategoria
+from productos.models import (
+    Categoria,
+    Marca,
+    Producto,
+    SubCategoria,
+    UltimoCambioPrecio,
+)
 
 
 class AumentoPrecioForm(forms.Form):
@@ -12,7 +21,23 @@ class AumentoPrecioForm(forms.Form):
         required=True,
         decimal_places=2,
         max_digits=5,
+        min_value=Decimal("0.01"),
         help_text="Ejemplo: 10 = aumenta un 10% el precio de costo",
+    )
+
+
+class ConfirmacionForm(forms.Form):
+    """Formulario simple para confirmaciones."""
+
+    confirmacion = forms.ChoiceField(
+        label="¿Confirma la acción?",
+        choices=[
+            ("", "Seleccione una opción"),
+            ("confirmo", "Sí, confirmo"),
+        ],
+        required=True,
+        widget=forms.RadioSelect,
+        help_text="Esta acción no se puede deshacer",
     )
 
 
@@ -75,7 +100,7 @@ class ProductoAdmin(admin.ModelAdmin):
     list_filter = ["marca", "categoria", "sub_categoria"]
     autocomplete_fields = ["marca"]
 
-    actions = ["aumentar_precios"]
+    actions = ["aumentar_precios", "revertir_ultimo_cambio"]
 
     class Media:
         js = (
@@ -108,7 +133,9 @@ class ProductoAdmin(admin.ModelAdmin):
                     kwargs["queryset"] = SubCategoria.objects.none()
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
-    def aumentar_precios(self, request, queryset):
+    def aumentar_precios(
+        self, request: HttpRequest, queryset: QuerySet[Producto]
+    ) -> Optional[HttpResponse]:
         """
         Action para aumentar precios de costo en lote.
         """
@@ -141,4 +168,96 @@ class ProductoAdmin(admin.ModelAdmin):
         )
         return render(request, "admin/aumentar_precios_intermedio.html", context)
 
-    aumentar_precios.short_description = "Aumentar precio de costo en porcentaje"
+    def revertir_ultimo_cambio(
+        self, request: HttpRequest, queryset: QuerySet[Producto]
+    ) -> Optional[HttpResponse]:
+        """
+        Action para revertir al precio anterior (último cambio solamente).
+
+        Args:
+            request: Solicitud HTTP
+            queryset: Productos seleccionados
+
+        Returns:
+            Optional[HttpResponse]: Respuesta HTML o None para volver al changelist
+        """
+        if "cancel" in request.POST:
+            # Si presiona cancelar, volver al changelist
+            return None
+
+        if "apply" in request.POST:
+            form = ConfirmacionForm(request.POST)
+            if form.is_valid():
+                confirmacion: str = form.cleaned_data["confirmacion"]
+
+                if confirmacion == "confirmo":
+                    count = 0
+                    productos_sin_historial: List[str] = []
+
+                    for producto in queryset:
+                        try:
+                            ultimo_cambio = producto.ultimo_cambio_precio
+                            if ultimo_cambio.puede_revertir():
+                                # Revertir al precio anterior
+                                producto.precio_costo = ultimo_cambio.precio_anterior
+                                producto.save()
+                                count += 1
+                            else:
+                                productos_sin_historial.append(producto.nombre)
+
+                        except UltimoCambioPrecio.DoesNotExist:
+                            productos_sin_historial.append(producto.nombre)
+
+                    mensaje = f"Se revirtieron {count} productos al precio anterior."
+                    if productos_sin_historial:
+                        cantidad_sin_historial = len(productos_sin_historial)
+                        if cantidad_sin_historial <= 3:
+                            mensaje += (
+                                f" Sin historial: {', '.join(productos_sin_historial)}."
+                            )
+                        else:
+                            mensaje += f" Sin historial: {', '.join(productos_sin_historial[:3])} y {cantidad_sin_historial - 3} más."
+
+                    self.message_user(request, mensaje, level=messages.SUCCESS)
+                    return None
+        else:
+            form = ConfirmacionForm()
+
+        # Preparar datos para mostrar
+        productos_info: List[Dict[str, Any]] = []
+        for producto in queryset:
+            try:
+                ultimo_cambio = producto.ultimo_cambio_precio
+                productos_info.append(
+                    {
+                        "producto": producto,
+                        "precio_actual": producto.precio_costo,
+                        "precio_anterior": ultimo_cambio.precio_anterior,
+                        "puede_revertir": ultimo_cambio.puede_revertir(),
+                        "tipo_cambio": ultimo_cambio.get_tipo_ultimo_cambio_display(),
+                        "fecha": ultimo_cambio.fecha_ultimo_cambio,
+                        "porcentaje": ultimo_cambio.porcentaje_aplicado,
+                    }
+                )
+            except UltimoCambioPrecio.DoesNotExist:
+                productos_info.append(
+                    {
+                        "producto": producto,
+                        "precio_actual": producto.precio_costo,
+                        "puede_revertir": False,
+                        "sin_historial": True,
+                    }
+                )
+
+        context: Dict[str, Any] = dict(
+            self.admin_site.each_context(request),
+            productos_info=productos_info,
+            form=form,
+            title="Revertir último cambio de precio",
+            subtitle=f"Revertir {queryset.count()} producto(s) al precio anterior",
+        )
+        return render(request, "admin/revertir_ultimo_cambio.html", context)
+
+    # Descripciones de las actions
+    aumentar_precios.short_description = "Aumentar porcentaje de costo"
+    revertir_ultimo_cambio.short_description = "Volver al precio anterior"
