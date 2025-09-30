@@ -155,6 +155,7 @@ class ClienteAdmin(admin.ModelAdmin):
     ]
     search_fields = ["nombre_apellido", "dni", "obra_social__nombre"]
     autocomplete_fields = ["obra_social"]
+    ordering = ["nombre_apellido"]
 
     @admin.display(description="Historia Clínica")
     def ver_historia_clinica(self, obj):
