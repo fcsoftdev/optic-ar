@@ -19,6 +19,14 @@ class Proveedor(models.Model):
     def __str__(self):
         return self.nombre
 
+    def save(self, *args, **kwargs):
+        """Sobrescribir save para aplicar formateo TitleCase."""
+        if self.nombre:
+            self.nombre = self.nombre.title()
+        if self.direccion:
+            self.direccion = self.direccion.title()
+        super().save(*args, **kwargs)
+
 
 class Compra(models.Model):
     """Modelo para registrar el detalle de compras."""

@@ -19,6 +19,14 @@ class ObraSocial(models.Model):
         """Unicode representation of ObraSocial."""
         return f"{self.nombre}"
 
+    def save(self, *args, **kwargs):
+        """Sobrescribir save para aplicar formateo TitleCase."""
+        if self.nombre:
+            self.nombre = self.nombre.title()
+        if self.direccion:
+            self.direccion = self.direccion.title()
+        super().save(*args, **kwargs)
+
 
 class Cliente(models.Model):
     """Modelo para la registracion de Clientes."""
@@ -35,6 +43,14 @@ class Cliente(models.Model):
     def __str__(self):
         """Unicode representation of Cliente."""
         return f"{self.dni}-{self.nombre_apellido}"
+
+    def save(self, *args, **kwargs):
+        """Sobrescribir save para aplicar formateo TitleCase."""
+        if self.nombre_apellido:
+            self.nombre_apellido = self.nombre_apellido.title()
+        if self.direccion:
+            self.direccion = self.direccion.title()
+        super().save(*args, **kwargs)
 
 
 class Venta(models.Model):

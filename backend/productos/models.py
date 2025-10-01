@@ -13,6 +13,12 @@ class Marca(models.Model):
         """Unicode representation of Marca."""
         return f"{self.nombre}"
 
+    def save(self, *args, **kwargs):
+        """Sobrescribir save para aplicar formateo TitleCase."""
+        if self.nombre:
+            self.nombre = self.nombre.title()
+        super().save(*args, **kwargs)
+
 
 class Categoria(models.Model):
     """Modelo para registrar las Categorias."""
@@ -21,6 +27,12 @@ class Categoria(models.Model):
 
     def __str__(self):
         return self.nombre
+
+    def save(self, *args, **kwargs):
+        """Sobrescribir save para aplicar formateo TitleCase."""
+        if self.nombre:
+            self.nombre = self.nombre.title()
+        super().save(*args, **kwargs)
 
 
 class SubCategoria(models.Model):
@@ -35,6 +47,12 @@ class SubCategoria(models.Model):
 
     def __str__(self):
         return f"{self.categoria} - {self.nombre}"
+
+    def save(self, *args, **kwargs):
+        """Sobrescribir save para aplicar formateo TitleCase."""
+        if self.nombre:
+            self.nombre = self.nombre.title()
+        super().save(*args, **kwargs)
 
 
 class Producto(models.Model):
@@ -76,6 +94,12 @@ class Producto(models.Model):
                 return f"{self.nombre}-{marca_str}"
             else:
                 return self.nombre
+
+    def save(self, *args, **kwargs):
+        """Sobrescribir save para aplicar formateo TitleCase."""
+        if self.nombre:
+            self.nombre = self.nombre.title()
+        super().save(*args, **kwargs)
 
 
 class UltimoCambioPrecio(models.Model):
