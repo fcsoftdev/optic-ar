@@ -5,7 +5,7 @@ from compras.models import Compra, DetalleCompra, Gasto, Proveedor
 
 class DetalleCompraInline(admin.TabularInline):
     model = DetalleCompra
-    fields = ["producto", "cantidad", "precio_unitario", "subtotal"]
+    fields = ["producto", "cantidad", "precio_unitario", "precio_venta", "subtotal"]
     autocomplete_fields = ["producto"]
     readonly_fields = ["subtotal"]
     extra = 1

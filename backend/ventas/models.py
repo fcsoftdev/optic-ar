@@ -74,7 +74,13 @@ class DetalleVenta(models.Model):
         Producto, on_delete=models.SET_NULL, null=True, blank=True
     )
     cantidad = models.PositiveIntegerField(default=1)
-    porcentaje_ganancia = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    precio_venta = models.DecimalField(
+        "Precio de venta",
+        max_digits=10,
+        decimal_places=2,
+        default=0,
+        help_text="Precio de venta para este producto (editable)",
+    )
     precio_unitario = models.DecimalField(
         max_digits=10, decimal_places=2, default=0, editable=False
     )
@@ -97,16 +103,12 @@ class DetalleVenta(models.Model):
         self.producto.stock -= diferencia_stock
         self.producto.save()
 
-        # 4. Calcula el subtotal antes de guardar
-        self.subtotal = self.cantidad * self.precio_unitario
+        # 4. Asignamos el precio de venta como precio unitario (compatibilidad)
+        self.precio_unitario = self.precio_venta
 
-        # 5. Calculamos el precio unitario (precio_costo * porcentaje_venta)
-        self.precio_unitario = self.producto.precio_costo * (
-            1 + (self.porcentaje_ganancia / 100)
-        )
-
-        # 6. Calculamos el subtotal_item (precio_unitario * cantidad)
-        self.subtotal_item = self.precio_unitario * self.cantidad
+        # 5. Calculamos los subtotales usando precio_venta
+        self.subtotal = self.cantidad * self.precio_venta
+        self.subtotal_item = self.cantidad * self.precio_venta
 
         # Llama al save original para guardar la instancia de DetalleCompra
         super().save(*args, **kwargs)

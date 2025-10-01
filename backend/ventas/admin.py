@@ -197,6 +197,7 @@ class ProductoWidget(forms.Select):
             try:
                 prod = Producto.objects.get(pk=pk_value)
                 option["attrs"]["data-precio-costo"] = str(prod.precio_costo)
+                option["attrs"]["data-precio-venta"] = str(prod.precio_venta)
                 option["attrs"]["data-stock-actual"] = str(prod.stock)
             except Producto.DoesNotExist:
                 pass
@@ -211,12 +212,11 @@ class DetalleVentaInline(admin.TabularInline):
         "producto",
         "cantidad",
         "precio_costo",
-        "porcentaje_ganancia",
-        "precio_unitario",
+        "precio_venta",
         "subtotal_item",
     ]
-    readonly_fields = ("precio_unitario", "subtotal_item", "precio_costo")
-    autocomplete_fields = ["producto"]
+    readonly_fields = ("subtotal_item", "precio_costo")
+    # autocomplete_fields = ["producto"]  # ❌ Comentado para usar ProductoWidget personalizado
     extra = 1
 
     class Media:

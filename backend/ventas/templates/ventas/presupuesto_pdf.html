@@ -56,7 +56,7 @@
           <tr>
             <th>Producto</th>
             <th>Cantidad</th>
-            <th>Precio Unitario</th>
+            <th>Precio</th>
             <th>Subtotal</th>
           </tr>
         </thead>
@@ -65,7 +65,7 @@
           <tr>
             <td>{{ item.nombre }}</td>
             <td>{{ item.cantidad }}</td>
-            <td>$ {{ item.precio_unitario }}</td>
+            <td>$ {{ item.precio_venta }}</td>
             <td>$ {{ item.subtotal }}</td>
           </tr>
           {% endfor %}

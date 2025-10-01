@@ -31,21 +31,31 @@
               var cantidad = parseFloat(
                 row.querySelector('input[name$="-cantidad"]')?.value || 0
               );
-              var precio_unitario = parseFloat(
+              var precio_venta = parseFloat(
                 row
-                  .querySelector(".field-precio_unitario p")
-                  ?.textContent.replace(",", ".") || 0
+                  .querySelector('input[name$="-precio_venta"]')
+                  ?.value?.replace(",", ".") || 0
               );
               var subtotal = parseFloat(
                 row
                   .querySelector(".field-subtotal_item p")
-                  ?.textContent.replace(",", ".") || cantidad * precio_unitario
+                  ?.textContent.replace(",", ".") || 0
               );
+
+              // Si precio_venta es 0 pero tenemos subtotal y cantidad, calcularlo
+              if (precio_venta === 0 && subtotal > 0 && cantidad > 0) {
+                precio_venta = subtotal / cantidad;
+              }
+
+              // Si aún no tenemos subtotal, calcularlo
+              if (subtotal === 0 && precio_venta > 0 && cantidad > 0) {
+                subtotal = cantidad * precio_venta;
+              }
               if (nombre && cantidad > 0) {
                 productos.push({
                   nombre: nombre,
                   cantidad: cantidad,
-                  precio_unitario: precio_unitario,
+                  precio_venta: precio_venta,
                   subtotal: subtotal,
                 });
                 total += subtotal;

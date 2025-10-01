@@ -44,6 +44,13 @@ class DetalleCompra(models.Model):
     precio_unitario = models.DecimalField(
         "Precio unitario", max_digits=10, decimal_places=2, default=0
     )
+    precio_venta = models.DecimalField(
+        "Precio de venta",
+        max_digits=10,
+        decimal_places=2,
+        default=0,
+        help_text="Precio de venta sugerido para este producto",
+    )
     subtotal = models.DecimalField(max_digits=10, decimal_places=2, editable=False)
 
     class Meta:
@@ -67,9 +74,10 @@ class DetalleCompra(models.Model):
                 # Si el objeto es nuevo, la diferencia es la cantidad total
                 diferencia_stock = self.cantidad
 
-            # Actualizamos el stock y precio del producto
+            # Actualizamos el stock y precios del producto
             self.producto.stock += diferencia_stock
             self.producto.precio_costo = self.precio_unitario
+            self.producto.precio_venta = self.precio_venta
             self.producto.save()
 
         # 3. Guardar el detalle de compra
