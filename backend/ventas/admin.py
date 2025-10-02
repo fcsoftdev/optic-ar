@@ -147,12 +147,13 @@ class ConsultaInline(admin.TabularInline):
 @admin.register(Cliente)
 class ClienteAdmin(admin.ModelAdmin):
     list_display = [
-        "dni",
         "nombre_apellido",
+        "dni",
         "nro_afiliado",
         "obra_social",
         "ver_historia_clinica",
     ]
+    list_display_links = ["nombre_apellido"]
     search_fields = ["nombre_apellido", "dni", "obra_social__nombre"]
     autocomplete_fields = ["obra_social"]
     ordering = ["nombre_apellido"]

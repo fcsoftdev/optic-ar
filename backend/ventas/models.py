@@ -33,12 +33,16 @@ class Cliente(models.Model):
 
     nombre_apellido = models.CharField("Nombre y apellido", max_length=150)
     dni = models.CharField(max_length=8, unique=True)
-    fecha_nacimiento = models.DateField("Fecha de nacimiento")
-    telefono = models.CharField(max_length=16)
-    mail = models.EmailField(max_length=254)
-    direccion = models.CharField(max_length=50)
-    nro_afiliado = models.CharField("Número de Afiliado", max_length=50)
-    obra_social = models.ForeignKey(ObraSocial, null=True, on_delete=models.SET_NULL)
+    fecha_nacimiento = models.DateField("Fecha de nacimiento", null=True, blank=True)
+    telefono = models.CharField(max_length=16, null=True, blank=True)
+    mail = models.EmailField(max_length=254, null=True, blank=True)
+    direccion = models.CharField(max_length=50, null=True, blank=True)
+    nro_afiliado = models.CharField(
+        "Número de Afiliado", max_length=50, null=True, blank=True
+    )
+    obra_social = models.ForeignKey(
+        ObraSocial, null=True, on_delete=models.SET_NULL, blank=True
+    )
 
     def __str__(self):
         """Unicode representation of Cliente."""
