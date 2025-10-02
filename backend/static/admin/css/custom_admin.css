@@ -1,0 +1,45 @@
+/* Override para remover margin-bottom de .module */
+.module {
+  margin-bottom: 0 !important;
+}
+
+/* Si solo quieres afectar el sidebar específicamente */
+#content-related .module {
+  margin-bottom: 0 !important;
+}
+
+/* Ocultar Categoría y Subcategoría del sidebar de productos */
+/* Ocultar el elemento contenedor completo (tr, li, etc.) para evitar espacios vacíos */
+tr:has(a[href*="/productos/categoria/"]),
+tr:has(a[href*="/productos/subcategoria/"]),
+li:has(a[href*="/productos/categoria/"]),
+li:has(a[href*="/productos/subcategoria/"]),
+.actionlist li:has(a[href*="/productos/categoria/"]),
+.actionlist li:has(a[href*="/productos/subcategoria/"]) {
+  display: none !important;
+}
+
+/* Fallback para navegadores que no soporten :has() */
+.actionlist a[href*="/productos/categoria/"],
+.actionlist a[href*="/productos/subcategoria/"] {
+  display: none !important;
+}
+
+.actionlist a[href*="/productos/categoria/"] + *,
+.actionlist a[href*="/productos/subcategoria/"] + * {
+  display: none !important;
+}
+
+/* Ocultar por texto del enlace si no funciona por URL */
+a:contains("Categorías"),
+a:contains("Categoria"),
+a:contains("Subcategorías"),
+a:contains("Subcategoria") {
+  display: none !important;
+}
+
+/* Selector más general para elementos del sidebar de productos */
+#content-related .actionlist li a[href*="categoria"],
+#content-related .actionlist li a[href*="subcategoria"] {
+  display: none !important;
+}
