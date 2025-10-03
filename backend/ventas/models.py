@@ -44,6 +44,10 @@ class Cliente(models.Model):
         ObraSocial, null=True, on_delete=models.SET_NULL, blank=True
     )
 
+    class Meta:
+        verbose_name = "Cliente/Paciente"
+        verbose_name_plural = "Clientes/Pacientes"
+
     def __str__(self):
         """Unicode representation of Cliente."""
         return f"{self.dni}-{self.nombre_apellido}"
