@@ -46,10 +46,23 @@
         font-size: 16pt; /* tamaño más grande */
         margin: 5px 0;
       }
+
+        .titulo {
+            text-align: center;
+            font-size: 28px;
+            font-weight: bold;
+            color: #333;
+            margin: 30px 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }      
     </style>
   </head>
   <body>
     <div class="contenido">
+      <div class="titulo">
+        📋  Presupuesto
+      </div>
       <p class="fecha">Fecha: {{ data.fecha }}</p>
       <table>
         <thead>

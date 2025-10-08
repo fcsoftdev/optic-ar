@@ -1,0 +1,559 @@
+/* ===== ESTILOS DEL CALENDARIO DE TURNOS SIMPLIFICADO ===== */
+
+/* Reset y base */
+* {
+  box-sizing: border-box;
+}
+
+#calendario-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: var(--font-family-primary, "Segoe UI", system-ui, sans-serif);
+  background: var(--body-bg, #fff);
+}
+
+/* ===== HEADER DEL CALENDARIO ===== */
+.calendario-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  padding: 20px 0;
+  border-bottom: 2px solid var(--hairline-color, #e8e8e8);
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.calendario-header h1 {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 300;
+  color: var(--header-branding-color, #f5dd5d);
+}
+
+.navegacion-mes {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.btn-nav {
+  background: var(--button-bg, #417690);
+  color: var(--button-fg, #fff);
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.2s;
+}
+
+.btn-nav:hover {
+  background: var(--button-hover-bg, #205067);
+}
+
+.mes-actual {
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: var(--body-fg, #333);
+  min-width: 200px;
+  text-align: center;
+}
+
+.acciones-header {
+  display: flex;
+  gap: 15px;
+}
+
+.btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.btn-primary {
+  background: var(--default-button-bg, #205067);
+  color: var(--button-fg, #fff);
+}
+
+.btn-primary:hover {
+  background: var(--default-button-hover-bg, #417690);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: var(--close-button-bg, #747474);
+  color: var(--button-fg, #fff);
+}
+
+.btn-secondary:hover {
+  background: var(--close-button-hover-bg, #333);
+}
+
+.btn-danger {
+  background: var(--delete-button-bg, #ba2121);
+  color: var(--button-fg, #fff);
+}
+
+.btn-danger:hover {
+  background: var(--delete-button-hover-bg, #a41515);
+}
+
+.btn-info {
+  background: #17a2b8;
+  color: var(--button-fg, #fff);
+}
+
+.btn-info:hover {
+  background: #138496;
+  transform: translateY(-1px);
+}
+
+/* ===== GRID DEL CALENDARIO ===== */
+.calendario-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px;
+  background: var(--border-color, #ccc);
+  border: 1px solid var(--border-color, #ccc);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.dia-semana {
+  background: var(--header-bg, #417690);
+  color: var(--header-link-color, #fff);
+  padding: 15px 10px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.dia-calendario {
+  background: var(--body-bg, #fff);
+  min-height: 120px;
+  position: relative;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  display: flex;
+  flex-direction: column;
+}
+
+.dia-calendario:hover {
+  background: var(--darkened-bg, #f8f8f8);
+}
+
+.dia-calendario.hoy {
+  background: #fff3cd;
+  border: 2px solid var(--accent, #f5dd5d);
+}
+
+.dia-vacio {
+  background: var(--selected-bg, #e4e4e4);
+  min-height: 120px;
+}
+
+.numero-dia {
+  padding: 8px 12px;
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--body-fg, #333);
+}
+
+.dia-calendario.hoy .numero-dia {
+  color: var(--secondary, #417690);
+  font-weight: 700;
+}
+
+/* ===== TURNOS EN EL CALENDARIO ===== */
+.turnos-dia {
+  flex: 1;
+  padding: 0 8px;
+  overflow-y: auto;
+  max-height: 80px;
+}
+
+.turno-item {
+  background: var(--primary, #79aec8);
+  color: #fff;
+  margin-bottom: 3px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  line-height: 1.2;
+  cursor: pointer;
+  transition: all 0.2s;
+  border-left: 4px solid #4a90a4;
+}
+
+.turno-item:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.turno-hora {
+  font-weight: 600;
+  margin-bottom: 1px;
+}
+
+.turno-cliente {
+  font-weight: 500;
+  margin-bottom: 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.turno-motivo {
+  font-size: 0.65rem;
+  opacity: 0.9;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ===== AGREGAR TURNO ===== */
+.agregar-turno {
+  position: absolute;
+  bottom: 5px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  background: var(--accent, #f5dd5d);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  opacity: 0;
+}
+
+.dia-calendario:hover .agregar-turno {
+  opacity: 1;
+}
+
+.agregar-turno:hover {
+  background: var(--secondary, #417690);
+  transform: scale(1.1);
+}
+
+.plus-icon {
+  color: #fff;
+  font-weight: bold;
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+/* ===== MODALES ===== */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(2px);
+}
+
+.modal-content {
+  background-color: var(--body-bg, #fff);
+  margin: 2% auto;
+  padding: 0;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 95vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modal-header {
+  background: var(--header-bg, #417690);
+  color: var(--header-link-color, #fff);
+  padding: 20px 30px;
+  border-radius: 12px 12px 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 500;
+}
+
+.modal-close {
+  color: var(--header-link-color, #fff);
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0 5px;
+}
+
+.modal-close:hover {
+  opacity: 0.7;
+}
+
+/* ===== FORMULARIOS ===== */
+#form-turno {
+  padding: 25px 30px;
+}
+
+.form-grupo {
+  margin-bottom: 18px;
+}
+
+.form-grupo label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 500;
+  color: var(--body-fg, #333);
+  font-size: 0.9rem;
+}
+
+.form-grupo input,
+.form-grupo select,
+.form-grupo textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border-color, #ccc);
+  border-radius: 6px;
+  font-size: 0.9rem;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.form-grupo textarea {
+  resize: vertical;
+  line-height: 1.4;
+  min-height: 80px;
+}
+
+.form-grupo input:focus,
+.form-grupo select:focus,
+.form-grupo textarea:focus {
+  outline: none;
+  border-color: var(--primary, #79aec8);
+  box-shadow: 0 0 0 2px rgba(121, 174, 200, 0.2);
+}
+
+.form-hora {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+.hora-grupo {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===== BÚSQUEDA DE CLIENTES ===== */
+.cliente-container {
+  position: relative;
+}
+
+.cliente-search-wrapper {
+  position: relative;
+}
+
+#cliente-search {
+  width: 100%;
+  position: relative;
+  z-index: 10;
+}
+
+.search-results {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--body-bg, #fff);
+  border: 1px solid var(--border-color, #ccc);
+  border-top: none;
+  border-radius: 0 0 6px 6px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 1000;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  display: none;
+}
+
+.cliente-resultado-item {
+  padding: 12px 15px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--hairline-color, #e8e8e8);
+  transition: background-color 0.2s;
+  font-size: 0.9rem;
+  color: var(--body-fg, #333);
+}
+
+.cliente-resultado-item:hover {
+  background: var(--darkened-bg, #f8f8f8);
+}
+
+.cliente-resultado-item:last-child {
+  border-bottom: none;
+}
+
+.cliente-nombre {
+  font-weight: 500;
+  color: var(--body-fg, #333);
+}
+
+.cliente-info {
+  font-size: 0.8rem;
+  color: var(--body-quiet-color, #666);
+  margin-top: 2px;
+}
+
+/* ===== ACCIONES DEL FORMULARIO ===== */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+  padding-top: 20px;
+  border-top: 1px solid var(--hairline-color, #e8e8e8);
+  margin-top: 20px;
+}
+
+/* ===== LOADING ===== */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.loading-spinner {
+  background: var(--primary, #79aec8);
+  color: #fff;
+  padding: 20px 30px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  #calendario-container {
+    padding: 10px;
+  }
+
+  .calendario-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 15px;
+  }
+
+  .navegacion-mes {
+    justify-content: center;
+  }
+
+  .acciones-header {
+    justify-content: center;
+  }
+
+  .calendario-grid {
+    font-size: 0.8rem;
+  }
+
+  .dia-calendario {
+    min-height: 80px;
+  }
+
+  .turnos-dia {
+    max-height: 50px;
+  }
+
+  .turno-item {
+    font-size: 0.7rem;
+    padding: 2px 5px;
+  }
+
+  .modal-content {
+    margin: 10px auto;
+    width: calc(100% - 20px);
+    max-height: calc(100vh - 20px);
+    overflow-y: auto;
+  }
+
+  #form-turno {
+    padding: 20px;
+  }
+
+  .form-hora {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .mes-actual {
+    font-size: 1.2rem;
+    min-width: auto;
+  }
+
+  .btn-nav {
+    padding: 8px 15px;
+    font-size: 0.8rem;
+  }
+
+  .btn {
+    padding: 8px 15px;
+    font-size: 0.8rem;
+  }
+
+  .calendario-header h1 {
+    font-size: 1.5rem;
+  }
+}
+
+/* ===== UTILIDADES ===== */
+.text-center {
+  text-align: center;
+}
+
+.mt-2 {
+  margin-top: 10px;
+}
+
+.mb-2 {
+  margin-bottom: 10px;
+}
+
+.hidden {
+  display: none !important;
+}

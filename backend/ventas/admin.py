@@ -249,6 +249,12 @@ class VentaAdmin(admin.ModelAdmin):
     inlines = [DetalleVentaInline]
     autocomplete_fields = ["cliente"]
 
+    class Media:
+        js = (
+            "admin/js/jquery.init.js",
+            "ventas/js/generar_presupuesto_pdf.js",
+        )
+
     def save_formset(self, request, form, formset, change):
         # Primero, se guardan los objetos del inline
         super().save_formset(request, form, formset, change)

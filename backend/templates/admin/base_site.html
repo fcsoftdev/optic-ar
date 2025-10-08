@@ -1,6 +1,10 @@
 {% extends "admin/base.html" %} 
-{% load static %} 
-{% block title %}{{site_title|default:_('Django site admin') }}{% endblock %} {% block extrahead %}
+{% load static %}
+{% load i18n admin_urls %}
+
+{% block title %}{{site_title|default:_('Django site admin') }}{% endblock %} 
+
+{% block extrahead %}
 {{ block.super }}
 <!-- favicon -->
 <link
@@ -10,7 +14,61 @@
 />
 <!-- CSS personalizado para admin -->
 <link rel="stylesheet" type="text/css" href="{% static 'admin/css/custom_admin.css' %}">
+
+<script>
+// Script para agregar enlace del calendario en TODAS las páginas del admin
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('=== SCRIPT EN EXTRAHEAD INICIADO ===');
+    console.log('URL:', window.location.pathname);
+    
+    setTimeout(function() {
+        console.log('Ejecutando después de timeout...');
+        
+        // Buscar el módulo SISTEMA DE TURNOS
+        var modules = document.querySelectorAll('.module');
+        console.log('Total módulos encontrados:', modules.length);
+        
+        var turnosModule = null;
+        
+        // Buscar por caption "Sistema de Turnos"
+        for (var i = 0; i < modules.length; i++) {
+            var caption = modules[i].querySelector('caption');
+            if (caption) {
+                console.log('Caption ' + i + ':', caption.textContent);
+                if (caption.textContent.trim() === 'Sistema de Turnos') {
+                    turnosModule = modules[i].querySelector('tbody');
+                    console.log('✓ Encontrado módulo Sistema de Turnos!');
+                    break;
+                }
+            }
+        }
+        
+        if (turnosModule) {
+            // Verificar que no exista ya el enlace
+            var existingCalendar = turnosModule.querySelector('.model-calendario');
+            
+            if (!existingCalendar) {
+                console.log('Agregando enlace del calendario...');
+                
+                var calendarioRow = document.createElement('tr');
+                calendarioRow.className = 'model-calendario';
+                
+                calendarioRow.innerHTML = '<th scope="row"><a href="/admin/calendario-turnos/" style="color: #417690;">Calendario de Turnos</a></th><td><a href="/admin/calendario-turnos/" class="addlink">Agregar</a></td><td><a href="/admin/calendario-turnos/" class="viewlink">Ver</a></td>';
+                
+                // Insertar al principio
+                turnosModule.insertBefore(calendarioRow, turnosModule.firstChild);
+                console.log('✓ Enlace agregado exitosamente!');
+            } else {
+                console.log('El enlace ya existe');
+            }
+        } else {
+            console.log('✗ NO se encontró el módulo Sistema de Turnos');
+        }
+    }, 500);
+});
+</script>
 {% endblock %} 
+
 {% block branding %}
 <h1 id="site-name" style="color: #FFFFFF">
   <img
@@ -22,4 +80,6 @@
 </h1>
 {% endblock %}
 
-
+{% block nav-sidebar %}
+{{ block.super }}
+{% endblock %}

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Turno - {{ turno.cliente.nombre_apellido }}</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 6mm;
+            background-image: url('{{ STATIC_URL }}images/presupuesto-bg.png');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center center;
+            @frame footer {
+                -pdf-frame-content: footerContent;
+                bottom: 0cm;
+                margin-left: 2cm;
+                margin-right: 2cm;
+                height: 1cm;
+            }
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            color: #333;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .contenido {
+            padding-top: 150px;
+            padding-left: 20px;
+            padding-right: 20px;
+        }
+        
+        .titulo {
+            text-align: center;
+            font-size: 28px;
+            font-weight: bold;
+            color: #333;
+            margin: 30px 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .info-container {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 30px;
+            border-radius: 10px;
+            margin: 15px 170px;
+            max-width: 200px;
+            border-left: 5px solid #417690;
+        }
+        
+        .campo {
+            margin-bottom: 20px;
+            line-height: 1.8;
+        }
+        
+        .campo-label {
+            font-weight: bold;
+            color: #417690;
+            font-size: 13px;
+            display: inline-block;
+            min-width: 140px;
+        }
+        
+        .campo-valor {
+            color: #333;
+            font-size: 13px;
+            font-weight: 500;
+            display: inline-block;
+        }
+        
+        .fecha-valor, .cliente-valor {
+            font-size: 13px;
+            color: #2c5530;
+            font-weight: bold;
+        }
+        
+        .hora-container {
+            display: flex;
+            gap: 40px;
+        }
+        
+
+        
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 13px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="contenido">
+        <div class="titulo">
+            📅 Comprobante de Turno
+        </div>
+        
+        <div class="info-container">
+            <div class="campo">
+                <div class="campo-label">📅 Fecha:</div>
+                <div class="campo-valor fecha-valor">{{ turno.fecha|date:"d/m/Y" }}</div>
+            </div>
+            
+            <div class="campo">
+                <div class="campo-label">👤 Cliente:</div>
+                <div class="campo-valor cliente-valor">{{ turno.cliente.nombre_apellido|upper }}</div>
+            </div>
+            
+            <div class="campo">
+                <div class="campo-label">⏰ Hora del Turno:</div>
+                <div class="campo-valor">{{ turno.hora_inicio|time:"H:i" }} hs</div>
+            </div>
+                        
+            {% if turno.motivo %}
+            <div class="campo">
+                <div class="campo-label">📝 Motivo:</div>
+                <div class="campo-valor">{{ turno.motivo }}</div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div id="footerContent">
+        <hr style="border: none; border-top: 1px solid #ccc; margin: 5px 0;" />
+        <p style="text-align: center; font-size: 11px; color: #555; margin: 0; padding: 5px;">
+        Óptica Punto de Vista · Bv. Gral. Roca 889, Río Cuarto, Córdoba · Tel: 3584654766
+        </p>
+    </div>
+</body>
+</html>

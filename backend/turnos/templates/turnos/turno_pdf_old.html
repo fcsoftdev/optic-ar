@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Turno - {{ turno.cliente.nombre_apellido }}</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 6mm;
+            background-image: url('{{ STATIC_URL }}images/presupuesto-bg.png');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center center;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            color: #333;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .contenido {
+            padding-top: 150px;
+        }
+        
+        .titulo {
+            text-align: center;
+            font-size: 28px;
+            font-weight: bold;
+            color: #333;
+            margin: 20px 0;
+        }
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 30px;
+            border-radius: 8px;
+            font-size: 24px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .turno-info {
+            background: rgba(248, 249, 250, 0.9);
+            padding: 30px;
+            border-radius: 8px;
+            border-left: 5px solid #417690;
+            margin: 30px 0;
+        }        .campo {
+            display: flex;
+            margin-bottom: 20px;
+            align-items: center;
+        }
+        
+        .campo-label {
+            font-weight: bold;
+            color: #417690;
+            min-width: 120px;
+            display: flex;
+            align-items: center;
+            font-size: 16px;
+        }
+        
+        .campo-label .icono {
+            margin-right: 8px;
+            font-size: 18px;
+        }
+        
+        .campo-valor {
+            color: #333;
+            font-size: 16px;
+            font-weight: 500;
+        }
+        
+        .fecha-valor {
+            font-size: 18px;
+            color: #2c5530;
+            font-weight: bold;
+        }
+        
+        .cliente-valor {
+            font-size: 18px;
+            color: #2c5530;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .hora-container {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .hora-item {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .motivo-container {
+            margin-top: 10px;
+        }
+        
+        .motivo-valor {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            min-height: 60px;
+            font-style: italic;
+        }
+        
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid #e9ecef;
+            text-align: center;
+            color: #666;
+            font-size: 12px;
+        }
+        
+        .footer-contacto {
+            margin-bottom: 10px;
+        }
+        
+        .footer-direccion {
+            font-weight: bold;
+            color: #417690;
+        }
+        
+        @media print {
+            body {
+                background: white;
+            }
+            
+            .container {
+                box-shadow: none;
+                margin: 0;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header con logo y datos de la empresa -->
+        <div class="header">
+            <img src="{{ STATIC_URL }}images/logo.png" alt="Logo Óptica" class="logo">
+            <div class="empresa-info">
+                <h2 style="color: #417690; margin-bottom: 5px;">ÓPTICA</h2>
+                <p>Cuidamos tu visión con excelencia</p>
+            </div>
+        </div>
+
+        <!-- Título del documento -->
+        <div class="titulo">
+            📅 Turno Programado
+        </div>
+
+        <!-- Información del turno -->
+        <div class="turno-info">
+            <div class="campo">
+                <div class="campo-label">
+                    <span class="icono">📅</span>
+                    Fecha:
+                </div>
+                <div class="campo-valor fecha-valor">
+                    {{ turno.fecha|date:"d/m/Y" }}
+                </div>
+            </div>
+
+            <div class="campo">
+                <div class="campo-label">
+                    <span class="icono">👤</span>
+                    Cliente:
+                </div>
+                <div class="campo-valor cliente-valor">
+                    {{ turno.cliente.nombre_apellido }}
+                </div>
+            </div>
+
+            <div class="campo">
+                <div class="campo-label">
+                    <span class="icono">⏰</span>
+                    Horario:
+                </div>
+                <div class="campo-valor">
+                    <div class="hora-container">
+                        <div class="hora-item">
+                            <strong>Hora Inicio:</strong> {{ turno.hora_inicio|time:"H:i" }}
+                        </div>
+                        <div class="hora-item">
+                            <strong>Hora Fin:</strong> {% if turno.hora_fin %}{{ turno.hora_fin|time:"H:i" }}{% else %}A confirmar{% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% if turno.motivo %}
+            <div class="campo">
+                <div class="campo-label">
+                    <span class="icono">📝</span>
+                    Motivo:
+                </div>
+                <div class="campo-valor">
+                    <div class="motivo-container">
+                        <div class="motivo-valor">
+                            {{ turno.motivo }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <div class="footer-contacto">
+                📞 Teléfono: (XXX) XXX-XXXX | 📧 Email: info@optica.com
+            </div>
+            <div class="footer-direccion">
+                📍 Dirección de la Óptica - Ciudad, Provincia
+            </div>
+            <div style="margin-top: 15px; font-size: 11px; color: #999;">
+                Documento generado el {{ "now"|date:"d/m/Y H:i" }}
+            </div>
+        </div>
+    </div>
+</body>
+</html>

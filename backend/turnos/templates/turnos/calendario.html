@@ -1,0 +1,639 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+{% load turnos_filters %}
+
+{% block title %}Calendario de Turnos - {{ mes_nombre }} {{ year }}{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'turnos/css/calendario.css' %}">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+{% endblock %}
+
+{% block content %}
+<div id="calendario-container">
+    <!-- Header del calendario -->
+    <div class="calendario-header">
+        <h1>📅 Calendario de Turnos</h1>
+        
+        <div class="navegacion-mes">
+            <button id="mes-anterior" class="btn-nav" 
+                    data-year="{{ mes_anterior.year }}" 
+                    data-month="{{ mes_anterior.month }}">
+                ← {{ mes_anterior|date:"F"|capfirst }}
+            </button>
+            
+            <span class="mes-actual">{{ fecha_actual|date:"F Y"|capfirst }}</span>
+            
+            <button id="mes-siguiente" class="btn-nav"
+                    data-year="{{ mes_siguiente.year }}" 
+                    data-month="{{ mes_siguiente.month }}">
+                {{ mes_siguiente|date:"F"|capfirst }} →
+            </button>
+        </div>
+        
+        <div class="acciones-header">
+            <a href="{% url 'admin:index' %}" class="btn btn-secondary">
+                🏠 Admin
+            </a>
+            <button id="btn-nuevo-turno" class="btn btn-primary">
+                ➕ Nuevo Turno
+            </button>
+            <button id="btn-hoy" class="btn btn-secondary">
+                📍 Hoy
+            </button>
+        </div>
+    </div>
+
+    <!-- Calendario principal -->
+    <div class="calendario-grid">
+        <!-- Cabecera de días de la semana -->
+        <div class="dia-semana">Lunes</div>
+        <div class="dia-semana">Martes</div>
+        <div class="dia-semana">Miércoles</div>
+        <div class="dia-semana">Jueves</div>
+        <div class="dia-semana">Viernes</div>
+        <div class="dia-semana">Sábado</div>
+        <div class="dia-semana">Domingo</div>
+        
+        <!-- Días del calendario -->
+        {% for semana in calendario %}
+            {% for dia in semana %}
+                {% if dia == 0 %}
+                    <div class="dia-vacio"></div>
+                {% else %}
+                    {% with fecha_actual.year|stringformat:"s" as year_str %}
+                    {% with fecha_actual.month|stringformat:"02d" as month_str %}
+                    {% with dia|stringformat:"02d" as dia_str %}
+                    {% with year_str|add:"-"|add:month_str|add:"-"|add:dia_str as fecha_key %}
+                    
+                    <div class="dia-calendario {% if year_str|add:'-'|add:month_str|add:'-'|add:dia_str == hoy|date:'Y-m-d' %}hoy{% endif %}" 
+                         data-fecha="{{ fecha_key }}"
+                         data-dia="{{ dia }}">
+                        
+                        <div class="numero-dia">{{ dia }}</div>
+                        
+                        <div class="turnos-dia" id="turnos-{{ fecha_key }}">
+                            {% if turnos_por_fecha|lookup:fecha_key %}
+                                {% for turno in turnos_por_fecha|lookup:fecha_key %}
+                                <div class="turno-item" data-turno-id="{{ turno.id }}">
+                                    <div class="turno-hora">{{ turno.hora_inicio }}</div>
+                                    <div class="turno-cliente">{{ turno.cliente }}</div>
+                                    {% if turno.motivo %}
+                                    <div class="turno-motivo">{{ turno.motivo }}</div>
+                                    {% endif %}
+                                </div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                        
+                        <div class="agregar-turno" data-fecha="{{ fecha_key }}">
+                            <span class="plus-icon">+</span>
+                        </div>
+                    </div>
+                    
+                    {% endwith %}
+                    {% endwith %}
+                    {% endwith %}
+                    {% endwith %}
+                {% endif %}
+            {% endfor %}
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Modal para crear/editar turnos -->
+<div id="modal-turno" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="modal-titulo">Nuevo Turno</h2>
+            <span class="modal-close">&times;</span>
+        </div>
+        
+        <form id="form-turno">
+            <div class="form-grupo">
+                <label for="fecha-turno">📅 Fecha:</label>
+                <input type="date" id="fecha-turno" name="fecha-turno" required>
+            </div>
+            
+            <div class="form-grupo cliente-container">
+                <label for="cliente-search">👤 Cliente:</label>
+                <div class="cliente-search-wrapper">
+                    <input type="text" id="cliente-search" placeholder="Buscar cliente..." autocomplete="off" required>
+                    <div id="cliente-resultados" class="search-results"></div>
+                    <input type="hidden" id="cliente-id" name="cliente-id">
+                </div>
+            </div>
+            
+            <div class="form-grupo form-hora">
+                <div class="hora-grupo">
+                    <label for="hora-inicio">⏰ Hora Inicio:</label>
+                    <input type="time" id="hora-inicio" name="hora-inicio" required>
+                </div>
+                <div class="hora-grupo">
+                    <label for="hora-fin">⏰ Hora Fin:</label>
+                    <input type="time" id="hora-fin" name="hora-fin" readonly>
+                </div>
+            </div>
+            
+            <div class="form-grupo">
+                <label for="motivo-turno">📝 Motivo:</label>
+                <textarea id="motivo-turno" name="motivo-turno" placeholder="Motivo de la consulta (opcional)..."></textarea>
+            </div>
+            
+            <div class="form-actions">
+                <button type="button" id="btn-cancelar" class="btn btn-secondary">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Guardar Turno</button>
+                <button type="button" id="btn-generar-pdf" class="btn btn-info" style="display: none;">📄 Generar PDF</button>
+                <button type="button" id="btn-eliminar" class="btn btn-danger" style="display: none;">Eliminar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Loading overlay -->
+<div id="loading-overlay" class="loading-overlay" style="display: none;">
+    <div class="loading-spinner">Cargando...</div>
+</div>
+
+<!-- JavaScript del Calendario -->
+<script>
+// Configuración global
+window.CALENDARIO_CONFIG = {
+    urls: {
+        buscarClientes: '{% url "turnos:api_buscar_clientes" %}',
+        turnosFecha: '{% url "turnos:api_turnos_fecha" %}',
+        crearTurno: '{% url "turnos:api_crear_turno" %}',
+        actualizarTurno: '{% url "turnos:api_actualizar_turno" %}',
+        eliminarTurno: '{% url "turnos:api_eliminar_turno" turno_id=0 %}'.replace('0', '{turno_id}'),
+        obtenerTurno: '{% url "turnos:api_obtener_turno" turno_id=0 %}'.replace('0', '{turno_id}'),
+    },
+    csrfToken: '{{ csrf_token }}',
+    fechaHoy: '{{ hoy|date:"Y-m-d" }}',
+    configuracion: {
+        horaApertura: '{{ configuracion.hora_apertura|default:"09:00" }}',
+        horaCierre: '{{ configuracion.hora_cierre|default:"18:00" }}',
+        duracionDefault: {{ configuracion.duracion_turno_default|default:30 }}
+    }
+};
+
+// Funcionalidad del Calendario
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Calendario de turnos inicializado');
+    
+    // Variables globales
+    let turnoActual = null;
+    
+    // Elementos DOM
+    const btnNuevoTurno = document.getElementById('btn-nuevo-turno');
+    const btnHoy = document.getElementById('btn-hoy');
+    const modalTurno = document.getElementById('modal-turno');
+    const formTurno = document.getElementById('form-turno');
+    
+    // Botón Nuevo Turno (header)
+    if (btnNuevoTurno) {
+        btnNuevoTurno.onclick = function(e) {
+            e.preventDefault();
+            abrirModalTurno();
+        };
+    }
+    
+    // Botón Hoy
+    if (btnHoy) {
+        btnHoy.onclick = function(e) {
+            e.preventDefault();
+            const hoy = new Date();
+            const year = hoy.getFullYear();
+            const month = hoy.getMonth() + 1;
+            window.location.href = `{% url "turnos:calendario" %}?year=${year}&month=${month}`;
+        };
+    }
+    
+    // Navegación de meses
+    const mesAnterior = document.getElementById('mes-anterior');
+    const mesSiguiente = document.getElementById('mes-siguiente');
+    
+    if (mesAnterior) {
+        mesAnterior.onclick = function(e) {
+            e.preventDefault();
+            const year = this.dataset.year;
+            const month = this.dataset.month;
+            window.location.href = `{% url "turnos:calendario" %}?year=${year}&month=${month}`;
+        };
+    }
+    
+    if (mesSiguiente) {
+        mesSiguiente.onclick = function(e) {
+            e.preventDefault();
+            const year = this.dataset.year;
+            const month = this.dataset.month;
+            window.location.href = `{% url "turnos:calendario" %}?year=${year}&month=${month}`;
+        };
+    }
+    
+    // Clicks en días del calendario
+    document.querySelectorAll('.dia-calendario').forEach(function(dia) {
+        dia.addEventListener('click', function(e) {
+            const target = e.target;
+            
+            if (target.classList.contains('plus-icon') || target.classList.contains('agregar-turno')) {
+                e.stopPropagation();
+                abrirModalTurno(dia.dataset.fecha);
+            } else if (target.classList.contains('turno-item') || target.closest('.turno-item')) {
+                e.stopPropagation();
+                const turnoElement = target.classList.contains('turno-item') ? target : target.closest('.turno-item');
+                const turnoId = turnoElement.dataset.turnoId;
+                editarTurno(turnoId);
+            }
+        });
+    });
+    
+    // Cerrar modales
+    document.querySelectorAll('.modal-close, #btn-cancelar').forEach(function(btn) {
+        btn.onclick = function(e) {
+            e.preventDefault();
+            cerrarModales();
+        };
+    });
+    
+    // Eliminar turno
+    const btnEliminar = document.getElementById('btn-eliminar');
+    if (btnEliminar) {
+        btnEliminar.onclick = function(e) {
+            e.preventDefault();
+            eliminarTurno();
+        };
+    }
+    
+    // Generar PDF del turno
+    const btnGenerarPDF = document.getElementById('btn-generar-pdf');
+    if (btnGenerarPDF) {
+        btnGenerarPDF.onclick = function(e) {
+            e.preventDefault();
+            generarPDFTurno();
+        };
+    }
+    
+    // Cerrar modal al hacer clic fuera
+    document.querySelectorAll('.modal').forEach(function(modal) {
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                cerrarModales();
+            }
+        });
+    });
+    
+    // Formulario de turno
+    if (formTurno) {
+        formTurno.onsubmit = function(e) {
+            e.preventDefault();
+            guardarTurno();
+        };
+    }
+    
+    // FUNCIONES
+    function abrirModalTurno(fecha = null, turnoData = null) {
+        if (!modalTurno || !formTurno) return;
+        
+        // Resetear formulario
+        formTurno.reset();
+        document.getElementById('cliente-id').value = '';
+        
+        if (turnoData) {
+            // Modo edición
+            document.getElementById('modal-titulo').textContent = 'Editar Turno';
+            cargarDatosTurno(turnoData);
+            document.getElementById('btn-eliminar').style.display = 'inline-block';
+            document.getElementById('btn-generar-pdf').style.display = 'inline-block';
+            turnoActual = turnoData;
+        } else {
+            // Modo creación
+            document.getElementById('modal-titulo').textContent = 'Nuevo Turno';
+            document.getElementById('btn-eliminar').style.display = 'none';
+            document.getElementById('btn-generar-pdf').style.display = 'none';
+            turnoActual = null;
+            
+            // Pre-llenar fecha
+            const campoFecha = document.getElementById('fecha-turno');
+            if (campoFecha) {
+                if (fecha) {
+                    campoFecha.value = fecha;
+                } else {
+                    campoFecha.value = window.CALENDARIO_CONFIG.fechaHoy;
+                }
+            }
+            
+            // Pre-llenar hora actual
+            const campoHora = document.getElementById('hora-inicio');
+            if (campoHora) {
+                const ahora = new Date();
+                let hora = ahora.getHours();
+                let minutos = Math.ceil(ahora.getMinutes() / 15) * 15;
+                
+                if (minutos >= 60) {
+                    hora += 1;
+                    minutos = 0;
+                }
+                
+                const horaStr = String(hora).padStart(2, '0');
+                const minutosStr = String(minutos).padStart(2, '0');
+                campoHora.value = `${horaStr}:${minutosStr}`;
+                
+                // Calcular hora fin automáticamente
+                calcularHoraFin();
+            }
+        }
+        
+        modalTurno.style.display = 'block';
+        configurarBusquedaClientes();
+    }
+    
+    function cerrarModales() {
+        document.querySelectorAll('.modal').forEach(function(modal) {
+            modal.style.display = 'none';
+        });
+        turnoActual = null;
+    }
+    
+    function guardarTurno() {
+        // Recopilar datos del formulario
+        const formData = new FormData(formTurno);
+        const clienteIdValue = formData.get('cliente-id');
+        
+        // Validaciones básicas
+        if (!clienteIdValue) {
+            alert('Por favor selecciona un cliente');
+            return;
+        }
+        
+        if (!formData.get('fecha-turno')) {
+            alert('Por favor selecciona una fecha');
+            return;
+        }
+        
+        if (!formData.get('hora-inicio')) {
+            alert('Por favor selecciona una hora de inicio');
+            return;
+        }
+        
+        // Preparar datos como JSON
+        const jsonData = {
+            cliente_id: formData.get('cliente-id'),
+            fecha: formData.get('fecha-turno'),
+            hora_inicio: formData.get('hora-inicio'),
+            motivo: formData.get('motivo-turno') || ''
+        };
+        
+        // Determinar si es creación o edición
+        const esEdicion = turnoActual && turnoActual.id;
+        const url = esEdicion 
+            ? window.CALENDARIO_CONFIG.urls.actualizarTurno 
+            : window.CALENDARIO_CONFIG.urls.crearTurno;
+        
+        if (esEdicion) {
+            jsonData.turno_id = turnoActual.id;
+        }
+        
+        // Enviar datos
+        fetch(url, {
+            method: 'POST',
+            body: JSON.stringify(jsonData),
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': window.CALENDARIO_CONFIG.csrfToken
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const mensaje = esEdicion ? 'Turno actualizado exitosamente' : 'Turno creado exitosamente';
+                alert(mensaje);
+                cerrarModales();
+                location.reload(); // Recargar para mostrar los cambios
+            } else {
+                alert('Error: ' + (data.error || 'Error desconocido'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al crear el turno');
+        });
+    }
+    
+    // Configurar búsqueda de clientes
+    let busquedaConfigurada = false;
+    let searchTimeout;
+    
+    function configurarBusquedaClientes() {
+        if (busquedaConfigurada) return;
+        
+        const searchInput = document.getElementById('cliente-search');
+        const resultsContainer = document.getElementById('cliente-resultados');
+        
+        if (!searchInput || !resultsContainer) return;
+        
+        searchInput.addEventListener('input', function(e) {
+            clearTimeout(searchTimeout);
+            const query = e.target.value.trim();
+            
+            if (query.length < 2) {
+                resultsContainer.innerHTML = '';
+                resultsContainer.style.display = 'none';
+                return;
+            }
+            
+            searchTimeout = setTimeout(function() {
+                buscarClientes(query);
+            }, 300);
+        });
+        
+        busquedaConfigurada = true;
+        
+        // Ocultar resultados al perder foco
+        searchInput.addEventListener('blur', function() {
+            setTimeout(function() {
+                resultsContainer.style.display = 'none';
+            }, 200);
+        });
+        
+        searchInput.addEventListener('focus', function() {
+            if (resultsContainer.children.length > 0) {
+                resultsContainer.style.display = 'block';
+            }
+        });
+    }
+    
+    // Función para buscar clientes
+    function buscarClientes(query) {
+        const resultsContainer = document.getElementById('cliente-resultados');
+        const url = window.CALENDARIO_CONFIG.urls.buscarClientes + '?q=' + encodeURIComponent(query);
+        
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                resultsContainer.innerHTML = '';
+                
+                if (data.clientes && data.clientes.length > 0) {
+                    data.clientes.forEach(function(cliente) {
+                        const item = document.createElement('div');
+                        item.className = 'cliente-resultado-item';
+                        item.innerHTML = `
+                            <div class="cliente-nombre">${cliente.nombre_apellido}</div>
+                            <div class="cliente-info">DNI: ${cliente.dni} - Tel: ${cliente.telefono}</div>
+                        `;
+                        item.onclick = function() {
+                            seleccionarCliente(cliente);
+                        };
+                        resultsContainer.appendChild(item);
+                    });
+                    resultsContainer.style.display = 'block';
+                } else {
+                    resultsContainer.style.display = 'none';
+                }
+            })
+            .catch(error => {
+                console.error('Error buscando clientes:', error);
+                resultsContainer.style.display = 'none';
+            });
+    }
+    
+    // Función para seleccionar cliente
+    function seleccionarCliente(cliente) {
+        const searchInput = document.getElementById('cliente-search');
+        const clienteIdInput = document.getElementById('cliente-id');
+        const resultsContainer = document.getElementById('cliente-resultados');
+        
+        if (searchInput) {
+            searchInput.value = cliente.nombre_apellido;
+        }
+        if (clienteIdInput) {
+            clienteIdInput.value = cliente.id;
+        }
+        if (resultsContainer) {
+            resultsContainer.style.display = 'none';
+        }
+    }
+    
+    // Función para cargar datos de turno en el formulario
+    function cargarDatosTurno(turno) {
+        document.getElementById('fecha-turno').value = turno.fecha;
+        document.getElementById('hora-inicio').value = turno.hora_inicio;
+        document.getElementById('hora-fin').value = turno.hora_fin || '';
+        document.getElementById('motivo-turno').value = turno.motivo || '';
+        
+        // Llenar cliente
+        if (turno.cliente) {
+            document.getElementById('cliente-search').value = turno.cliente.nombre_apellido || turno.cliente;
+            document.getElementById('cliente-id').value = turno.cliente_id || turno.cliente.id;
+        }
+    }
+    
+    // Función para editar turno existente
+    function editarTurno(turnoId) {
+        const url = window.CALENDARIO_CONFIG.urls.obtenerTurno.replace('{turno_id}', turnoId);
+        
+        fetch(url)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Error al obtener datos del turno');
+                }
+                return response.json();
+            })
+            .then(turno => {
+                abrirModalTurno(null, turno);
+            })
+            .catch(error => {
+                console.error('Error al cargar turno:', error);
+                alert('Error al cargar los datos del turno');
+            });
+    }
+    
+    // Función para eliminar turno
+    function eliminarTurno() {
+        if (!turnoActual || !turnoActual.id) {
+            alert('No hay turno para eliminar');
+            return;
+        }
+        
+        if (!confirm('¿Estás seguro de que deseas eliminar este turno? Esta acción no se puede deshacer.')) {
+            return;
+        }
+        
+        const url = window.CALENDARIO_CONFIG.urls.eliminarTurno.replace('{turno_id}', turnoActual.id);
+        
+        fetch(url, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRFToken': window.CALENDARIO_CONFIG.csrfToken
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Turno eliminado exitosamente');
+                cerrarModales();
+                location.reload();
+            } else {
+                alert('Error: ' + (data.error || 'Error desconocido'));
+            }
+        })
+        .catch(error => {
+            console.error('Error eliminando turno:', error);
+            alert('Error al eliminar el turno');
+        });
+    }
+    
+    // Configurar cálculo automático de horas
+    const horaInicioInput = document.getElementById('hora-inicio');
+    if (horaInicioInput) {
+        horaInicioInput.addEventListener('change', calcularHoraFin);
+    }
+    
+    function calcularHoraFin() {
+        const horaInicio = document.getElementById('hora-inicio').value;
+        const horaFinInput = document.getElementById('hora-fin');
+        
+        if (!horaInicio) {
+            horaFinInput.value = '';
+            return;
+        }
+        
+        // Usar duración por defecto de la configuración
+        const duracionMinutos = window.CALENDARIO_CONFIG.configuracion.duracionDefault;
+        
+        // Calcular hora fin
+        const [horas, minutos] = horaInicio.split(':').map(Number);
+        const inicioEnMinutos = horas * 60 + minutos;
+        const finEnMinutos = inicioEnMinutos + duracionMinutos;
+        
+        const horasFinales = Math.floor(finEnMinutos / 60);
+        const minutosFinales = finEnMinutos % 60;
+        
+        const horaFin = `${String(horasFinales).padStart(2, '0')}:${String(minutosFinales).padStart(2, '0')}`;
+        horaFinInput.value = horaFin;
+    }
+    
+    // Función para generar PDF del turno
+    function generarPDFTurno() {
+        if (!turnoActual || !turnoActual.id) {
+            alert('No hay turno para generar PDF');
+            return;
+        }
+        
+        // URL para generar el PDF
+        const url = `{% url "turnos:api_generar_pdf_turno" turno_id=0 %}`.replace('0', turnoActual.id);
+        
+        // Crear un enlace temporal para descargar el PDF
+        const link = document.createElement('a');
+        link.href = url;
+        link.target = '_blank';
+        
+        // Simular click para descargar
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+});
+</script>
+
+{% endblock %}
