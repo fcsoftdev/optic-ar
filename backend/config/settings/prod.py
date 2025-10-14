@@ -19,11 +19,14 @@ ALLOWED_HOSTS = ["puntodevista.pythonanywhere.com"]
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
-        "NAME": "puntodevista$opticardb",  # Nombre de BD en PythonAnywhere
-        "USER": "puntodevista",  # Usuario en PythonAnywhere
-        "PASSWORD": "Opticar#889",  # Contraseña de BD
-        "HOST": "puntodevista.mysql.pythonanywhere-services.com",  # Host de PythonAnywhere
+        "NAME": "puntodevista$default",
+        "USER": "puntodevista",
+        "PASSWORD": "Opticar.889",
+        "HOST": "puntodevista.mysql.pythonanywhere-services.com",
         "PORT": "3306",
+        "OPTIONS": {
+            "init_command": "SET sql_mode='STRICT_TRANS_TABLES'",
+        },
     }
 }
 
