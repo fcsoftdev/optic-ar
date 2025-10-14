@@ -1,0 +1,36 @@
+{% extends "admin/app_index.html" %}
+{% load admin_urls static %}
+
+{% block content %}
+    {% if not user.is_superuser %}
+        {# Vista personalizada para usuarios no superusuarios #}
+        <div class="app-turnos module">
+            <table summary="Funciones disponibles en Sistema de Turnos">
+                <caption>
+                    <a href="{% url 'admin:app_list' app_label='turnos' %}" class="section" title="Sistema de Turnos">
+                        SISTEMA DE TURNOS
+                    </a>
+                </caption>
+                <tr class="model-calendario model-first">
+                    <th scope="row">
+                        <a href="{% url 'admin:calendario-turnos' %}">
+                            📅 Calendario de Turnos
+                        </a>
+                    </th>
+                    <td>
+                        <a href="{% url 'admin:calendario-turnos' %}" class="viewlink">
+                            Ver calendario
+                        </a>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        
+        <div class="module">
+            <p><strong>Acceso limitado:</strong> Solo puedes ver el calendario de turnos. Para gestionar configuraciones o turnos individuales, contacta al administrador.</p>
+        </div>
+    {% else %}
+        {# Vista completa para superusuarios #}
+        {{ block.super }}
+    {% endif %}
+{% endblock %}

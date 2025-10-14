@@ -15,7 +15,7 @@ def calendario_turnos_view(request):
 
 @admin.register(ConfiguracionCalendario)
 class ConfiguracionCalendarioAdmin(admin.ModelAdmin):
-    """Configuración del admin para ConfiguracionCalendario."""
+    """Configuración del admin para ConfiguracionCalendario - Solo superusuarios."""
 
     list_display = [
         "nombre",
@@ -33,10 +33,30 @@ class ConfiguracionCalendarioAdmin(admin.ModelAdmin):
         ("Configuración de Turnos", {"fields": ("duracion_turno_default",)}),
     )
 
+    def has_module_permission(self, request):
+        """Permitir acceso al módulo turnos para staff."""
+        return request.user.is_staff
+
+    def has_view_permission(self, request, obj=None):
+        """Solo superusuarios pueden ver este modelo."""
+        return request.user.is_superuser
+
+    def has_add_permission(self, request):
+        """Solo superusuarios pueden agregar este modelo."""
+        return request.user.is_superuser
+
+    def has_change_permission(self, request, obj=None):
+        """Solo superusuarios pueden modificar este modelo."""
+        return request.user.is_superuser
+
+    def has_delete_permission(self, request, obj=None):
+        """Solo superusuarios pueden eliminar este modelo."""
+        return request.user.is_superuser
+
 
 @admin.register(Turno)
 class TurnoAdmin(admin.ModelAdmin):
-    """Configuración del admin para Turno."""
+    """Configuración del admin para Turno - Solo superusuarios."""
 
     list_display = [
         "cliente",
@@ -69,6 +89,26 @@ class TurnoAdmin(admin.ModelAdmin):
             },
         ),
     )
+
+    def has_module_permission(self, request):
+        """Permitir acceso al módulo turnos para staff."""
+        return request.user.is_staff
+
+    def has_view_permission(self, request, obj=None):
+        """Solo superusuarios pueden ver este modelo."""
+        return request.user.is_superuser
+
+    def has_add_permission(self, request):
+        """Solo superusuarios pueden agregar este modelo."""
+        return request.user.is_superuser
+
+    def has_change_permission(self, request, obj=None):
+        """Solo superusuarios pueden modificar este modelo."""
+        return request.user.is_superuser
+
+    def has_delete_permission(self, request, obj=None):
+        """Solo superusuarios pueden eliminar este modelo."""
+        return request.user.is_superuser
 
     def motivo_breve(self, obj):
         """Muestra una versión breve del motivo."""
