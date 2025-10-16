@@ -176,20 +176,28 @@ class MovimientoCajaAdmin(admin.ModelAdmin):
 
     balance_formateado.short_description = "Balance"
 
-    def balance_calculado(self, obj: Any) -> SafeString | str:
-        """Muestra el balance calculado en el formulario."""
+    def balance_calculado(self, obj: Any) -> SafeString:
+        """Muestra el balance calculado en el formulario con cálculo en tiempo real."""
         if obj.pk:
+            # Si ya existe, mostrar el balance actual
             color = "#28a745" if obj.balance >= 0 else "#dc3545"
             signo = "+" if obj.balance >= 0 else ""
             balance_str = f"{signo}${obj.balance:,.2f}"
             return format_html(
-                '<span style="color: {}; font-weight: bold; font-size: 16px;">{}</span>',
+                '<span id="balance-display" style="color: {}; font-weight: bold; font-size: 16px;">{}</span>',
                 color,
                 balance_str,
             )
-        return "Se calculará automáticamente"
+        else:
+            # Si es nuevo, iniciar en $0.00
+            return format_html(
+                '<span id="balance-display" style="color: #28a745; font-weight: bold; font-size: 16px;">$0.00</span>'
+            )
 
     balance_calculado.short_description = "Balance (Automático)"
+    
+    class Media:
+        js = ('contabilidad/js/balance_calculador.js',)
 
     def save_model(self, request, obj, form, change):
         """Asigna el usuario que crea el movimiento."""

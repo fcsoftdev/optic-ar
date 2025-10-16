@@ -5,11 +5,28 @@ from django.contrib.admin import AdminSite
 from django.http import HttpRequest
 
 
+# Mapeo de iconos Font Awesome para cada app
+APP_ICONS = {
+    "turnos": "fa-calendar-check",
+    "contabilidad": "fa-cash-register",
+    "productos": "fa-box",
+    "ventas": "fa-shopping-cart",
+    "compras": "fa-truck",
+    "auth": "fa-users",
+    "sites": "fa-globe",
+}
+
+
 class CustomAdminSite(AdminSite):
     """Sitio de administración personalizado con CSS custom y permisos"""
 
     class Media:
-        css = {"all": ("admin/css/custom_admin.css",)}
+        css = {
+            "all": (
+                "admin/css/custom_admin.css",
+                "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css",
+            )
+        }
 
     def has_permission(self, request: HttpRequest) -> bool:
         """
@@ -42,6 +59,7 @@ class CustomAdminSite(AdminSite):
                     "app_label": "turnos",
                     "app_url": "/admin/turnos/",
                     "has_module_perms": True,
+                    "icon": "fa-calendar-check",  # Icono para el sidebar
                     "models": [
                         {
                             "name": "Calendario de Turnos",
@@ -99,6 +117,7 @@ class CustomAdminSite(AdminSite):
                             "app_label": "contabilidad",
                             "app_url": "/admin/contabilidad/",
                             "has_module_perms": True,
+                            "icon": "fa-cash-register",  # Icono para el sidebar
                             "models": contabilidad_models,
                         }
                         filtered_app_list.append(contabilidad_app)
@@ -111,12 +130,21 @@ class CustomAdminSite(AdminSite):
                     ]
                     if visible_models:
                         app["models"] = visible_models
+                        # Agregar icono desde el diccionario
+                        app_label = app.get("app_label", "")
+                        if app_label in APP_ICONS:
+                            app["icon"] = APP_ICONS[app_label]
                         filtered_app_list.append(app)
 
             return filtered_app_list
 
-        # Para superusuarios, agregar "Reporte de Caja" a la app Contabilidad
+        # Para superusuarios, agregar "Reporte de Caja" e iconos
         for app in app_list:
+            # Agregar icono desde el diccionario
+            app_label = app.get("app_label", "")
+            if app_label in APP_ICONS:
+                app["icon"] = APP_ICONS[app_label]
+
             if app["app_label"] == "contabilidad":
                 # Agregar el reporte de caja como primer elemento
                 reporte_caja_model = {
@@ -133,7 +161,6 @@ class CustomAdminSite(AdminSite):
                     "view_only": True,
                 }
                 app["models"].insert(0, reporte_caja_model)
-                break
 
         return app_list
 

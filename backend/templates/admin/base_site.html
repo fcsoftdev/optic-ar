@@ -13,56 +13,137 @@
   type="image/x-icon"
 />
 <!-- CSS personalizado para admin -->
-<link rel="stylesheet" type="text/css" href="{% static 'admin/css/custom_admin.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'admin/css/custom_admin.css' %}?v=20251015-001">
 
 <script>
-// Script para agregar enlace del calendario en TODAS las páginas del admin
+// ===== SIDEBAR RESPONSIVE =====
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('=== SCRIPT EN EXTRAHEAD INICIADO ===');
-    console.log('URL:', window.location.pathname);
-    
     setTimeout(function() {
-        console.log('Ejecutando después de timeout...');
+        var sidebar = document.getElementById('nav-sidebar');
+        if (!sidebar) return;
         
-        // Buscar el módulo SISTEMA DE TURNOS
+        // Crear botón hamburger
+        var toggleBtn = document.createElement('button');
+        toggleBtn.className = 'nav-sidebar-toggle';
+        toggleBtn.innerHTML = '☰';
+        toggleBtn.setAttribute('aria-label', 'Toggle navigation');
+        document.body.appendChild(toggleBtn);
+        
+        // Crear overlay
+        var overlay = document.createElement('div');
+        overlay.className = 'sidebar-overlay';
+        document.body.appendChild(overlay);
+        
+        // Agregar tooltips
+        sidebar.querySelectorAll('caption.section').forEach(function(caption) {
+            if (!caption.getAttribute('title')) {
+                caption.setAttribute('title', caption.textContent.trim());
+            }
+        });
+        
+        sidebar.querySelectorAll('th a').forEach(function(link) {
+            var parent = link.closest('th');
+            if (parent && !parent.getAttribute('title')) {
+                parent.setAttribute('title', link.textContent.trim());
+            }
+        });
+        
+        // Detectar móvil
+        function isMobile() {
+            return window.innerWidth < 768;
+        }
+        
+        // Click en botón hamburger
+        toggleBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            
+            if (isMobile()) {
+                if (sidebar.classList.contains('active')) {
+                    // Cerrar
+                    sidebar.classList.remove('active');
+                    overlay.classList.remove('active');
+                    document.body.style.overflow = '';
+                    sidebar.style.setProperty('transform', 'translateX(-100%)', 'important');
+                    overlay.style.setProperty('opacity', '0', 'important');
+                    overlay.style.setProperty('visibility', 'hidden', 'important');
+                } else {
+                    // Abrir
+                    sidebar.classList.add('active');
+                    overlay.classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                    sidebar.style.setProperty('transform', 'translateX(0)', 'important');
+                    sidebar.style.setProperty('position', 'fixed', 'important');
+                    sidebar.style.setProperty('top', '0', 'important');
+                    sidebar.style.setProperty('left', '0', 'important');
+                    sidebar.style.setProperty('z-index', '1050', 'important');
+                    sidebar.style.setProperty('width', '280px', 'important');
+                    sidebar.style.setProperty('min-width', '280px', 'important');
+                    sidebar.style.setProperty('max-width', '85vw', 'important');
+                    sidebar.style.setProperty('height', '100vh', 'important');
+                    sidebar.style.setProperty('background', '#f8f8f8', 'important');
+                    sidebar.style.setProperty('display', 'block', 'important');
+                    sidebar.style.setProperty('visibility', 'visible', 'important');
+                    overlay.style.setProperty('opacity', '1', 'important');
+                    overlay.style.setProperty('visibility', 'visible', 'important');
+                    overlay.style.setProperty('pointer-events', 'auto', 'important');
+                }
+            }
+        });
+        
+        // Click en overlay
+        overlay.addEventListener('click', function() {
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+            document.body.style.overflow = '';
+        });
+        
+        // Click en enlaces
+        sidebar.querySelectorAll('a').forEach(function(link) {
+            link.addEventListener('click', function() {
+                if (isMobile() && sidebar.classList.contains('active')) {
+                    sidebar.classList.remove('active');
+                    overlay.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+            });
+        });
+        
+        // Resize
+        window.addEventListener('resize', function() {
+            if (!isMobile()) {
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        });
+    }, 150);
+});
+</script>
+
+<script>
+// Script para agregar enlace del calendario
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(function() {
         var modules = document.querySelectorAll('.module');
-        console.log('Total módulos encontrados:', modules.length);
-        
         var turnosModule = null;
         
-        // Buscar por caption "Sistema de Turnos"
         for (var i = 0; i < modules.length; i++) {
             var caption = modules[i].querySelector('caption');
-            if (caption) {
-                console.log('Caption ' + i + ':', caption.textContent);
-                if (caption.textContent.trim() === 'Sistema de Turnos') {
-                    turnosModule = modules[i].querySelector('tbody');
-                    console.log('✓ Encontrado módulo Sistema de Turnos!');
-                    break;
-                }
+            if (caption && caption.textContent.trim() === 'Sistema de Turnos') {
+                turnosModule = modules[i].querySelector('tbody');
+                break;
             }
         }
         
         if (turnosModule) {
-            // Verificar que no exista ya el enlace
             var existingCalendar = turnosModule.querySelector('.model-calendario');
             
             if (!existingCalendar) {
-                console.log('Agregando enlace del calendario...');
-                
                 var calendarioRow = document.createElement('tr');
                 calendarioRow.className = 'model-calendario';
-                
                 calendarioRow.innerHTML = '<th scope="row"><a href="/admin/calendario-turnos/" style="color: #417690;">Calendario de Turnos</a></th><td><a href="/admin/calendario-turnos/" class="addlink">Agregar</a></td><td><a href="/admin/calendario-turnos/" class="viewlink">Ver</a></td>';
-                
-                // Insertar al principio
                 turnosModule.insertBefore(calendarioRow, turnosModule.firstChild);
-                console.log('✓ Enlace agregado exitosamente!');
-            } else {
-                console.log('El enlace ya existe');
             }
-        } else {
-            console.log('✗ NO se encontró el módulo Sistema de Turnos');
         }
     }, 500);
 });

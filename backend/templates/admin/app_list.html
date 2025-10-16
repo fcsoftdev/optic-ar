@@ -1,0 +1,45 @@
+{% load i18n %}
+
+{% if app_list %}
+  {% for app in app_list %}
+    <div class="app-{{ app.app_label }} module">
+      <table>
+        <caption class="section" title="{{ app.name }}">
+          {% if app.icon %}
+            <i class="fas {{ app.icon }} app-icon"></i>
+          {% endif %}
+          <span class="app-name">{{ app.name }}</span>
+        </caption>
+        {% for model in app.models %}
+          <tr class="model-{{ model.object_name|lower }}">
+            {% if model.admin_url %}
+              <th scope="row" class="{% if request.resolver_match.url_name == model.object_name|lower %}current-model{% endif %}">
+                <a href="{{ model.admin_url }}"{% if model.add_url %} class="addlink"{% endif %}>
+                  <span class="model-name">{{ model.name }}</span>
+                </a>
+              </th>
+            {% else %}
+              <th scope="row">
+                <span class="model-name">{{ model.name }}</span>
+              </th>
+            {% endif %}
+
+            {% if model.add_url %}
+              <td><a href="{{ model.add_url }}" class="addlink">{% translate 'Add' %}</a></td>
+            {% else %}
+              <td></td>
+            {% endif %}
+
+            {% if model.admin_url and show_changelinks %}
+              <td><a href="{{ model.admin_url }}" class="changelink">{% translate 'Change' %}</a></td>
+            {% else %}
+              <td></td>
+            {% endif %}
+          </tr>
+        {% endfor %}
+      </table>
+    </div>
+  {% endfor %}
+{% else %}
+  <p>{% translate "You don't have permission to view or edit anything." %}</p>
+{% endif %}
