@@ -3,6 +3,28 @@
 from django.db import migrations, models
 
 
+def remove_index_if_exists(apps, schema_editor):
+    """Elimina el índice solo si existe (para evitar errores en producción)."""
+    if schema_editor.connection.vendor != "mysql":
+        return
+
+    with schema_editor.connection.cursor() as cursor:
+        # Verificar si el índice existe
+        cursor.execute(
+            """
+            SELECT COUNT(*)
+            FROM information_schema.statistics
+            WHERE table_schema = DATABASE()
+            AND table_name = 'contabilidad_movimientocaja'
+            AND index_name = 'contabilida_tipo_e91636_idx'
+        """
+        )
+        if cursor.fetchone()[0] > 0:
+            cursor.execute(
+                "ALTER TABLE contabilidad_movimientocaja DROP INDEX contabilida_tipo_e91636_idx"
+            )
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -10,9 +32,9 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveIndex(
-            model_name='movimientocaja',
-            name='contabilida_tipo_e91636_idx',
+        migrations.RunPython(
+            remove_index_if_exists,
+            reverse_code=migrations.RunPython.noop,
         ),
         migrations.RemoveField(
             model_name='movimientocaja',
