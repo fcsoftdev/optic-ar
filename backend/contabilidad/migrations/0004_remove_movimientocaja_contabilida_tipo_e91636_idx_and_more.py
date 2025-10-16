@@ -25,6 +25,69 @@ def remove_index_if_exists(apps, schema_editor):
             )
 
 
+def remove_fields_if_exist(apps, schema_editor):
+    """Elimina campos solo si existen (para evitar errores en producción)."""
+    if schema_editor.connection.vendor != "mysql":
+        return
+
+    with schema_editor.connection.cursor() as cursor:
+        # Lista de campos a eliminar
+        fields_to_remove = ['concepto', 'monto', 'tipo']
+        
+        for field in fields_to_remove:
+            # Verificar si el campo existe
+            cursor.execute(
+                f"""
+                SELECT COUNT(*)
+                FROM information_schema.columns
+                WHERE table_schema = DATABASE()
+                AND table_name = 'contabilidad_movimientocaja'
+                AND column_name = '{field}'
+            """
+            )
+            if cursor.fetchone()[0] > 0:
+                cursor.execute(
+                    f"ALTER TABLE contabilidad_movimientocaja DROP COLUMN {field}"
+                )
+
+
+def add_fields_if_not_exist(apps, schema_editor):
+    """Agrega campos solo si no existen (para evitar errores en producción)."""
+    if schema_editor.connection.vendor != "mysql":
+        return
+
+    with schema_editor.connection.cursor() as cursor:
+        # Verificar y agregar campo 'egreso'
+        cursor.execute(
+            """
+            SELECT COUNT(*)
+            FROM information_schema.columns
+            WHERE table_schema = DATABASE()
+            AND table_name = 'contabilidad_movimientocaja'
+            AND column_name = 'egreso'
+        """
+        )
+        if cursor.fetchone()[0] == 0:
+            cursor.execute(
+                "ALTER TABLE contabilidad_movimientocaja ADD COLUMN egreso DECIMAL(10, 2) NOT NULL DEFAULT 0"
+            )
+
+        # Verificar y agregar campo 'ingreso'
+        cursor.execute(
+            """
+            SELECT COUNT(*)
+            FROM information_schema.columns
+            WHERE table_schema = DATABASE()
+            AND table_name = 'contabilidad_movimientocaja'
+            AND column_name = 'ingreso'
+        """
+        )
+        if cursor.fetchone()[0] == 0:
+            cursor.execute(
+                "ALTER TABLE contabilidad_movimientocaja ADD COLUMN ingreso DECIMAL(10, 2) NOT NULL DEFAULT 0"
+            )
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -36,26 +99,12 @@ class Migration(migrations.Migration):
             remove_index_if_exists,
             reverse_code=migrations.RunPython.noop,
         ),
-        migrations.RemoveField(
-            model_name='movimientocaja',
-            name='concepto',
+        migrations.RunPython(
+            remove_fields_if_exist,
+            reverse_code=migrations.RunPython.noop,
         ),
-        migrations.RemoveField(
-            model_name='movimientocaja',
-            name='monto',
-        ),
-        migrations.RemoveField(
-            model_name='movimientocaja',
-            name='tipo',
-        ),
-        migrations.AddField(
-            model_name='movimientocaja',
-            name='egreso',
-            field=models.DecimalField(decimal_places=2, default=0, max_digits=10, verbose_name='Egreso'),
-        ),
-        migrations.AddField(
-            model_name='movimientocaja',
-            name='ingreso',
-            field=models.DecimalField(decimal_places=2, default=0, max_digits=10, verbose_name='Ingreso'),
+        migrations.RunPython(
+            add_fields_if_not_exist,
+            reverse_code=migrations.RunPython.noop,
         ),
     ]
