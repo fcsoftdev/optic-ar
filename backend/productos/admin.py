@@ -79,8 +79,8 @@ class ProductoAdminForm(forms.ModelForm):
 class ProductoAdmin(admin.ModelAdmin):
     form = ProductoAdminForm
     list_display = [
-        "codigo",
         "nombre",
+        "codigo",
         "categoria",
         "sub_categoria",
         "marca",
@@ -99,6 +99,7 @@ class ProductoAdmin(admin.ModelAdmin):
     search_fields = ["codigo", "nombre", "descripcion"]
     list_filter = ["marca", "categoria", "sub_categoria"]
     autocomplete_fields = ["marca"]
+    list_display_links = ["nombre"]
 
     actions = ["aumentar_precios", "revertir_ultimo_cambio"]
 
