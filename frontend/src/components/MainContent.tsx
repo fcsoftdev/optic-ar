@@ -2,6 +2,14 @@ import type { ReactNode } from "react";
 import { Col } from "react-bootstrap";
 import DashboardHome from "./DashboardHome";
 import ProductList from "./ProductList";
+import BrandList from "./BrandList";
+import CustomerList from "./CustomerList";
+import ConsultationList from "./ConsultationList";
+import InsuranceProvider from "./InsuranceProvider";
+import PurchaseList from "./PurchaseList";
+import ExpensesList from "./ExpensesList";
+import SuppliersList from "./SuppliersList";
+import SalesList from "./SalesList";
 
 interface MainContentProps {
   children?: ReactNode;
@@ -22,6 +30,14 @@ function MainContent({ children, activeSection }: MainContentProps) {
       <div className="p-2">
         {activeSection === "dashboard" && <DashboardHome />}
         {activeSection === "productos" && <ProductList />}
+        {activeSection === "marcas" && <BrandList />}
+        {activeSection === "clientes-pacientes" && <CustomerList />}
+        {activeSection === "consultas" && <ConsultationList />}
+        {activeSection === "obras-sociales" && <InsuranceProvider />}
+        {activeSection === "compras" && <PurchaseList />}
+        {activeSection === "gastos" && <ExpensesList />}
+        {activeSection === "proveedores" && <SuppliersList />}
+        {activeSection === "ventas" && <SalesList />}
       </div>
     </Col>
   );

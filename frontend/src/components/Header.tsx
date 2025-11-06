@@ -46,8 +46,9 @@ function Header({ onToggleSidebar }: HeaderProps) {
           <List size={24} />
         </Button>
 
-        {/* Brand a la izquierda */}
-        <Navbar.Brand href="#home" className="d-flex align-items-center">
+        {/* Brand a la izquierda */}  
+        
+        <Navbar.Brand href="#dashboard" className="d-flex align-items-center">
           <Eyeglasses size={30} className="me-2" />
           <span>Opticar</span>
         </Navbar.Brand>
