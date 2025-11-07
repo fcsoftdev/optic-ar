@@ -13,6 +13,15 @@ DEBUG = True
 # Hosts permitidos en desarrollo
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", "0.0.0.0"]
 
+# CORS Configuration para desarrollo
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",  # Vite dev server
+    "http://127.0.0.1:5173",
+    "http://localhost:3000",  # Alternative React port
+]
+
+CORS_ALLOW_CREDENTIALS = True
+
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 DATABASES = {
