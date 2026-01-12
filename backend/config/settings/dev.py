@@ -17,6 +17,8 @@ ALLOWED_HOSTS = ["localhost", "127.0.0.1", "0.0.0.0"]
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",  # Vite dev server
     "http://127.0.0.1:5173",
+    "http://localhost:5174",  # Vite dev server (puerto alternativo)
+    "http://127.0.0.1:5174",
     "http://localhost:3000",  # Alternative React port
 ]
 
@@ -26,15 +28,14 @@ CORS_ALLOW_CREDENTIALS = True
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 DATABASES = {
     "default": {
-        #'ENGINE': 'django.db.backends.sqlite3',
-        #'NAME': BASE_DIR / 'db.sqlite3',
-        "ENGINE": "django.db.backends.mysql",
-        # "NAME": BASE_DIR / "db.sqlite3",
-        "NAME": "opticardb",
-        "USER": "opticaruser",
-        "PASSWORD": "Opticar#889",
-        "HOST": "localhost",
-        "PORT": "3306",
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
+        # "ENGINE": "django.db.backends.mysql",
+        # "NAME": "opticardb",
+        # "USER": "opticaruser",
+        # "PASSWORD": "Opticar#889",
+        # "HOST": "localhost",
+        # "PORT": "3306",
     }
 }
 

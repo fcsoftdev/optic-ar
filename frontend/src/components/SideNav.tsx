@@ -141,6 +141,7 @@ function SideNav({ show, onHide, setActiveSection }: SideNavProps) {
         {menuItems.map((item, index) => {
           return (
             <SideNavItem
+              key={index}
               item={item}
               index={index}
               onHide={onHide}

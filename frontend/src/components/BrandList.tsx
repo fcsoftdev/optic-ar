@@ -1,51 +1,383 @@
 /**
  * @file BrandList.tsx
- * @description Componente para listar las marcas de productos.
+ * @description Componente para listar y gestionar marcas de productos.
+ *
+ * Características:
+ * - Búsqueda en tiempo real con debounce
+ * - CRUD completo (Crear, Leer, Actualizar, Eliminar)
+ * - Selección múltiple para eliminación masiva
+ * - Paginación (10 items por página)
+ * - Manejo de estados de carga y errores
+ * - Integración con React Query para cache optimizado
  */
-import { Table } from "react-bootstrap";
-
-/** * @interface Marca
- * @description Define la estructura del objeto marca.
- */
-interface Marca {
-  id: number;
-  nombre: string;
-}
-
-/** * Lista mock de marcas para mostrar en la tabla.
- */
-const mockMarcas: Marca[] = [
-  { id: 1, nombre: "Ray-Ban" },
-  { id: 2, nombre: "Oakley" },
-  { id: 3, nombre: "Acuvue" },
-  { id: 4, nombre: "Vogue" },
-];
+import React, { useState, useEffect } from "react";
+import {
+  Button,
+  Col,
+  Form,
+  Row,
+  Table,
+  Spinner,
+  Alert,
+  Badge,
+  Pagination,
+} from "react-bootstrap";
+import { PencilSquare, Trash, Plus } from "react-bootstrap-icons";
+import { useMarcas, useDeleteMarca } from "../hooks/useProductos";
+import MarcaFormModal from "./MarcaFormModal";
+import type { Marca } from "../services/productos.service";
 
 /**
- * Componente BrandList - Lista de marcas de productos.
+ * Componente BrandList - Lista de marcas con ABM completo.
  *
- * Muestra una lista de marcas utilizando datos mock.
+ * Permite:
+ * - Ver listado de todas las marcas
+ * - Buscar marcas por nombre
+ * - Crear nuevas marcas
+ * - Editar marcas existentes
+ * - Eliminar marcas (individual o múltiple)
  */
 function BrandList() {
+  const [selectedMarcas, setSelectedMarcas] = useState<number[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [showModal, setShowModal] = useState(false);
+  const [editingMarca, setEditingMarca] = useState<Marca | null>(null);
+
+  // Debounce para el término de búsqueda
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+      setCurrentPage(1); // Reset a la primera página al buscar
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  // Obtener marcas desde API con React Query (con paginación)
+  const { data, isLoading, error } = useMarcas({
+    page: currentPage,
+    search: debouncedSearchTerm || undefined,
+  });
+  const deleteMarca = useDeleteMarca();
+
+  // Extraer marcas y total de la respuesta paginada o usar array simple
+  const marcas = Array.isArray(data) ? data : data?.results || [];
+  const totalPages =
+    !Array.isArray(data) && data?.count ? Math.ceil(data.count / 10) : 0;
+
+  /**
+   * Seleccionar/deseleccionar todas las marcas de la página actual
+   */
+  const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.checked) {
+      setSelectedMarcas(marcas.map((m) => m.id));
+    } else {
+      setSelectedMarcas([]);
+    }
+  };
+
+  /**
+   * Seleccionar/deseleccionar una marca individual
+   */
+  const handleSelectMarca = (marcaId: number) => {
+    if (selectedMarcas.includes(marcaId)) {
+      setSelectedMarcas(selectedMarcas.filter((id) => id !== marcaId));
+    } else {
+      setSelectedMarcas([...selectedMarcas, marcaId]);
+    }
+  };
+
+  /**
+   * Eliminar una marca con confirmación
+   */
+  const handleDeleteMarca = (marcaId: number) => {
+    if (confirm("¿Está seguro de eliminar esta marca?")) {
+      deleteMarca.mutate(marcaId);
+      setSelectedMarcas(selectedMarcas.filter((id) => id !== marcaId));
+    }
+  };
+
+  /**
+   * Eliminar marcas seleccionadas con confirmación
+   */
+  const handleDeleteSelected = () => {
+    if (
+      confirm(`¿Está seguro de eliminar ${selectedMarcas.length} marca(s)?`)
+    ) {
+      selectedMarcas.forEach((id) => {
+        deleteMarca.mutate(id);
+      });
+      setSelectedMarcas([]);
+    }
+  };
+
+  /**
+   * Abrir modal para editar marca
+   */
+  const handleEditMarca = (marca: Marca) => {
+    setEditingMarca(marca);
+    setShowModal(true);
+  };
+
+  /**
+   * Abrir modal para crear nueva marca
+   */
+  const handleAddMarca = () => {
+    setEditingMarca(null);
+    setShowModal(true);
+  };
+
+  /**
+   * Cerrar modal y resetear estado
+   */
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setEditingMarca(null);
+  };
+
+  /**
+   * Cambiar de página
+   */
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  /**
+   * Generar items de paginación con elipsis inteligentes
+   */
+  const getPaginationItems = () => {
+    const items = [];
+    const maxVisiblePages = 5;
+
+    if (totalPages <= maxVisiblePages) {
+      for (let i = 1; i <= totalPages; i++) {
+        items.push(i);
+      }
+    } else {
+      if (currentPage <= 3) {
+        for (let i = 1; i <= 4; i++) items.push(i);
+        items.push("...");
+        items.push(totalPages);
+      } else if (currentPage >= totalPages - 2) {
+        items.push(1);
+        items.push("...");
+        for (let i = totalPages - 3; i <= totalPages; i++) items.push(i);
+      } else {
+        items.push(1);
+        items.push("...");
+        for (let i = currentPage - 1; i <= currentPage + 1; i++) items.push(i);
+        items.push("...");
+        items.push(totalPages);
+      }
+    }
+
+    return items;
+  };
+
+  // Estados de carga y error
+  if (isLoading) {
+    return (
+      <div className="text-center py-5">
+        <Spinner animation="border" role="status">
+          <span className="visually-hidden">Cargando marcas...</span>
+        </Spinner>
+        <p className="mt-3">Cargando marcas...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <Alert variant="danger">
+        Error al cargar las marcas. Por favor, intente nuevamente.
+      </Alert>
+    );
+  }
+
   return (
     <>
-      <h5 className="mb-3">Listado de Marcas</h5>
-      <Table striped bordered hover responsive>
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Nombre</th>
-          </tr>
-        </thead>
-        <tbody>
-          {mockMarcas.map((marca) => (
-            <tr key={marca.id}>
-              <td>{marca.id}</td>
-              <td>{marca.nombre}</td>
+      {/* Header con título y botón de crear */}
+      <Row className="mb-3 align-items-center">
+        <Col>
+          <h4 className="mb-0">
+            Marcas{" "}
+            <Badge bg="secondary" pill>
+              {!Array.isArray(data) && data?.count ? data.count : marcas.length}
+            </Badge>
+          </h4>
+        </Col>
+        <Col xs="auto">
+          <Button variant="primary" onClick={handleAddMarca}>
+            <Plus size={18} className="me-1" />
+            Nueva Marca
+          </Button>
+        </Col>
+      </Row>
+
+      {/* Barra de búsqueda y acciones */}
+      <Row className="mb-3">
+        <Col md={6}>
+          <Form.Control
+            type="text"
+            placeholder="Buscar marca por nombre..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </Col>
+        <Col md={6} className="text-end">
+          {selectedMarcas.length > 0 && (
+            <Button variant="danger" onClick={handleDeleteSelected}>
+              <Trash size={16} className="me-1" />
+              Eliminar seleccionadas ({selectedMarcas.length})
+            </Button>
+          )}
+        </Col>
+      </Row>
+
+      {/* Contenedor con scroll para la tabla */}
+      <div
+        style={{
+          overflow: "auto",
+          maxHeight: "calc(100vh - 300px)",
+          border: "1px solid #dee2e6",
+          borderRadius: "4px",
+        }}
+      >
+        <Table
+          striped
+          bordered
+          hover
+          style={{ minWidth: "600px", marginBottom: 0 }}
+        >
+          <thead
+            style={{
+              position: "sticky",
+              top: 0,
+              backgroundColor: "#fff",
+              zIndex: 1,
+              boxShadow: "0 2px 2px -1px rgba(0, 0, 0, 0.1)",
+            }}
+          >
+            <tr>
+              <th style={{ width: "50px" }}>
+                <Form.Check
+                  type="checkbox"
+                  checked={
+                    marcas.length > 0 && selectedMarcas.length === marcas.length
+                  }
+                  onChange={handleSelectAll}
+                />
+              </th>
+              <th style={{ width: "80px" }}>ID</th>
+              <th>Nombre</th>
+              <th style={{ width: "150px" }}>Acciones</th>
             </tr>
-          ))}
-        </tbody>
-      </Table>
+          </thead>
+          <tbody>
+            {marcas.length === 0 ? (
+              <tr>
+                <td colSpan={4} className="text-center text-muted">
+                  {debouncedSearchTerm
+                    ? "No se encontraron marcas con ese criterio de búsqueda"
+                    : "No hay marcas registradas. Agregue una nueva marca."}
+                </td>
+              </tr>
+            ) : (
+              marcas.map((marca) => (
+                <tr key={marca.id}>
+                  <td>
+                    <Form.Check
+                      type="checkbox"
+                      checked={selectedMarcas.includes(marca.id)}
+                      onChange={() => handleSelectMarca(marca.id)}
+                    />
+                  </td>
+                  <td>{marca.id}</td>
+                  <td>
+                    <strong>{marca.nombre}</strong>
+                  </td>
+                  <td>
+                    <Button
+                      variant="outline-primary"
+                      size="sm"
+                      className="me-2"
+                      onClick={() => handleEditMarca(marca)}
+                      title="Editar marca"
+                    >
+                      <PencilSquare size={14} />
+                    </Button>
+                    <Button
+                      variant="outline-danger"
+                      size="sm"
+                      onClick={() => handleDeleteMarca(marca.id)}
+                      title="Eliminar marca"
+                    >
+                      <Trash size={14} />
+                    </Button>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </Table>
+      </div>
+
+      {/* Paginación */}
+      {totalPages > 1 && (
+        <div
+          className="d-flex justify-content-between align-items-center mt-4 pt-3"
+          style={{ borderTop: "1px solid #dee2e6" }}
+        >
+          <div className="text-muted">
+            Mostrando {marcas.length} de{" "}
+            {!Array.isArray(data) && data?.count ? data.count : marcas.length}{" "}
+            marcas
+          </div>
+          <Pagination className="mb-0">
+            <Pagination.First
+              onClick={() => handlePageChange(1)}
+              disabled={currentPage === 1}
+            />
+            <Pagination.Prev
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+            />
+
+            {getPaginationItems().map((item, index) =>
+              typeof item === "number" ? (
+                <Pagination.Item
+                  key={index}
+                  active={item === currentPage}
+                  onClick={() => handlePageChange(item)}
+                >
+                  {item}
+                </Pagination.Item>
+              ) : (
+                <Pagination.Ellipsis key={index} disabled />
+              )
+            )}
+
+            <Pagination.Next
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+            />
+            <Pagination.Last
+              onClick={() => handlePageChange(totalPages)}
+              disabled={currentPage === totalPages}
+            />
+          </Pagination>
+        </div>
+      )}
+
+      {/* Modal de crear/editar marca */}
+      <MarcaFormModal
+        show={showModal}
+        onHide={handleCloseModal}
+        marca={editingMarca}
+      />
     </>
   );
 }

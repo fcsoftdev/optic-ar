@@ -1,75 +1,26 @@
-/**
- * @file ProductList.tsx
- * @description Componente que muestra un listado de productos mock en una tabla usando React-Bootstrap.
- */
-
-import React, { useState, type JSX } from "react";
-import { Button, Col, Dropdown, Form, Row, Table } from "react-bootstrap";
+import React, { useState, useEffect, type JSX } from "react";
+import {
+  Button,
+  Col,
+  Form,
+  Row,
+  Table,
+  Spinner,
+  Alert,
+  Pagination,
+  Badge,
+} from "react-bootstrap";
 import { PencilSquare, Trash } from "react-bootstrap-icons";
+import {
+  useProductos,
+  useDeleteProducto,
+  useMarcas,
+  useCategorias,
+  useSubCategorias,
+} from "../hooks/useProductos";
+import ProductoFormModal from "./ProductoFormModal";
+import type { Producto } from "../services/productos.service";
 
-/**
- * @interface Product
- * @description Define la estructura del objeto producto.
- */
-interface Product {
-  id: number;
-  codigo: string;
-  nombre: string;
-  categoria: string;
-  subCategoria: string;
-  precio: number;
-  stock: number;
-}
-
-/**
- * @constant mockProducts
- * @description Lista de productos mock para pruebas visuales.
- */
-const mockProducts: Product[] = [
-  {
-    id: 1,
-    codigo: "RB001",
-    nombre: "Armazón Ray-Ban",
-    categoria: "Armazones",
-    subCategoria: "Armazones de plástico",
-    precio: 45000,
-    stock: 1,
-  },
-  {
-    id: 2,
-    codigo: "AC002",
-    nombre: "Lentes de Contacto Acuvue",
-    categoria: "Lentes",
-    subCategoria: "Lentes desechables",
-    precio: 18000,
-    stock: 30,
-  },
-  {
-    id: 3,
-    codigo: "VG003",
-    nombre: "Gafas de Sol Vogue",
-    categoria: "Gafas de Sol",
-    subCategoria: "Gafas de sol polarizadas",
-    precio: 52000,
-    stock: 8,
-  },
-  {
-    id: 4,
-    codigo: "OK004",
-    nombre: "Armazón Oakley",
-    categoria: "Armazones",
-    subCategoria: "Armazones de metal",
-    precio: 48000,
-    stock: 5,
-  },
-];
-
-/**
- * Determina la clase CSS de Bootstrap según el nivel de stock
- *
- * @param stock - Cantidad actual en inventario
- * @returns Clase CSS de Bootstrap o cadena vacía
- */
 const obtenerClaseStock = (stock: number): string => {
   if (stock <= 1) {
     return "table-danger";
@@ -79,19 +30,69 @@ const obtenerClaseStock = (stock: number): string => {
   return "";
 };
 
-/**
- * @component ProductList
- * @description Renderiza una tabla con productos mockeados.
- * @returns {JSX.Element} Tabla con información de productos.
- */
 const ProductList: React.FC = (): JSX.Element => {
-  const [selectedFilter, setSelectedFilter] = useState("Todas las categorías");
-  const [products, setProducts] = useState<Product[]>(mockProducts);
   const [selectedProducts, setSelectedProducts] = useState<number[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+  const [selectedMarca, setSelectedMarca] = useState<number | null>(null);
+  const [selectedCategoria, setSelectedCategoria] = useState<number | null>(
+    null
+  );
+  const [selectedSubCategoria, setSelectedSubCategoria] = useState<
+    number | null
+  >(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [showModal, setShowModal] = useState(false);
+  const [editingProducto, setEditingProducto] = useState<Producto | null>(null);
 
-  /**
-   * Maneja la selección/deselección de todos los productos
-   */
+  // Debounce para el término de búsqueda
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+      setCurrentPage(1); // Reset a la primera página al buscar
+    }, 500); // Espera 500ms después de que el usuario deje de escribir
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  const { data, isLoading, error } = useProductos({
+    search: debouncedSearchTerm,
+    page: currentPage,
+    marca: selectedMarca || undefined,
+    categoria: selectedCategoria || undefined,
+    sub_categoria: selectedSubCategoria || undefined,
+  });
+  const deleteProducto = useDeleteProducto();
+  const { data: marcasData } = useMarcas();
+  const { data: categorias } = useCategorias();
+  const { data: subcategorias } = useSubCategorias(
+    selectedCategoria || undefined
+  );
+
+  const products = data?.results || [];
+  const totalPages = data?.count ? Math.ceil(data.count / 10) : 0;
+  const marcas = Array.isArray(marcasData)
+    ? marcasData
+    : marcasData?.results || [];
+  const categoriasData = categorias || [];
+  const subcategoriasData = subcategorias || [];
+
+  const handleMarcaChange = (marcaId: number | null) => {
+    setSelectedMarca(marcaId);
+    setCurrentPage(1);
+  };
+
+  const handleCategoriaChange = (categoriaId: number | null) => {
+    setSelectedCategoria(categoriaId);
+    setSelectedSubCategoria(null); // Reset subcategoría al cambiar categoría
+    setCurrentPage(1);
+  };
+
+  const handleSubCategoriaChange = (subCategoriaId: number | null) => {
+    setSelectedSubCategoria(subCategoriaId);
+    setCurrentPage(1);
+  };
+
   const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.checked) {
       setSelectedProducts(products.map((p) => p.id));
@@ -100,9 +101,6 @@ const ProductList: React.FC = (): JSX.Element => {
     }
   };
 
-  /**
-   * Maneja la selección/deselección de un producto individual
-   */
   const handleSelectProduct = (productId: number) => {
     if (selectedProducts.includes(productId)) {
       setSelectedProducts(selectedProducts.filter((id) => id !== productId));
@@ -111,135 +109,250 @@ const ProductList: React.FC = (): JSX.Element => {
     }
   };
 
-  /**
-   * Elimina un producto individual
-   */
   const handleDeleteProduct = (productId: number) => {
-    setProducts(products.filter((p) => p.id !== productId));
-    setSelectedProducts(selectedProducts.filter((id) => id !== productId));
+    if (confirm("¿Está seguro de eliminar este producto?")) {
+      deleteProducto.mutate(productId);
+      setSelectedProducts(selectedProducts.filter((id) => id !== productId));
+    }
   };
 
-  /**
-   * Elimina los productos seleccionados
-   */
   const handleDeleteSelected = () => {
-    setProducts(products.filter((p) => !selectedProducts.includes(p.id)));
-    setSelectedProducts([]);
+    if (
+      confirm(`¿Está seguro de eliminar ${selectedProducts.length} productos?`)
+    ) {
+      selectedProducts.forEach((id) => {
+        deleteProducto.mutate(id);
+      });
+      setSelectedProducts([]);
+    }
   };
 
-  /**
-   * Abre el modal de edición (placeholder)
-   */
-  const handleEditProduct = (productId: number) => {
-    console.log("Editar producto:", productId);
-    // TODO: Abrir modal de edición
+  const handleEditProduct = async (productId: number) => {
+    const producto = products.find((p) => p.id === productId);
+    if (producto) {
+      // Necesitamos obtener el producto completo desde la API
+      try {
+        const response = await fetch(
+          `${
+            import.meta.env.VITE_API_URL || "http://127.0.0.1:8000"
+          }/api/productos/${productId}/`
+        );
+        const fullProducto = await response.json();
+        setEditingProducto(fullProducto);
+        setShowModal(true);
+      } catch (error) {
+        console.error("Error al cargar producto:", error);
+      }
+    }
   };
 
-  /**
-   * Abre el modal de agregar producto (placeholder)
-   */
   const handleAddProduct = () => {
-    console.log("Agregar nuevo producto");
-    // TODO: Abrir modal de agregar producto
+    setEditingProducto(null);
+    setShowModal(true);
   };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setEditingProducto(null);
+  };
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    setDebouncedSearchTerm(searchTerm);
+    setCurrentPage(1); // Reset a la primera página al buscar
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  // Generar items de paginación
+  const getPaginationItems = () => {
+    const items = [];
+    const maxVisiblePages = 5;
+
+    if (totalPages <= maxVisiblePages) {
+      for (let i = 1; i <= totalPages; i++) {
+        items.push(i);
+      }
+    } else {
+      if (currentPage <= 3) {
+        for (let i = 1; i <= 4; i++) items.push(i);
+        items.push("...");
+        items.push(totalPages);
+      } else if (currentPage >= totalPages - 2) {
+        items.push(1);
+        items.push("...");
+        for (let i = totalPages - 3; i <= totalPages; i++) items.push(i);
+      } else {
+        items.push(1);
+        items.push("...");
+        for (let i = currentPage - 1; i <= currentPage + 1; i++) items.push(i);
+        items.push("...");
+        items.push(totalPages);
+      }
+    }
+
+    return items;
+  };
+
+  if (isLoading) {
+    return (
+      <div className="text-center p-5">
+        <Spinner animation="border" role="status">
+          <span className="visually-hidden">Cargando...</span>
+        </Spinner>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <Alert variant="danger">
+        Error al cargar productos: {(error as Error).message}
+      </Alert>
+    );
+  }
 
   return (
-    <>
-      <div className="d-flex justify-content-between align-items-center mb-3">
-        <h5 className="mb-0">Listado de Productos</h5>
-        <div>
-          {selectedProducts.length > 0 && (
-            <Button
-              variant="danger"
-              size="sm"
-              className="me-2"
-              onClick={handleDeleteSelected}
-            >
-              <Trash size={16} className="me-1" />
-              Eliminar seleccionados ({selectedProducts.length})
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        height: "calc(100vh - 100px)",
+      }}
+    >
+      <div style={{ flex: "0 0 auto" }}>
+        <div className="d-flex justify-content-between align-items-center mb-3">
+          <h4 className="mb-0">
+            Productos {""}
+            <Badge bg="secondary" pill>
+              {data?.count || 0}
+            </Badge>
+          </h4>
+          <div>
+            {selectedProducts.length > 0 && (
+              <Button
+                variant="danger"
+                size="sm"
+                className="me-2"
+                onClick={handleDeleteSelected}
+              >
+                <Trash size={16} className="me-1" />
+                Eliminar seleccionados ({selectedProducts.length})
+              </Button>
+            )}
+            <Button variant="success" size="sm" onClick={handleAddProduct}>
+              + Agregar Producto
             </Button>
-          )}
-          <Button variant="success" size="sm" onClick={handleAddProduct}>
-            + Agregar Producto
-          </Button>
+          </div>
         </div>
+
+        <Form className="mb-3" onSubmit={handleSearch}>
+          <Row className="g-2 align-items-center">
+            <Col xs={12} md={3}>
+              <Form.Control
+                type="text"
+                placeholder="Buscar producto..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </Col>
+            <Col xs={12} md={2}>
+              <Form.Select
+                value={selectedMarca || ""}
+                onChange={(e) =>
+                  handleMarcaChange(
+                    e.target.value ? Number(e.target.value) : null
+                  )
+                }
+              >
+                <option value="">Todas las marcas</option>
+                {marcas.map((marca) => (
+                  <option key={marca.id} value={marca.id}>
+                    {marca.nombre}
+                  </option>
+                ))}
+              </Form.Select>
+            </Col>
+            <Col xs={12} md={2}>
+              <Form.Select
+                value={selectedCategoria || ""}
+                onChange={(e) =>
+                  handleCategoriaChange(
+                    e.target.value ? Number(e.target.value) : null
+                  )
+                }
+              >
+                <option value="">Todas las categorías</option>
+                {categoriasData.map((cat) => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.nombre}
+                  </option>
+                ))}
+              </Form.Select>
+            </Col>
+            <Col xs={12} md={2}>
+              <Form.Select
+                value={selectedSubCategoria || ""}
+                onChange={(e) =>
+                  handleSubCategoriaChange(
+                    e.target.value ? Number(e.target.value) : null
+                  )
+                }
+                disabled={!selectedCategoria}
+              >
+                <option value="">Todas las subcategorías</option>
+                {subcategoriasData.map((subcat) => (
+                  <option key={subcat.id} value={subcat.id}>
+                    {subcat.nombre}
+                  </option>
+                ))}
+              </Form.Select>
+            </Col>
+            <Col xs="auto">
+              <Button
+                variant="outline-secondary"
+                onClick={() => {
+                  setSearchTerm("");
+                  setDebouncedSearchTerm("");
+                  setSelectedMarca(null);
+                  setSelectedCategoria(null);
+                  setSelectedSubCategoria(null);
+                  setCurrentPage(1);
+                }}
+              >
+                Limpiar
+              </Button>
+            </Col>
+          </Row>
+        </Form>
       </div>
 
-      <Form className="mb-3">
-        <Row className="g-2 align-items-center">
-          <Col xs={12} md={4}>
-            <Form.Control type="text" placeholder="Buscar producto..." />
-          </Col>
-          <Col xs={12} md={4}>
-            <Dropdown>
-              <Dropdown.Toggle variant="outline-secondary" className="w-100">
-                {selectedFilter}
-              </Dropdown.Toggle>
-              <Dropdown.Menu>
-                <Dropdown.Item
-                  onClick={() => setSelectedFilter("Todas las categorías")}
-                >
-                  Todas las categorías
-                </Dropdown.Item>
-                <Dropdown.Divider />
-                <Dropdown.Item
-                  onClick={() => setSelectedFilter("Armazones")}
-                  className="fw-bold"
-                >
-                  Armazones
-                </Dropdown.Item>
-                <Dropdown.Item
-                  onClick={() => setSelectedFilter("Armazones de plástico")}
-                  className="ps-4"
-                >
-                  Armazones de plástico
-                </Dropdown.Item>
-                <Dropdown.Item
-                  onClick={() => setSelectedFilter("Armazones de metal")}
-                  className="ps-4"
-                >
-                  Armazones de metal
-                </Dropdown.Item>
-                <Dropdown.Divider />
-                <Dropdown.Item
-                  onClick={() => setSelectedFilter("Lentes")}
-                  className="fw-bold"
-                >
-                  Lentes
-                </Dropdown.Item>
-                <Dropdown.Item
-                  onClick={() => setSelectedFilter("Lentes desechables")}
-                  className="ps-4"
-                >
-                  Lentes desechables
-                </Dropdown.Item>
-                <Dropdown.Divider />
-                <Dropdown.Item
-                  onClick={() => setSelectedFilter("Gafas de Sol")}
-                  className="fw-bold"
-                >
-                  Gafas de Sol
-                </Dropdown.Item>
-                <Dropdown.Item
-                  onClick={() => setSelectedFilter("Gafas de sol polarizadas")}
-                  className="ps-4"
-                >
-                  Gafas de sol polarizadas
-                </Dropdown.Item>
-              </Dropdown.Menu>
-            </Dropdown>
-          </Col>
-          <Col xs="auto">
-            <Button variant="primary" type="submit">
-              Buscar
-            </Button>
-          </Col>
-        </Row>
-      </Form>
-
-      <div style={{ overflowX: "auto", width: "100%" }}>
-        <Table striped bordered hover style={{ minWidth: "800px" }}>
-          <thead>
+      <div
+        style={{
+          overflow: "auto",
+          flex: "1 1 auto",
+          border: "1px solid #dee2e6",
+          borderRadius: "4px",
+        }}
+      >
+        <Table
+          striped
+          bordered
+          hover
+          style={{ minWidth: "800px", marginBottom: 0 }}
+        >
+          <thead
+            style={{
+              position: "sticky",
+              top: 0,
+              backgroundColor: "#fff",
+              zIndex: 1,
+              boxShadow: "0 2px 2px -1px rgba(0, 0, 0, 0.1)",
+            }}
+          >
             <tr>
               <th style={{ width: "50px" }}>
                 <Form.Check
@@ -254,6 +367,7 @@ const ProductList: React.FC = (): JSX.Element => {
               <th>#</th>
               <th>Código</th>
               <th>Nombre</th>
+              <th>Marca</th>
               <th>Categoría</th>
               <th>Subcategoría</th>
               <th>Precio</th>
@@ -277,9 +391,14 @@ const ProductList: React.FC = (): JSX.Element => {
                 <td>{producto.id}</td>
                 <td>{producto.codigo}</td>
                 <td>{producto.nombre}</td>
-                <td>{producto.categoria}</td>
-                <td>{producto.subCategoria}</td>
-                <td>${producto.precio.toLocaleString()}</td>
+                <td>{producto.marca_nombre}</td>
+                <td>{producto.categoria_nombre}</td>
+                <td>{producto.sub_categoria_nombre || "-"}</td>
+                <td>
+                  {producto.precio_venta
+                    ? `$${producto.precio_venta.toLocaleString()}`
+                    : "-"}
+                </td>
                 <td>{producto.stock}</td>
                 <td>
                   <Button
@@ -305,7 +424,61 @@ const ProductList: React.FC = (): JSX.Element => {
           </tbody>
         </Table>
       </div>
-    </>
+
+      {/* Paginación */}
+      <div style={{ flex: "0 0 auto", marginTop: "auto" }}>
+        {totalPages > 1 && (
+          <div
+            className="d-flex justify-content-between align-items-center mt-4 pt-3"
+            style={{ borderTop: "1px solid #dee2e6" }}
+          >
+            <div className="text-muted">
+              Mostrando {products.length} de {data?.count || 0} productos
+            </div>
+            <Pagination className="mb-0">
+              <Pagination.First
+                onClick={() => handlePageChange(1)}
+                disabled={currentPage === 1}
+              />
+              <Pagination.Prev
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+              />
+
+              {getPaginationItems().map((item, index) =>
+                typeof item === "number" ? (
+                  <Pagination.Item
+                    key={index}
+                    active={item === currentPage}
+                    onClick={() => handlePageChange(item)}
+                  >
+                    {item}
+                  </Pagination.Item>
+                ) : (
+                  <Pagination.Ellipsis key={index} disabled />
+                )
+              )}
+
+              <Pagination.Next
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+              />
+              <Pagination.Last
+                onClick={() => handlePageChange(totalPages)}
+                disabled={currentPage === totalPages}
+              />
+            </Pagination>
+          </div>
+        )}
+      </div>
+
+      {/* Modal de formulario */}
+      <ProductoFormModal
+        show={showModal}
+        onHide={handleCloseModal}
+        producto={editingProducto}
+      />
+    </div>
   );
 };
 

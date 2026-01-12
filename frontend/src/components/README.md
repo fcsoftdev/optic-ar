@@ -55,6 +55,51 @@ Estilos personalizados para:
 - Responsive design para móviles
 - Transiciones suaves
 
+## Módulos ABM Implementados
+
+### 📦 Productos (ProductList + ProductoFormModal)
+
+**Características:**
+✅ Búsqueda en tiempo real con debounce  
+✅ Filtros por marca, categoría y subcategoría  
+✅ Paginación (10 items por página)  
+✅ CRUD completo con validación Zod  
+✅ Selección múltiple para eliminación masiva  
+✅ Indicadores de stock (bajo/crítico)  
+✅ Modal de gestión de entidades relacionadas
+
+**Archivos:**
+
+- `ProductList.tsx` - Lista con filtros y paginación
+- `ProductoFormModal.tsx` - Modal de crear/editar
+- `EntityManagerModal.tsx` - CRUD de marcas/categorías/subcategorías
+- `SearchableSelect.tsx` - Select con búsqueda (react-select)
+- `schemas/productoSchema.ts` - Validaciones
+
+### 🏷️ Marcas (BrandList + MarcaFormModal)
+
+**Características:**
+✅ Búsqueda por nombre (filtrado local)  
+✅ CRUD completo con validación Zod  
+✅ Selección múltiple para eliminación masiva  
+✅ Modal simple de crear/editar  
+✅ Cache optimizado con React Query (setQueryData)  
+✅ Actualización instantánea sin refetch
+
+**Archivos:**
+
+- `BrandList.tsx` - Lista con búsqueda
+- `MarcaFormModal.tsx` - Modal de crear/editar
+- `schemas/marcaSchema.ts` - Validaciones
+
+**Patrón de Arquitectura:**
+
+```
+Component → Hook (useProductos) → Service (productosService) → API (axios)
+             ↓
+          React Query Cache (optimizado con setQueryData)
+```
+
 ## Uso
 
 ```tsx
@@ -71,8 +116,13 @@ function App() {
 
 ## TODO
 
+- [x] Implementar ABM de Productos
+- [x] Implementar ABM de Marcas
+- [ ] Implementar ABM de Categorías
+- [ ] Implementar ABM de SubCategorías
+- [ ] Implementar ABM de Clientes/Pacientes
+- [ ] Implementar ABM de Ventas
+- [ ] Implementar ABM de Compras
 - [ ] Implementar routing con React Router
-- [ ] Agregar estado activo en navegación
-- [ ] Implementar autenticación
-- [ ] Agregar menú móvil (hamburger menu)
-- [ ] Crear componente MainContent separado
+- [ ] Implementar autenticación JWT
+- [ ] Agregar Dashboard con métricas

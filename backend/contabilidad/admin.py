@@ -195,9 +195,9 @@ class MovimientoCajaAdmin(admin.ModelAdmin):
             )
 
     balance_calculado.short_description = "Balance (Automático)"
-    
+
     class Media:
-        js = ('contabilidad/js/balance_calculador.js',)
+        js = ("contabilidad/js/balance_calculador.js",)
 
     def save_model(self, request, obj, form, change):
         """Asigna el usuario que crea el movimiento."""

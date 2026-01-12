@@ -77,6 +77,14 @@ class Producto(models.Model):
         null=True,
         blank=True,
     )
+    porcentaje_ganancia = models.DecimalField(
+        "Porcentaje de ganancia",
+        max_digits=5,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        help_text="Porcentaje de ganancia sobre el precio de costo (ej: 30.00 para 30%)",
+    )
     precio_venta = models.DecimalField(
         "Precio de venta", max_digits=10, decimal_places=2, null=True
     )
