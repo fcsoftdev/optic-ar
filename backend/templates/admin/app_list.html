@@ -1,5 +1,12 @@
 {% load i18n %}
 
+<style>
+/* Ocultar duplicados de ReporteCaja - mostrar solo el primero */
+.app-contabilidad .model-reportecaja ~ .model-reportecaja {
+    display: none;
+}
+</style>
+
 {% if app_list %}
   {% for app in app_list %}
     <div class="app-{{ app.app_label }} module">

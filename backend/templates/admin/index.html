@@ -1,0 +1,12 @@
+{% extends "admin/index.html" %}
+{% load i18n static %}
+
+{% block extrahead %}
+{{ block.super }}
+<style>
+/* Ocultar duplicados del modelo ReporteCaja en el admin index */
+#content-main .app-contabilidad .model-reportecaja:nth-of-type(n+2) {
+    display: none;
+}
+</style>
+{% endblock %}
