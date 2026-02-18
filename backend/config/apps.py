@@ -13,7 +13,7 @@ class OpticArConfig(AppConfig):
         # Importar el admin personalizado
         from . import admin as custom_admin
 
-        admin.site.site_header = "Optica Punto de Vista"
+        admin.site.site_header = "Optic-AR"
         admin.site.site_title = "Sistema de Ópticas"
         admin.site.index_title = "Panel de administración"
         admin.site.site_url = None
