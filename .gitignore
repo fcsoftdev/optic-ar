@@ -68,5 +68,4 @@ Thumbs.db
 .vscode/
 backend/db.sqlite3
 */staticfiles/
-.github/
 .prettierignore
