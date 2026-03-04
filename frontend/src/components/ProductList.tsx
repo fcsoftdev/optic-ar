@@ -11,6 +11,7 @@ import {
   Badge,
 } from "react-bootstrap";
 import { PencilSquare, Trash } from "react-bootstrap-icons";
+import AddButton from "./AddButton";
 import {
   useProductos,
   useDeleteProducto,
@@ -36,7 +37,7 @@ const ProductList: React.FC = (): JSX.Element => {
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [selectedMarca, setSelectedMarca] = useState<number | null>(null);
   const [selectedCategoria, setSelectedCategoria] = useState<number | null>(
-    null
+    null,
   );
   const [selectedSubCategoria, setSelectedSubCategoria] = useState<
     number | null
@@ -66,7 +67,7 @@ const ProductList: React.FC = (): JSX.Element => {
   const { data: marcasData } = useMarcas();
   const { data: categorias } = useCategorias();
   const { data: subcategorias } = useSubCategorias(
-    selectedCategoria || undefined
+    selectedCategoria || undefined,
   );
 
   const products = data?.results || [];
@@ -135,7 +136,7 @@ const ProductList: React.FC = (): JSX.Element => {
         const response = await fetch(
           `${
             import.meta.env.VITE_API_URL || "http://127.0.0.1:8000"
-          }/api/productos/${productId}/`
+          }/api/productos/${productId}/`,
         );
         const fullProducto = await response.json();
         setEditingProducto(fullProducto);
@@ -243,9 +244,7 @@ const ProductList: React.FC = (): JSX.Element => {
                 Eliminar seleccionados ({selectedProducts.length})
               </Button>
             )}
-            <Button variant="success" size="sm" onClick={handleAddProduct}>
-              + Agregar Producto
-            </Button>
+            <AddButton label="Producto" onClick={handleAddProduct} />
           </div>
         </div>
 
@@ -264,7 +263,7 @@ const ProductList: React.FC = (): JSX.Element => {
                 value={selectedMarca || ""}
                 onChange={(e) =>
                   handleMarcaChange(
-                    e.target.value ? Number(e.target.value) : null
+                    e.target.value ? Number(e.target.value) : null,
                   )
                 }
               >
@@ -281,7 +280,7 @@ const ProductList: React.FC = (): JSX.Element => {
                 value={selectedCategoria || ""}
                 onChange={(e) =>
                   handleCategoriaChange(
-                    e.target.value ? Number(e.target.value) : null
+                    e.target.value ? Number(e.target.value) : null,
                   )
                 }
               >
@@ -298,7 +297,7 @@ const ProductList: React.FC = (): JSX.Element => {
                 value={selectedSubCategoria || ""}
                 onChange={(e) =>
                   handleSubCategoriaChange(
-                    e.target.value ? Number(e.target.value) : null
+                    e.target.value ? Number(e.target.value) : null,
                   )
                 }
                 disabled={!selectedCategoria}
@@ -456,7 +455,7 @@ const ProductList: React.FC = (): JSX.Element => {
                   </Pagination.Item>
                 ) : (
                   <Pagination.Ellipsis key={index} disabled />
-                )
+                ),
               )}
 
               <Pagination.Next

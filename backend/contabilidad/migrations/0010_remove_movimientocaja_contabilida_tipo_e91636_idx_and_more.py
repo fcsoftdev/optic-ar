@@ -10,30 +10,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveIndex(
-            model_name='movimientocaja',
-            name='contabilida_tipo_e91636_idx',
-        ),
-        migrations.RemoveField(
-            model_name='movimientocaja',
-            name='concepto',
-        ),
-        migrations.RemoveField(
-            model_name='movimientocaja',
-            name='monto',
-        ),
-        migrations.RemoveField(
-            model_name='movimientocaja',
-            name='tipo',
-        ),
-        migrations.AddField(
-            model_name='movimientocaja',
-            name='egreso',
-            field=models.DecimalField(decimal_places=2, default=0, max_digits=10, verbose_name='Egreso'),
-        ),
-        migrations.AddField(
-            model_name='movimientocaja',
-            name='ingreso',
-            field=models.DecimalField(decimal_places=2, default=0, max_digits=10, verbose_name='Ingreso'),
-        ),
+        # Esta migración se vacía porque el modelo MovimientoCaja
+        # es eliminado en 0010_delete_movimientocaja (branch paralelo)
+        # Mantener las operaciones causaría KeyError en el merge
     ]

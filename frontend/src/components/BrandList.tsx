@@ -22,8 +22,9 @@ import {
   Badge,
   Pagination,
 } from "react-bootstrap";
-import { PencilSquare, Trash, Plus } from "react-bootstrap-icons";
+import { PencilSquare, Trash } from "react-bootstrap-icons";
 import { useMarcas, useDeleteMarca } from "../hooks/useProductos";
+import AddButton from "./AddButton";
 import MarcaFormModal from "./MarcaFormModal";
 import type { Marca } from "../services/productos.service";
 
@@ -210,10 +211,7 @@ function BrandList() {
           </h4>
         </Col>
         <Col xs="auto">
-          <Button variant="primary" onClick={handleAddMarca}>
-            <Plus size={18} className="me-1" />
-            Nueva Marca
-          </Button>
+          <AddButton label="Marca" onClick={handleAddMarca} />
         </Col>
       </Row>
 
@@ -357,7 +355,7 @@ function BrandList() {
                 </Pagination.Item>
               ) : (
                 <Pagination.Ellipsis key={index} disabled />
-              )
+              ),
             )}
 
             <Pagination.Next

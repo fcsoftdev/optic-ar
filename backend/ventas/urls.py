@@ -1,7 +1,17 @@
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
 from .views import GenerarPresupuestoPDFView
+from . import viewsets
+
+# Router para API REST
+router = DefaultRouter()
+router.register(r"obras-sociales", viewsets.ObraSocialViewSet)
+router.register(r"clientes", viewsets.ClienteViewSet)
 
 urlpatterns = [
+    # API REST endpoints
+    path("api/", include(router.urls)),
+    # Vista legacy
     path(
         "generar-presupuesto-pdf/",
         GenerarPresupuestoPDFView.as_view(),

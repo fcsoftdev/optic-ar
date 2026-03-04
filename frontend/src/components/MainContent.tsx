@@ -3,7 +3,7 @@ import { Col } from "react-bootstrap";
 import DashboardHome from "./DashboardHome";
 import ProductList from "./ProductList";
 import BrandList from "./BrandList";
-import CustomerList from "./CustomerList";
+import ClienteList from "./ClienteList";
 import ConsultationList from "./ConsultationList";
 import InsuranceProvider from "./InsuranceProvider";
 import PurchaseList from "./PurchaseList";
@@ -26,12 +26,18 @@ interface MainContentProps {
  */
 function MainContent({ children, activeSection }: MainContentProps) {
   return (
-    <Col xs={12} md={9} lg={10} className="p-4 overflow-auto bg-white">
+    <Col
+      xs={12}
+      md={9}
+      lg={10}
+      className="p-4 overflow-auto bg-white"
+      style={{ minHeight: 0 }}
+    >
       <div className="p-2">
         {activeSection === "dashboard" && <DashboardHome />}
         {activeSection === "productos" && <ProductList />}
         {activeSection === "marcas" && <BrandList />}
-        {activeSection === "clientes-pacientes" && <CustomerList />}
+        {activeSection === "clientes-pacientes" && <ClienteList />}
         {activeSection === "consultas" && <ConsultationList />}
         {activeSection === "obras-sociales" && <InsuranceProvider />}
         {activeSection === "compras" && <PurchaseList />}
