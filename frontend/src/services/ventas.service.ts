@@ -58,6 +58,56 @@ export interface ClienteCreateUpdate {
   obra_social?: number;
 }
 
+/** Graduación óptica asociada a una consulta */
+export interface Graduacion {
+  id?: number;
+  od_lejos_esferico?: number | null;
+  od_lejos_cilindrico?: number | null;
+  od_lejos_eje?: number | null;
+  oi_lejos_esferico?: number | null;
+  oi_lejos_cilindrico?: number | null;
+  oi_lejos_eje?: number | null;
+  od_cerca_esferico?: number | null;
+  od_cerca_cilindrico?: number | null;
+  od_cerca_eje?: number | null;
+  oi_cerca_esferico?: number | null;
+  oi_cerca_cilindrico?: number | null;
+  oi_cerca_eje?: number | null;
+}
+
+/** Consulta médica completa con graduación anidada */
+export interface Consulta {
+  id: number;
+  cliente: number;
+  cliente_nombre: string;
+  fecha: string;
+  motivo: string;
+  diagnostico?: string;
+  tratamiento?: string;
+  graduacion?: Graduacion | null;
+}
+
+/** Consulta simplificada para listados */
+export interface ConsultaList {
+  id: number;
+  cliente: number;
+  cliente_nombre: string;
+  fecha: string;
+  motivo: string;
+  diagnostico?: string;
+  tiene_graduacion: boolean;
+}
+
+/** Datos para crear o actualizar una consulta */
+export interface ConsultaCreateUpdate {
+  cliente: number;
+  fecha: string;
+  motivo: string;
+  diagnostico?: string;
+  tratamiento?: string;
+  graduacion?: Graduacion | null;
+}
+
 /**
  * ============================================
  * SERVICIO DE VENTAS
@@ -77,8 +127,10 @@ const ventasService = {
   /**
    * Crear una nueva obra social
    */
-  createObraSocial: async (nombre: string): Promise<ObraSocial> => {
-    const response = await api.post("/ventas/api/obras-sociales/", { nombre });
+  createObraSocial: async (
+    data: Omit<ObraSocial, "id">,
+  ): Promise<ObraSocial> => {
+    const response = await api.post("/ventas/api/obras-sociales/", data);
     return response.data;
   },
 
@@ -87,7 +139,7 @@ const ventasService = {
    */
   updateObraSocial: async (
     id: number,
-    data: Partial<ObraSocial>
+    data: Partial<ObraSocial>,
   ): Promise<ObraSocial> => {
     const response = await api.put(`/ventas/api/obras-sociales/${id}/`, data);
     return response.data;
@@ -109,6 +161,8 @@ const ventasService = {
     page?: number;
     search?: string;
     obra_social?: number;
+    /** Tamaño de página. Usar un valor grande (ej: 9999) para obtener todos los registros en selectores. */
+    page_size?: number;
   }): Promise<PaginatedResponse<ClienteList>> => {
     const response = await api.get("/ventas/api/clientes/", { params });
     return response.data;
@@ -135,7 +189,7 @@ const ventasService = {
    */
   updateCliente: async (
     id: number,
-    data: ClienteCreateUpdate
+    data: ClienteCreateUpdate,
   ): Promise<Cliente> => {
     const response = await api.put(`/ventas/api/clientes/${id}/`, data);
     return response.data;
@@ -146,6 +200,56 @@ const ventasService = {
    */
   deleteCliente: async (id: number): Promise<void> => {
     await api.delete(`/ventas/api/clientes/${id}/`);
+  },
+
+  // ==================== CONSULTAS ====================
+
+  /**
+   * Obtener listado paginado de consultas con filtros opcionales
+   */
+  getConsultas: async (params?: {
+    page?: number;
+    search?: string;
+    cliente?: number;
+    fecha_desde?: string;
+    fecha_hasta?: string;
+  }): Promise<PaginatedResponse<ConsultaList>> => {
+    const response = await api.get("/ventas/api/consultas/", { params });
+    return response.data;
+  },
+
+  /**
+   * Obtener el detalle completo de una consulta por ID
+   */
+  getConsulta: async (id: number): Promise<Consulta> => {
+    const response = await api.get(`/ventas/api/consultas/${id}/`);
+    return response.data;
+  },
+
+  /**
+   * Crear una nueva consulta con graduación opcional
+   */
+  createConsulta: async (data: ConsultaCreateUpdate): Promise<Consulta> => {
+    const response = await api.post("/ventas/api/consultas/", data);
+    return response.data;
+  },
+
+  /**
+   * Actualizar una consulta existente
+   */
+  updateConsulta: async (
+    id: number,
+    data: ConsultaCreateUpdate,
+  ): Promise<Consulta> => {
+    const response = await api.put(`/ventas/api/consultas/${id}/`, data);
+    return response.data;
+  },
+
+  /**
+   * Eliminar una consulta
+   */
+  deleteConsulta: async (id: number): Promise<void> => {
+    await api.delete(`/ventas/api/consultas/${id}/`);
   },
 };
 

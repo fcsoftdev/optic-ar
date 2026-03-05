@@ -7,6 +7,7 @@ from . import viewsets
 router = DefaultRouter()
 router.register(r"obras-sociales", viewsets.ObraSocialViewSet)
 router.register(r"clientes", viewsets.ClienteViewSet)
+router.register(r"consultas", viewsets.ConsultaViewSet)
 
 urlpatterns = [
     # API REST endpoints

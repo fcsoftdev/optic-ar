@@ -1,6 +1,6 @@
 import React from "react";
 import { InputGroup, Button } from "react-bootstrap";
-import { GearFill } from "react-bootstrap-icons";
+import { GearFill, PlusCircle } from "react-bootstrap-icons";
 import Select, { type StylesConfig } from "react-select";
 
 interface Option {
@@ -16,6 +16,12 @@ interface SearchableSelectProps {
   isInvalid?: boolean;
   disabled?: boolean;
   onManageClick?: () => void;
+  /** Texto del botón de gestión. Si se omite, se muestra solo el ícono de engranaje. */
+  manageLabel?: string;
+  /** Tooltip del botón de gestión. Si se omite, se usa `manageLabel` o "Gestionar". */
+  manageTitle?: string;
+  /** Muestra el ícono `+` en lugar del engranaje en el botón de gestión. */
+  addIcon?: boolean;
   isClearable?: boolean;
   noOptionsMessage?: string;
 }
@@ -28,6 +34,9 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
   isInvalid = false,
   disabled = false,
   onManageClick,
+  manageLabel,
+  manageTitle,
+  addIcon = false,
   isClearable = false,
   noOptionsMessage = "No hay opciones",
 }) => {
@@ -39,8 +48,8 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
       borderColor: isInvalid
         ? "#dc3545"
         : state.isFocused
-        ? "#86b7fe"
-        : "#dee2e6",
+          ? "#86b7fe"
+          : "#dee2e6",
       boxShadow: state.isFocused
         ? isInvalid
           ? "0 0 0 0.25rem rgba(220, 53, 69, 0.25)"
@@ -50,8 +59,8 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
         borderColor: isInvalid
           ? "#dc3545"
           : state.isFocused
-          ? "#86b7fe"
-          : "#dee2e6",
+            ? "#86b7fe"
+            : "#dee2e6",
       },
       minHeight: "38px",
       borderTopRightRadius: onManageClick ? 0 : "0.375rem",
@@ -66,8 +75,8 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
       backgroundColor: state.isSelected
         ? "#0d6efd"
         : state.isFocused
-        ? "#e7f1ff"
-        : "white",
+          ? "#e7f1ff"
+          : "white",
       color: state.isSelected ? "white" : "#212529",
       "&:active": {
         backgroundColor: "#0d6efd",
@@ -93,10 +102,19 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
         <Button
           variant="outline-primary"
           onClick={onManageClick}
-          title="Gestionar"
+          title={manageTitle ?? manageLabel ?? "Gestionar"}
           disabled={disabled}
         >
-          <GearFill size={18} />
+          {manageLabel ? (
+            <>
+              <PlusCircle size={15} className="me-1" />
+              {manageLabel}
+            </>
+          ) : addIcon ? (
+            <PlusCircle size={16} />
+          ) : (
+            <GearFill size={18} />
+          )}
         </Button>
       )}
     </InputGroup>

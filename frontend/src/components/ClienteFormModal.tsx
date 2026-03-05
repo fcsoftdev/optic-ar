@@ -7,13 +7,10 @@ import {
   useCreateCliente,
   useUpdateCliente,
   useObrasSociales,
-  useCreateObraSocial,
-  useUpdateObraSocial,
-  useDeleteObraSocial,
 } from "../hooks/useVentas";
 import { clienteSchema, type ClienteFormData } from "../schemas/clienteSchema";
 import type { Cliente } from "../services/ventas.service";
-import EntityManagerModal from "./EntityManagerModal";
+import ObraSocialFormModal from "./ObraSocialFormModal";
 import SearchableSelect from "./SearchableSelect";
 
 /**
@@ -73,10 +70,6 @@ const ClienteFormModal: React.FC<ClienteFormModalProps> = ({
     useObrasSociales();
   const createCliente = useCreateCliente();
   const updateCliente = useUpdateCliente();
-
-  const createObraSocial = useCreateObraSocial();
-  const updateObraSocial = useUpdateObraSocial();
-  const deleteObraSocial = useDeleteObraSocial();
 
   useEffect(() => {
     if (cliente && clienteCompleto) {
@@ -142,35 +135,6 @@ const ClienteFormModal: React.FC<ClienteFormModalProps> = ({
   const handleClose = () => {
     reset();
     onHide();
-  };
-
-  /**
-   * Crea una nueva obra social y la selecciona automáticamente en el formulario.
-   *
-   * @param nombre - Nombre de la nueva obra social.
-   */
-  const handleCreateObraSocial = async (nombre: string) => {
-    const newObraSocial = await createObraSocial.mutateAsync(nombre);
-    setValue("obra_social", newObraSocial.id);
-  };
-
-  /**
-   * Actualiza el nombre de una obra social existente.
-   *
-   * @param id - ID de la obra social a modificar.
-   * @param nombre - Nuevo nombre a asignar.
-   */
-  const handleUpdateObraSocial = async (id: number, nombre: string) => {
-    await updateObraSocial.mutateAsync({ id, data: { nombre } });
-  };
-
-  /**
-   * Elimina una obra social del sistema.
-   *
-   * @param id - ID de la obra social a eliminar.
-   */
-  const handleDeleteObraSocial = async (id: number) => {
-    await deleteObraSocial.mutateAsync(id);
   };
 
   return (
@@ -329,6 +293,8 @@ const ClienteFormModal: React.FC<ClienteFormModalProps> = ({
                         placeholder="Seleccionar Obra Social"
                         disabled={loadingObrasSociales}
                         onManageClick={() => setShowObraSocialManager(true)}
+                        addIcon
+                        manageTitle="Agregar nueva obra social"
                         isClearable={true}
                         noOptionsMessage="No hay obras sociales disponibles"
                       />
@@ -378,17 +344,11 @@ const ClienteFormModal: React.FC<ClienteFormModalProps> = ({
         </Modal.Footer>
       </Modal>
 
-      {/* Modal de gestión de obras sociales */}
-      <EntityManagerModal
+      {/* Formulario de nueva obra social */}
+      <ObraSocialFormModal
         show={showObraSocialManager}
         onHide={() => setShowObraSocialManager(false)}
-        title="Obras Sociales"
-        entityType="marca"
-        items={obrasSociales}
-        onCreate={handleCreateObraSocial}
-        onUpdate={handleUpdateObraSocial}
-        onDelete={handleDeleteObraSocial}
-        isLoading={loadingObrasSociales}
+        onCreated={(os) => setValue("obra_social", os.id)}
       />
     </>
   );

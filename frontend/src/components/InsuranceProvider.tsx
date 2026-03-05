@@ -1,65 +1,219 @@
-import { Table } from "react-bootstrap";
-
 /**
  * @file InsuranceProvider.tsx
- * @description Componente de proveedor de seguros. (OSDE, Swiss Medical, etc.)
+ * @description ABM completo para la gestión de Obras Sociales.
  */
-interface ObraSocial {
-  id: number;
-  nombre: string;
-  direccion: string;
-  telefono: string;
-}
+import { useState } from "react";
+import {
+  Alert,
+  Badge,
+  Button,
+  Col,
+  Form,
+  InputGroup,
+  Row,
+  Spinner,
+  Table,
+} from "react-bootstrap";
+import { Pencil, Search, Trash, XCircle } from "react-bootstrap-icons";
+import { useDeleteObraSocial, useObrasSociales } from "../hooks/useVentas";
+import type { ObraSocial } from "../services/ventas.service";
+import AddButton from "./AddButton";
+import ObraSocialFormModal from "./ObraSocialFormModal";
 
-/** * Lista mock de obras sociales para mostrar en la tabla.
+/**
+ * Componente ABM para la gestión de Obras Sociales.
  *
+ * @remarks
+ * Permite listar, crear, editar y eliminar obras sociales.
+ * Incluye búsqueda local por nombre. No requiere paginación
+ * ya que el endpoint devuelve el listado completo sin paginar.
  */
-const mockObrasSociales: ObraSocial[] = [
-  {
-    id: 1,
-    nombre: "OSDE",
-    direccion: "Calle Falsa 123",
-    telefono: "1234-5678",
-  },
-  {
-    id: 2,
-    nombre: "Swiss Medical",
-    direccion: "Avenida Siempre Viva 742",
-    telefono: "8765-4321",
-  },
-  {
-    id: 3,
-    nombre: "Galeno",
-    direccion: "Boulevard de los Sueños Rotos 456",
-    telefono: "1122-3344",
-  },
-];
-
 function InsuranceProvider() {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [showModal, setShowModal] = useState(false);
+  const [editingObraSocial, setEditingObraSocial] = useState<ObraSocial | null>(
+    null,
+  );
+
+  const { data: obrasSociales = [], isLoading, error } = useObrasSociales();
+  const deleteObraSocial = useDeleteObraSocial();
+
+  /** Obras sociales filtradas por el término de búsqueda local. */
+  const filtered = obrasSociales.filter((os) =>
+    os.nombre.toLowerCase().includes(searchTerm.toLowerCase()),
+  );
+
+  /**
+   * Abre el modal de edición con los datos de la obra social seleccionada.
+   *
+   * @param obraSocial - Obra social a editar.
+   */
+  const handleEdit = (obraSocial: ObraSocial) => {
+    setEditingObraSocial(obraSocial);
+    setShowModal(true);
+  };
+
+  /**
+   * Solicita confirmación y elimina la obra social si el usuario acepta.
+   *
+   * @param id - ID de la obra social a eliminar.
+   * @param nombre - Nombre usado en el mensaje de confirmación.
+   */
+  const handleDelete = async (id: number, nombre: string) => {
+    if (
+      window.confirm(`¿Está seguro de eliminar la obra social "${nombre}"?`)
+    ) {
+      try {
+        await deleteObraSocial.mutateAsync(id);
+      } catch {
+        alert(
+          "Error al eliminar la obra social. Puede estar asociada a clientes.",
+        );
+      }
+    }
+  };
+
+  /**
+   * Cierra el modal y limpia la obra social en edición.
+   */
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setEditingObraSocial(null);
+  };
+
+  if (error) {
+    return (
+      <Alert variant="danger" className="m-3">
+        Error al cargar obras sociales: {(error as Error).message}
+      </Alert>
+    );
+  }
+
   return (
-    <>
-      <h5 className="mb-3">Obras Sociales</h5>
-      <Table striped bordered hover responsive>
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Nombre</th>
-            <th>Dirección</th>
-            <th>Teléfono</th>
-          </tr>
-        </thead>
-        <tbody>
-          {mockObrasSociales.map((obraSocial) => (
-            <tr key={obraSocial.id}>
-              <td>{obraSocial.id}</td>
-              <td>{obraSocial.nombre}</td>
-              <td>{obraSocial.direccion}</td>
-              <td>{obraSocial.telefono}</td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
-    </>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        height: "calc(100vh - 100px)",
+      }}
+    >
+      {/* Header y búsqueda - fijos arriba */}
+      <div style={{ flex: "0 0 auto" }}>
+        {/* Header */}
+        <Row className="mb-3 align-items-center">
+          <Col>
+            <h4 className="mb-0">
+              Obras Sociales{" "}
+              <Badge bg="secondary" pill>
+                {obrasSociales.length}
+              </Badge>
+            </h4>
+          </Col>
+          <Col xs="auto">
+            <AddButton
+              label="Obra Social"
+              onClick={() => {
+                setEditingObraSocial(null);
+                setShowModal(true);
+              }}
+            />
+          </Col>
+        </Row>
+
+        {/* Búsqueda */}
+        <Row className="mb-3 g-2">
+          <Col md={4}>
+            <InputGroup>
+              <InputGroup.Text>
+                <Search size={16} />
+              </InputGroup.Text>
+              <Form.Control
+                type="text"
+                placeholder="Buscar por nombre..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              {searchTerm && (
+                <Button
+                  variant="outline-secondary"
+                  onClick={() => setSearchTerm("")}
+                >
+                  <XCircle size={16} />
+                </Button>
+              )}
+            </InputGroup>
+          </Col>
+        </Row>
+      </div>
+
+      {/* Tabla - área scrollable */}
+      <div style={{ overflow: "auto", flex: "1 1 auto" }}>
+        {isLoading ? (
+          <div className="text-center py-5">
+            <Spinner animation="border" variant="primary" />
+            <p className="mt-2">Cargando obras sociales...</p>
+          </div>
+        ) : filtered.length === 0 ? (
+          <Alert variant="info">
+            {searchTerm
+              ? "No se encontraron obras sociales con ese nombre."
+              : "No hay obras sociales registradas."}
+          </Alert>
+        ) : (
+          <Table striped bordered hover responsive>
+            <thead
+              className="table-light"
+              style={{ position: "sticky", top: 0, zIndex: 1 }}
+            >
+              <tr>
+                <th>Nombre</th>
+                <th>Dirección</th>
+                <th>Teléfono</th>
+                <th style={{ width: "120px" }}>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map((os) => (
+                <tr key={os.id}>
+                  <td>
+                    <strong>{os.nombre}</strong>
+                  </td>
+                  <td>{os.direccion || "-"}</td>
+                  <td>{os.telefono || "-"}</td>
+                  <td>
+                    <div className="d-flex gap-1">
+                      <Button
+                        variant="outline-primary"
+                        size="sm"
+                        onClick={() => handleEdit(os)}
+                        title="Editar"
+                      >
+                        <Pencil size={14} />
+                      </Button>
+                      <Button
+                        variant="outline-danger"
+                        size="sm"
+                        onClick={() => handleDelete(os.id, os.nombre)}
+                        title="Eliminar"
+                      >
+                        <Trash size={14} />
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        )}
+      </div>
+
+      {/* Modal de formulario */}
+      <ObraSocialFormModal
+        show={showModal}
+        onHide={handleCloseModal}
+        obraSocial={editingObraSocial}
+      />
+    </div>
   );
 }
 

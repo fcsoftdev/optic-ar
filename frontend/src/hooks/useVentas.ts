@@ -1,6 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import ventasService, {
   type ClienteCreateUpdate,
+  type ObraSocial,
+  type ConsultaCreateUpdate,
 } from "../services/ventas.service";
 
 // ==================== HOOKS DE OBRAS SOCIALES ====================
@@ -30,7 +32,8 @@ export const useCreateObraSocial = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (nombre: string) => ventasService.createObraSocial(nombre),
+    mutationFn: (data: Omit<ObraSocial, "id">) =>
+      ventasService.createObraSocial(data),
     onSuccess: (newObraSocial) => {
       queryClient.setQueryData(["obras-sociales"], (old: any) => {
         if (!old) return [newObraSocial];
@@ -103,6 +106,8 @@ export const useClientes = (params?: {
   page?: number;
   search?: string;
   obra_social?: number;
+  /** Tamaño de página. Usar un valor grande (ej: 9999) para cargar todos los registros en selectores. */
+  page_size?: number;
 }) => {
   return useQuery({
     queryKey: ["clientes", params],
@@ -184,6 +189,115 @@ export const useDeleteCliente = () => {
     onSuccess: (_, deletedId) => {
       queryClient.removeQueries({ queryKey: ["cliente", deletedId] });
       queryClient.invalidateQueries({ queryKey: ["clientes"] });
+    },
+  });
+};
+
+// ==================== HOOKS DE CONSULTAS ====================
+
+/**
+ * Hook para obtener el listado paginado de consultas con filtros opcionales.
+ *
+ * @param params - Filtros opcionales de búsqueda, paginación y fechas.
+ * @param params.page - Número de página (defecto: 1).
+ * @param params.search - Búsqueda por nombre de paciente o motivo.
+ * @param params.cliente - ID de cliente para filtrar sus consultas.
+ * @param params.fecha_desde - Fecha inicial del rango (YYYY-MM-DD).
+ * @param params.fecha_hasta - Fecha final del rango (YYYY-MM-DD).
+ * @returns Query paginada con las consultas que coincidan con los filtros.
+ */
+export const useConsultas = (params?: {
+  page?: number;
+  search?: string;
+  cliente?: number;
+  fecha_desde?: string;
+  fecha_hasta?: string;
+}) => {
+  return useQuery({
+    queryKey: ["consultas", params],
+    queryFn: () => ventasService.getConsultas(params),
+  });
+};
+
+/**
+ * Hook para obtener el detalle completo de una consulta por su ID.
+ *
+ * @param id - ID de la consulta. La query se deshabilita si es 0.
+ * @returns Query con todos los campos de la consulta incluyendo graduación.
+ */
+export const useConsulta = (id: number) => {
+  return useQuery({
+    queryKey: ["consulta", id],
+    queryFn: () => ventasService.getConsulta(id),
+    enabled: !!id,
+  });
+};
+
+/**
+ * Hook para crear una nueva consulta médica.
+ *
+ * @remarks
+ * Invalida el listado de consultas al crear exitosamente.
+ *
+ * @returns Mutation que recibe los datos de la consulta y la crea en la API.
+ */
+export const useCreateConsulta = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: ConsultaCreateUpdate) =>
+      ventasService.createConsulta(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["consultas"] });
+    },
+  });
+};
+
+/**
+ * Hook para actualizar una consulta existente.
+ *
+ * @remarks
+ * Actualiza el cache del detalle individual e invalida el listado.
+ *
+ * @returns Mutation que recibe `{ id, data }` y actualiza la consulta.
+ */
+export const useUpdateConsulta = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      id,
+      data,
+    }: {
+      id: number;
+      data: ConsultaCreateUpdate;
+    }) => ventasService.updateConsulta(id, data),
+    onSuccess: (updatedConsulta) => {
+      queryClient.setQueryData(
+        ["consulta", updatedConsulta.id],
+        updatedConsulta,
+      );
+      queryClient.invalidateQueries({ queryKey: ["consultas"] });
+    },
+  });
+};
+
+/**
+ * Hook para eliminar una consulta.
+ *
+ * @remarks
+ * Elimina el cache del detalle individual e invalida el listado.
+ *
+ * @returns Mutation que recibe el `id` de la consulta a eliminar.
+ */
+export const useDeleteConsulta = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: number) => ventasService.deleteConsulta(id),
+    onSuccess: (_, deletedId) => {
+      queryClient.removeQueries({ queryKey: ["consulta", deletedId] });
+      queryClient.invalidateQueries({ queryKey: ["consultas"] });
     },
   });
 };
