@@ -7,11 +7,11 @@ import {
   Table,
   Spinner,
   Alert,
-  Pagination,
   Badge,
 } from "react-bootstrap";
 import { PencilSquare, Trash } from "react-bootstrap-icons";
 import AddButton from "./AddButton";
+import PaginationBar from "./PaginationBar";
 import {
   useProductos,
   useDeleteProducto,
@@ -168,35 +168,6 @@ const ProductList: React.FC = (): JSX.Element => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Generar items de paginación
-  const getPaginationItems = () => {
-    const items = [];
-    const maxVisiblePages = 5;
-
-    if (totalPages <= maxVisiblePages) {
-      for (let i = 1; i <= totalPages; i++) {
-        items.push(i);
-      }
-    } else {
-      if (currentPage <= 3) {
-        for (let i = 1; i <= 4; i++) items.push(i);
-        items.push("...");
-        items.push(totalPages);
-      } else if (currentPage >= totalPages - 2) {
-        items.push(1);
-        items.push("...");
-        for (let i = totalPages - 3; i <= totalPages; i++) items.push(i);
-      } else {
-        items.push(1);
-        items.push("...");
-        for (let i = currentPage - 1; i <= currentPage + 1; i++) items.push(i);
-        items.push("...");
-        items.push(totalPages);
-      }
-    }
-
-    return items;
-  };
 
   if (isLoading) {
     return (
@@ -426,49 +397,14 @@ const ProductList: React.FC = (): JSX.Element => {
 
       {/* Paginación */}
       <div style={{ flex: "0 0 auto", marginTop: "auto" }}>
-        {totalPages > 1 && (
-          <div
-            className="d-flex justify-content-between align-items-center mt-4 pt-3"
-            style={{ borderTop: "1px solid #dee2e6" }}
-          >
-            <div className="text-muted">
-              Mostrando {products.length} de {data?.count || 0} productos
-            </div>
-            <Pagination className="mb-0">
-              <Pagination.First
-                onClick={() => handlePageChange(1)}
-                disabled={currentPage === 1}
-              />
-              <Pagination.Prev
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage === 1}
-              />
-
-              {getPaginationItems().map((item, index) =>
-                typeof item === "number" ? (
-                  <Pagination.Item
-                    key={index}
-                    active={item === currentPage}
-                    onClick={() => handlePageChange(item)}
-                  >
-                    {item}
-                  </Pagination.Item>
-                ) : (
-                  <Pagination.Ellipsis key={index} disabled />
-                ),
-              )}
-
-              <Pagination.Next
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage === totalPages}
-              />
-              <Pagination.Last
-                onClick={() => handlePageChange(totalPages)}
-                disabled={currentPage === totalPages}
-              />
-            </Pagination>
-          </div>
-        )}
+        <PaginationBar
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+          totalItems={data?.count ?? 0}
+          pageItems={products.length}
+          itemLabel="producto(s)"
+        />
       </div>
 
       {/* Modal de formulario */}

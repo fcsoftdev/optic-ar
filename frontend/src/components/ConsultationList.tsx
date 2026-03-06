@@ -10,7 +10,6 @@ import {
   Col,
   Form,
   InputGroup,
-  Pagination,
   Row,
   Spinner,
   Table,
@@ -24,6 +23,7 @@ import {
 import type { ConsultaList } from "../services/ventas.service";
 import AddButton from "./AddButton";
 import ConsultationFormModal from "./ConsultationFormModal";
+import PaginationBar from "./PaginationBar";
 
 /**
  * Componente ABM para la gestión del listado de Consultas médicas.
@@ -130,82 +130,7 @@ const ConsultationList: React.FC = () => {
 
   const hasActiveFilters = searchTerm || fechaDesde || fechaHasta;
 
-  /**
-   * Genera los items de paginación con elipsis inteligentes.
-   *
-   * @returns Array de números de página intercalados con `"..."` donde corresponda.
-   */
-  const getPaginationItems = (): (number | string)[] => {
-    const items: (number | string)[] = [];
-    if (totalPages <= 5) {
-      for (let i = 1; i <= totalPages; i++) items.push(i);
-    } else if (currentPage <= 3) {
-      for (let i = 1; i <= 4; i++) items.push(i);
-      items.push("...");
-      items.push(totalPages);
-    } else if (currentPage >= totalPages - 2) {
-      items.push(1);
-      items.push("...");
-      for (let i = totalPages - 3; i <= totalPages; i++) items.push(i);
-    } else {
-      items.push(1);
-      items.push("...");
-      for (let i = currentPage - 1; i <= currentPage + 1; i++) items.push(i);
-      items.push("...");
-      items.push(totalPages);
-    }
-    return items;
-  };
 
-  /**
-   * Renderiza el bloque de paginación Bootstrap con contador y controles.
-   *
-   * @returns JSX de la paginación o `null` si hay una sola página.
-   */
-  const renderPagination = () => {
-    if (totalPages <= 1) return null;
-    return (
-      <div
-        className="d-flex justify-content-between align-items-center mt-4 pt-3"
-        style={{ borderTop: "1px solid #dee2e6" }}
-      >
-        <div className="text-muted">
-          Mostrando {consultas.length} de {consultasData?.count ?? 0} consulta(s)
-        </div>
-        <Pagination className="mb-0">
-          <Pagination.First
-            onClick={() => setCurrentPage(1)}
-            disabled={currentPage === 1}
-          />
-          <Pagination.Prev
-            onClick={() => setCurrentPage(currentPage - 1)}
-            disabled={currentPage === 1}
-          />
-          {getPaginationItems().map((item, index) =>
-            typeof item === "number" ? (
-              <Pagination.Item
-                key={index}
-                active={item === currentPage}
-                onClick={() => setCurrentPage(item)}
-              >
-                {item}
-              </Pagination.Item>
-            ) : (
-              <Pagination.Ellipsis key={index} disabled />
-            ),
-          )}
-          <Pagination.Next
-            onClick={() => setCurrentPage(currentPage + 1)}
-            disabled={currentPage === totalPages}
-          />
-          <Pagination.Last
-            onClick={() => setCurrentPage(totalPages)}
-            disabled={currentPage === totalPages}
-          />
-        </Pagination>
-      </div>
-    );
-  };
 
   if (error) {
     return (
@@ -417,7 +342,16 @@ const ConsultationList: React.FC = () => {
       </div>
 
       {/* Paginación — fija abajo */}
-      <div style={{ flex: "0 0 auto" }}>{renderPagination()}</div>
+      <div style={{ flex: "0 0 auto" }}>
+        <PaginationBar
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          totalItems={consultasData?.count ?? 0}
+          pageItems={consultas.length}
+          itemLabel="consulta(s)"
+        />
+      </div>
 
       {/* Modal de formulario */}
       <ConsultationFormModal

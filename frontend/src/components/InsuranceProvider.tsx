@@ -10,7 +10,6 @@ import {
   Col,
   Form,
   InputGroup,
-  Pagination,
   Row,
   Spinner,
   Table,
@@ -23,6 +22,7 @@ import {
 import type { ObraSocial } from "../services/ventas.service";
 import AddButton from "./AddButton";
 import ObraSocialFormModal from "./ObraSocialFormModal";
+import PaginationBar from "./PaginationBar";
 
 /**
  * Componente ABM para la gestión de Obras Sociales.
@@ -104,88 +104,7 @@ const InsuranceProvider: React.FC = () => {
     setEditingObraSocial(null);
   };
 
-  /**
-   * Genera los items de paginación con elipsis inteligentes.
-   *
-   * @returns Array de números de página intercalados con `"..."` donde corresponda.
-   */
-  const getPaginationItems = (): (number | string)[] => {
-    const items: (number | string)[] = [];
-    const maxVisiblePages = 5;
 
-    if (totalPages <= maxVisiblePages) {
-      for (let i = 1; i <= totalPages; i++) items.push(i);
-    } else {
-      if (currentPage <= 3) {
-        for (let i = 1; i <= 4; i++) items.push(i);
-        items.push("...");
-        items.push(totalPages);
-      } else if (currentPage >= totalPages - 2) {
-        items.push(1);
-        items.push("...");
-        for (let i = totalPages - 3; i <= totalPages; i++) items.push(i);
-      } else {
-        items.push(1);
-        items.push("...");
-        for (let i = currentPage - 1; i <= currentPage + 1; i++) items.push(i);
-        items.push("...");
-        items.push(totalPages);
-      }
-    }
-    return items;
-  };
-
-  /**
-   * Renderiza el bloque de paginación con contador y controles Bootstrap.
-   *
-   * @returns JSX de la paginación o `null` si hay una sola página.
-   */
-  const renderPagination = () => {
-    if (totalPages <= 1) return null;
-
-    return (
-      <div
-        className="d-flex justify-content-between align-items-center mt-4 pt-3"
-        style={{ borderTop: "1px solid #dee2e6" }}
-      >
-        <div className="text-muted">
-          Mostrando {obrasSociales.length} de {obrasSocialesData?.count ?? 0}{" "}
-          obra(s) social(es)
-        </div>
-        <Pagination className="mb-0">
-          <Pagination.First
-            onClick={() => setCurrentPage(1)}
-            disabled={currentPage === 1}
-          />
-          <Pagination.Prev
-            onClick={() => setCurrentPage(currentPage - 1)}
-            disabled={currentPage === 1}
-          />
-          {getPaginationItems().map((item, index) =>
-            typeof item === "number" ? (
-              <Pagination.Item
-                key={index}
-                active={item === currentPage}
-                onClick={() => setCurrentPage(item)}
-              >
-                {item}
-              </Pagination.Item>
-            ) : (
-              <Pagination.Ellipsis key={index} disabled />
-            ),
-          )}
-          <Pagination.Next
-            onClick={() => setCurrentPage(currentPage + 1)}
-            disabled={currentPage === totalPages}
-          />
-          <Pagination.Last
-            onClick={() => setCurrentPage(totalPages)}
-            disabled={currentPage === totalPages}
-          />
-        </Pagination>
-      </div>
-    );
-  };
 
   if (error) {
     return (
@@ -315,7 +234,14 @@ const InsuranceProvider: React.FC = () => {
 
       {/* Paginación - fija abajo */}
       <div style={{ flex: "0 0 auto", marginTop: "auto" }}>
-        {renderPagination()}
+        <PaginationBar
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          totalItems={obrasSocialesData?.count ?? 0}
+          pageItems={obrasSociales.length}
+          itemLabel="obra(s) social(es)"
+        />
       </div>
 
       {/* Modal de formulario */}
