@@ -117,11 +117,28 @@ const ventasService = {
   // ==================== OBRAS SOCIALES ====================
 
   /**
-   * Obtener lista completa de obras sociales
+   * Obtener lista completa de obras sociales (sin paginar, para selectores)
    */
   getObrasSociales: async (): Promise<ObraSocial[]> => {
-    const response = await api.get("/ventas/api/obras-sociales/");
+    const response = await api.get("/ventas/api/obras-sociales/", {
+      params: { page_size: 9999 },
+    });
     return response.data.results || response.data;
+  },
+
+  /**
+   * Obtener obras sociales paginadas con filtros (para el ABM)
+   *
+   * @param params - Parámetros opcionales de página y búsqueda.
+   * @returns Respuesta paginada de obras sociales.
+   */
+  getObrasSocialesPaginadas: async (params?: {
+    page?: number;
+    search?: string;
+    page_size?: number;
+  }): Promise<PaginatedResponse<ObraSocial>> => {
+    const response = await api.get("/ventas/api/obras-sociales/", { params });
+    return response.data;
   },
 
   /**

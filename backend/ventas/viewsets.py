@@ -37,13 +37,12 @@ class ObraSocialViewSet(viewsets.ModelViewSet):
     actualizar y eliminar obras sociales, con soporte de búsqueda
     y ordenamiento por nombre.
 
-    La paginación está deshabilitada ya que es un catálogo pequeño
-    que se usa como selector en formularios.
+    Soporta paginación estándar y el parámetro ``page_size`` para
+    obtener todos los registros en un único request (ej: selectores).
     """
 
     queryset = ObraSocial.objects.all()
     serializer_class = ObraSocialSerializer
-    pagination_class = None
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ["nombre"]
     ordering_fields = ["nombre"]

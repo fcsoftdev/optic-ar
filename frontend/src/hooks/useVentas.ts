@@ -20,6 +20,22 @@ export const useObrasSociales = () => {
 };
 
 /**
+ * Hook para obtener obras sociales paginadas con búsqueda (ABM).
+ *
+ * @param params - Parámetros de página y búsqueda.
+ * @returns Query paginada de obras sociales.
+ */
+export const useObrasSocialesPaginadas = (params?: {
+  page?: number;
+  search?: string;
+}) => {
+  return useQuery({
+    queryKey: ["obras-sociales-paginadas", params],
+    queryFn: () => ventasService.getObrasSocialesPaginadas(params),
+  });
+};
+
+/**
  * Hook para crear una nueva obra social.
  *
  * @remarks
@@ -39,6 +55,7 @@ export const useCreateObraSocial = () => {
         if (!old) return [newObraSocial];
         return [...old, newObraSocial];
       });
+      queryClient.invalidateQueries({ queryKey: ["obras-sociales-paginadas"] });
     },
   });
 };
@@ -65,6 +82,7 @@ export const useUpdateObraSocial = () => {
           os.id === updatedObraSocial.id ? updatedObraSocial : os,
         );
       });
+      queryClient.invalidateQueries({ queryKey: ["obras-sociales-paginadas"] });
     },
   });
 };
@@ -87,6 +105,7 @@ export const useDeleteObraSocial = () => {
         if (!old) return [];
         return old.filter((os: any) => os.id !== deletedId);
       });
+      queryClient.invalidateQueries({ queryKey: ["obras-sociales-paginadas"] });
     },
   });
 };

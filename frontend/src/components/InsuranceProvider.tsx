@@ -2,7 +2,7 @@
  * @file InsuranceProvider.tsx
  * @description ABM completo para la gestión de Obras Sociales.
  */
-import { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Alert,
   Badge,
@@ -10,12 +10,16 @@ import {
   Col,
   Form,
   InputGroup,
+  Pagination,
   Row,
   Spinner,
   Table,
 } from "react-bootstrap";
 import { Pencil, Search, Trash, XCircle } from "react-bootstrap-icons";
-import { useDeleteObraSocial, useObrasSociales } from "../hooks/useVentas";
+import {
+  useDeleteObraSocial,
+  useObrasSocialesPaginadas,
+} from "../hooks/useVentas";
 import type { ObraSocial } from "../services/ventas.service";
 import AddButton from "./AddButton";
 import ObraSocialFormModal from "./ObraSocialFormModal";
@@ -25,23 +29,42 @@ import ObraSocialFormModal from "./ObraSocialFormModal";
  *
  * @remarks
  * Permite listar, crear, editar y eliminar obras sociales.
- * Incluye búsqueda local por nombre. No requiere paginación
- * ya que el endpoint devuelve el listado completo sin paginar.
+ * Incluye búsqueda con debounce (500ms) y paginación al estilo
+ * del resto de los ABM del sistema.
  */
-function InsuranceProvider() {
+const InsuranceProvider: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
   const [showModal, setShowModal] = useState(false);
   const [editingObraSocial, setEditingObraSocial] = useState<ObraSocial | null>(
     null,
   );
 
-  const { data: obrasSociales = [], isLoading, error } = useObrasSociales();
+  /** Debounce para búsqueda (500ms) */
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+      setCurrentPage(1);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  const {
+    data: obrasSocialesData,
+    isLoading,
+    error,
+  } = useObrasSocialesPaginadas({
+    page: currentPage,
+    search: debouncedSearchTerm,
+  });
+
   const deleteObraSocial = useDeleteObraSocial();
 
-  /** Obras sociales filtradas por el término de búsqueda local. */
-  const filtered = obrasSociales.filter((os) =>
-    os.nombre.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
+  const obrasSociales = obrasSocialesData?.results || [];
+  const totalPages = obrasSocialesData?.count
+    ? Math.ceil(obrasSocialesData.count / 10)
+    : 1;
 
   /**
    * Abre el modal de edición con los datos de la obra social seleccionada.
@@ -81,6 +104,89 @@ function InsuranceProvider() {
     setEditingObraSocial(null);
   };
 
+  /**
+   * Genera los items de paginación con elipsis inteligentes.
+   *
+   * @returns Array de números de página intercalados con `"..."` donde corresponda.
+   */
+  const getPaginationItems = (): (number | string)[] => {
+    const items: (number | string)[] = [];
+    const maxVisiblePages = 5;
+
+    if (totalPages <= maxVisiblePages) {
+      for (let i = 1; i <= totalPages; i++) items.push(i);
+    } else {
+      if (currentPage <= 3) {
+        for (let i = 1; i <= 4; i++) items.push(i);
+        items.push("...");
+        items.push(totalPages);
+      } else if (currentPage >= totalPages - 2) {
+        items.push(1);
+        items.push("...");
+        for (let i = totalPages - 3; i <= totalPages; i++) items.push(i);
+      } else {
+        items.push(1);
+        items.push("...");
+        for (let i = currentPage - 1; i <= currentPage + 1; i++) items.push(i);
+        items.push("...");
+        items.push(totalPages);
+      }
+    }
+    return items;
+  };
+
+  /**
+   * Renderiza el bloque de paginación con contador y controles Bootstrap.
+   *
+   * @returns JSX de la paginación o `null` si hay una sola página.
+   */
+  const renderPagination = () => {
+    if (totalPages <= 1) return null;
+
+    return (
+      <div
+        className="d-flex justify-content-between align-items-center mt-4 pt-3"
+        style={{ borderTop: "1px solid #dee2e6" }}
+      >
+        <div className="text-muted">
+          Mostrando {obrasSociales.length} de {obrasSocialesData?.count ?? 0}{" "}
+          obra(s) social(es)
+        </div>
+        <Pagination className="mb-0">
+          <Pagination.First
+            onClick={() => setCurrentPage(1)}
+            disabled={currentPage === 1}
+          />
+          <Pagination.Prev
+            onClick={() => setCurrentPage(currentPage - 1)}
+            disabled={currentPage === 1}
+          />
+          {getPaginationItems().map((item, index) =>
+            typeof item === "number" ? (
+              <Pagination.Item
+                key={index}
+                active={item === currentPage}
+                onClick={() => setCurrentPage(item)}
+              >
+                {item}
+              </Pagination.Item>
+            ) : (
+              <Pagination.Ellipsis key={index} disabled />
+            ),
+          )}
+          <Pagination.Next
+            onClick={() => setCurrentPage(currentPage + 1)}
+            disabled={currentPage === totalPages}
+          />
+          <Pagination.Last
+            onClick={() => setCurrentPage(totalPages)}
+            disabled={currentPage === totalPages}
+          />
+        </Pagination>
+      </div>
+    );
+  };
+
   if (error) {
     return (
       <Alert variant="danger" className="m-3">
@@ -105,7 +211,7 @@ function InsuranceProvider() {
             <h4 className="mb-0">
               Obras Sociales{" "}
               <Badge bg="secondary" pill>
-                {obrasSociales.length}
+                {obrasSocialesData?.count ?? 0}
               </Badge>
             </h4>
           </Col>
@@ -153,7 +259,7 @@ function InsuranceProvider() {
             <Spinner animation="border" variant="primary" />
             <p className="mt-2">Cargando obras sociales...</p>
           </div>
-        ) : filtered.length === 0 ? (
+        ) : obrasSociales.length === 0 ? (
           <Alert variant="info">
             {searchTerm
               ? "No se encontraron obras sociales con ese nombre."
@@ -173,7 +279,7 @@ function InsuranceProvider() {
               </tr>
             </thead>
             <tbody>
-              {filtered.map((os) => (
+              {obrasSociales.map((os) => (
                 <tr key={os.id}>
                   <td>
                     <strong>{os.nombre}</strong>
@@ -207,6 +313,11 @@ function InsuranceProvider() {
         )}
       </div>
 
+      {/* Paginación - fija abajo */}
+      <div style={{ flex: "0 0 auto", marginTop: "auto" }}>
+        {renderPagination()}
+      </div>
+
       {/* Modal de formulario */}
       <ObraSocialFormModal
         show={showModal}
@@ -215,6 +326,6 @@ function InsuranceProvider() {
       />
     </div>
   );
-}
+};
 
 export default InsuranceProvider;
