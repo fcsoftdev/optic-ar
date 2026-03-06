@@ -21,7 +21,10 @@ import {
   useCreateConsulta,
   useUpdateConsulta,
 } from "../hooks/useVentas";
-import { consultaSchema, type ConsultaFormData } from "../schemas/consultaSchema";
+import {
+  consultaSchema,
+  type ConsultaFormData,
+} from "../schemas/consultaSchema";
 import type { ConsultaList } from "../services/ventas.service";
 import SearchableSelect from "./SearchableSelect";
 
@@ -438,11 +441,7 @@ const ConsultationFormModal: React.FC<ConsultationFormModalProps> = ({
           onClick={handleSubmit(onSubmit)}
           disabled={isSubmitting}
         >
-          {isSubmitting
-            ? "Guardando..."
-            : isEditing
-              ? "Actualizar"
-              : "Crear"}
+          {isSubmitting ? "Guardando..." : isEditing ? "Actualizar" : "Crear"}
         </Button>
       </Modal.Footer>
     </Modal>

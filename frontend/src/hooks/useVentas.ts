@@ -284,13 +284,8 @@ export const useUpdateConsulta = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({
-      id,
-      data,
-    }: {
-      id: number;
-      data: ConsultaCreateUpdate;
-    }) => ventasService.updateConsulta(id, data),
+    mutationFn: ({ id, data }: { id: number; data: ConsultaCreateUpdate }) =>
+      ventasService.updateConsulta(id, data),
     onSuccess: (updatedConsulta) => {
       queryClient.setQueryData(
         ["consulta", updatedConsulta.id],

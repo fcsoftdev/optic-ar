@@ -97,9 +97,7 @@ const ConsultationList: React.FC = () => {
    */
   const handleDelete = async (id: number, paciente: string) => {
     if (
-      window.confirm(
-        `¿Está seguro de eliminar la consulta de ${paciente}?`,
-      )
+      window.confirm(`¿Está seguro de eliminar la consulta de ${paciente}?`)
     ) {
       try {
         await deleteConsulta.mutateAsync(id);
@@ -129,8 +127,6 @@ const ConsultationList: React.FC = () => {
   };
 
   const hasActiveFilters = searchTerm || fechaDesde || fechaHasta;
-
-
 
   if (error) {
     return (
@@ -269,7 +265,9 @@ const ConsultationList: React.FC = () => {
                     <strong>{c.cliente_nombre}</strong>
                   </td>
                   <td className="text-nowrap">
-                    {new Date(c.fecha + "T00:00:00").toLocaleDateString("es-AR")}
+                    {new Date(c.fecha + "T00:00:00").toLocaleDateString(
+                      "es-AR",
+                    )}
                   </td>
                   <td>
                     <span

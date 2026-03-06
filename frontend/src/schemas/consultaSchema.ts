@@ -96,10 +96,7 @@ const graduacionSchema = z.object({
  *   Si se incluye, al menos un campo debe estar completo.
  */
 export const consultaSchema = z.object({
-  cliente: z
-    .number()
-    .int()
-    .positive("Debe seleccionar un paciente"),
+  cliente: z.number().int().positive("Debe seleccionar un paciente"),
   fecha: z.string().min(1, "La fecha es obligatoria"),
   motivo: z
     .string()

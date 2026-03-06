@@ -296,7 +296,9 @@ function BrandList() {
         currentPage={currentPage}
         totalPages={totalPages}
         onPageChange={handlePageChange}
-        totalItems={!Array.isArray(data) && data?.count ? data.count : marcas.length}
+        totalItems={
+          !Array.isArray(data) && data?.count ? data.count : marcas.length
+        }
         pageItems={marcas.length}
         itemLabel="marca(s)"
       />

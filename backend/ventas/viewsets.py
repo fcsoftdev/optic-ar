@@ -95,9 +95,7 @@ class ConsultaViewSet(viewsets.ModelViewSet):
     """
 
     queryset = (
-        Consulta.objects.select_related("cliente")
-        .prefetch_related("graduacion")
-        .all()
+        Consulta.objects.select_related("cliente").prefetch_related("graduacion").all()
     )
     filter_backends = [
         DjangoFilterBackend,

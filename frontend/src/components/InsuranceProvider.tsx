@@ -104,8 +104,6 @@ const InsuranceProvider: React.FC = () => {
     setEditingObraSocial(null);
   };
 
-
-
   if (error) {
     return (
       <Alert variant="danger" className="m-3">

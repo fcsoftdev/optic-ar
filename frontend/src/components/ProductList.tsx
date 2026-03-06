@@ -168,7 +168,6 @@ const ProductList: React.FC = (): JSX.Element => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-
   if (isLoading) {
     return (
       <div className="text-center p-5">
