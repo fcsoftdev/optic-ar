@@ -208,13 +208,15 @@ class ConsultaListSerializer(serializers.ModelSerializer):
     Serializer simplificado para listados de consultas.
 
     Expone solo los campos necesarios para la vista de tabla,
-    incluye el nombre del cliente y un indicador de si tiene graduación.
+    incluye el nombre del cliente, un indicador de si tiene graduación
+    y los datos de graduación anidados (si existen).
     """
 
     cliente_nombre = serializers.CharField(
         source="cliente.nombre_apellido", read_only=True
     )
     tiene_graduacion = serializers.SerializerMethodField()
+    graduacion = GraduacionSerializer(read_only=True)
 
     class Meta:
         model = Consulta
@@ -226,6 +228,7 @@ class ConsultaListSerializer(serializers.ModelSerializer):
             "motivo",
             "diagnostico",
             "tiene_graduacion",
+            "graduacion",
         ]
 
     def get_tiene_graduacion(self, obj: Consulta) -> bool:

@@ -10,15 +10,27 @@ import {
   Spinner,
   Table,
 } from "react-bootstrap";
-import { Pencil, Search, Trash, XCircle } from "react-bootstrap-icons";
+import {
+  Pencil,
+  ClipboardPulse,
+  Search,
+  Trash,
+  XCircle,
+} from "react-bootstrap-icons";
 import {
   useClientes,
   useDeleteCliente,
   useObrasSociales,
 } from "../hooks/useVentas";
-import type { Cliente } from "../services/ventas.service";
+import type {
+  Cliente,
+  ClienteList as ClienteListType,
+  ConsultaList,
+} from "../services/ventas.service";
 import AddButton from "./AddButton";
+import ClienteConsultasModal from "./ClienteConsultasModal";
 import ClienteFormModal from "./ClienteFormModal";
+import ConsultationFormModal from "./ConsultationFormModal";
 import PaginationBar from "./PaginationBar";
 import SearchableSelect from "./SearchableSelect";
 
@@ -39,6 +51,16 @@ const ClienteList: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [showModal, setShowModal] = useState(false);
   const [editingCliente, setEditingCliente] = useState<Cliente | null>(null);
+  const [showConsultasModal, setShowConsultasModal] = useState(false);
+  const [selectedCliente, setSelectedCliente] =
+    useState<ClienteListType | null>(null);
+  const [showConsultationForm, setShowConsultationForm] = useState(false);
+  const [editingConsulta, setEditingConsulta] = useState<ConsultaList | null>(
+    null,
+  );
+  const [preselectedClienteId, setPreselectedClienteId] = useState<
+    number | undefined
+  >(undefined);
 
   // Debounce para búsqueda
   useEffect(() => {
@@ -62,7 +84,13 @@ const ClienteList: React.FC = () => {
   });
 
   const { data: obrasSociales = [] } = useObrasSociales();
+  const { data: todosLosClientes } = useClientes({ page_size: 9999 });
   const deleteCliente = useDeleteCliente();
+
+  const clienteOptions = (todosLosClientes?.results || []).map((c) => ({
+    value: c.id,
+    label: `${c.nombre_apellido} (DNI: ${c.dni})`,
+  }));
 
   const clientes = clientesData?.results || [];
   const totalPages = clientesData?.count
@@ -107,6 +135,52 @@ const ClienteList: React.FC = () => {
   };
 
   /**
+   * Abre el modal de historial de consultas del cliente seleccionado.
+   *
+   * @param cliente - Cliente cuyas consultas se desean ver.
+   */
+  const handleVerConsultas = (cliente: ClienteListType) => {
+    setSelectedCliente(cliente);
+    setShowConsultasModal(true);
+  };
+
+  /**
+   * Cierra el modal de consultas y abre el formulario de nueva consulta
+   * con el cliente preseleccionado.
+   *
+   * @param clienteId - ID del cliente a preseleccionar.
+   */
+  const handleNuevaConsulta = (clienteId: number) => {
+    setShowConsultasModal(false);
+    setEditingConsulta(null);
+    setPreselectedClienteId(clienteId);
+    setShowConsultationForm(true);
+  };
+
+  /**
+   * Cierra el modal de consultas y abre el formulario de edición
+   * con los datos de la consulta seleccionada.
+   *
+   * @param consulta - Consulta a editar.
+   */
+  const handleEditarConsulta = (consulta: ConsultaList) => {
+    setShowConsultasModal(false);
+    setPreselectedClienteId(undefined);
+    setEditingConsulta(consulta);
+    setShowConsultationForm(true);
+  };
+
+  /**
+   * Cierra el formulario de consulta y vuelve al historial del cliente.
+   */
+  const handleCloseConsultationForm = () => {
+    setShowConsultationForm(false);
+    setEditingConsulta(null);
+    setPreselectedClienteId(undefined);
+    if (selectedCliente) setShowConsultasModal(true);
+  };
+
+  /**
    * Resetea todos los filtros activos y vuelve a la primera página.
    */
   const handleClearFilters = () => {
@@ -115,8 +189,6 @@ const ClienteList: React.FC = () => {
     setSelectedObraSocial(null);
     setCurrentPage(1);
   };
-
-
 
   if (error) {
     return (
@@ -225,7 +297,7 @@ const ClienteList: React.FC = () => {
                 <th>Teléfono</th>
                 <th>Obra Social</th>
                 <th>Fecha Nacimiento</th>
-                <th style={{ width: "120px" }}>Acciones</th>
+                <th style={{ width: "140px" }}>Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -244,6 +316,14 @@ const ClienteList: React.FC = () => {
                   </td>
                   <td>
                     <div className="d-flex gap-1">
+                      <Button
+                        variant="outline-info"
+                        size="sm"
+                        onClick={() => handleVerConsultas(cliente)}
+                        title="Ver consultas"
+                      >
+                        <ClipboardPulse size={14} />
+                      </Button>
                       <Button
                         variant="outline-primary"
                         size="sm"
@@ -288,6 +368,24 @@ const ClienteList: React.FC = () => {
         show={showModal}
         onHide={handleCloseModal}
         cliente={editingCliente}
+      />
+
+      {/* Modal de historial de consultas */}
+      <ClienteConsultasModal
+        show={showConsultasModal}
+        onHide={() => setShowConsultasModal(false)}
+        cliente={selectedCliente}
+        onNuevaConsulta={handleNuevaConsulta}
+        onEditarConsulta={handleEditarConsulta}
+      />
+
+      {/* Modal de formulario de consulta */}
+      <ConsultationFormModal
+        show={showConsultationForm}
+        onHide={handleCloseConsultationForm}
+        clienteOptions={clienteOptions}
+        consulta={editingConsulta}
+        defaultClienteId={preselectedClienteId}
       />
     </div>
   );

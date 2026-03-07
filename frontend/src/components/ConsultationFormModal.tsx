@@ -40,6 +40,8 @@ interface ConsultationFormModalProps {
   clienteOptions: { value: number; label: string }[];
   /** Consulta a editar. Si es `null` o `undefined`, opera en modo creación. */
   consulta?: ConsultaList | null;
+  /** ID del cliente a preseleccionar en modo creación. */
+  defaultClienteId?: number;
 }
 
 /**
@@ -57,6 +59,7 @@ const ConsultationFormModal: React.FC<ConsultationFormModalProps> = ({
   onHide,
   clienteOptions,
   consulta,
+  defaultClienteId,
 }) => {
   const isEditing = !!consulta;
   const [showGraduacion, setShowGraduacion] = useState(false);
@@ -114,7 +117,7 @@ const ConsultationFormModal: React.FC<ConsultationFormModalProps> = ({
     } else if (!consulta) {
       setShowGraduacion(false);
       reset({
-        cliente: undefined,
+        cliente: defaultClienteId ?? undefined,
         fecha: new Date().toISOString().split("T")[0],
         motivo: "",
         diagnostico: "",
@@ -122,7 +125,7 @@ const ConsultationFormModal: React.FC<ConsultationFormModalProps> = ({
         graduacion: null,
       });
     }
-  }, [consulta, consultaCompleta, reset]);
+  }, [consulta, consultaCompleta, defaultClienteId, reset]);
 
   /**
    * Maneja el envío del formulario: crea o actualiza la consulta.

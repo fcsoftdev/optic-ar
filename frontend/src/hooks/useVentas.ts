@@ -231,6 +231,8 @@ export const useConsultas = (params?: {
   cliente?: number;
   fecha_desde?: string;
   fecha_hasta?: string;
+  /** Tamaño de página. Usar un valor grande para obtener todos los registros. */
+  page_size?: number;
 }) => {
   return useQuery({
     queryKey: ["consultas", params],

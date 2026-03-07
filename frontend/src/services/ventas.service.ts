@@ -96,6 +96,7 @@ export interface ConsultaList {
   motivo: string;
   diagnostico?: string;
   tiene_graduacion: boolean;
+  graduacion?: Graduacion | null;
 }
 
 /** Datos para crear o actualizar una consulta */
@@ -230,6 +231,8 @@ const ventasService = {
     cliente?: number;
     fecha_desde?: string;
     fecha_hasta?: string;
+    /** Tamaño de página. Usar un valor grande para obtener todos los registros. */
+    page_size?: number;
   }): Promise<PaginatedResponse<ConsultaList>> => {
     const response = await api.get("/ventas/api/consultas/", { params });
     return response.data;
