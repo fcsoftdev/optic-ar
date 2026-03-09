@@ -109,6 +109,76 @@ export interface ConsultaCreateUpdate {
   graduacion?: Graduacion | null;
 }
 
+// ============================================================
+// TIPOS DE VENTAS
+// ============================================================
+
+/** Formas de pago disponibles */
+export type FormaPago = "CO" | "DE" | "CR" | "TR" | "QR";
+
+/** Mapa de etiquetas para las formas de pago */
+export const FORMA_PAGO_LABELS: Record<FormaPago, string> = {
+  CO: "Contado",
+  DE: "Tarjeta de Débito",
+  CR: "Tarjeta de Crédito",
+  TR: "Transferencia",
+  QR: "QR",
+};
+
+/** Ítem de detalle de venta (lectura) */
+export interface DetalleVenta {
+  id: number;
+  producto: number | null;
+  producto_nombre: string;
+  cantidad: number;
+  precio_venta: string;
+  subtotal_item: string;
+}
+
+/** Venta completa con detalles anidados */
+export interface Venta {
+  id: number;
+  fecha: string;
+  cliente: number;
+  cliente_nombre: string;
+  forma_pago: FormaPago;
+  forma_pago_display: string;
+  entrego: string;
+  total_venta: string;
+  saldo: string;
+  detalles_ventas: DetalleVenta[];
+}
+
+/** Venta simplificada para listados */
+export interface VentaList {
+  id: number;
+  fecha: string;
+  cliente: number;
+  cliente_nombre: string;
+  forma_pago: FormaPago;
+  forma_pago_display: string;
+  entrego: string;
+  total_venta: string;
+  saldo: string;
+}
+
+/** Ítem de detalle para crear/actualizar (write) */
+export interface DetalleVentaWrite {
+  id?: number | null;
+  producto: number;
+  cantidad: number;
+  precio_venta: number;
+}
+
+/** Datos para crear o actualizar una venta */
+export interface VentaCreateUpdate {
+  fecha: string;
+  cliente: number;
+  forma_pago: FormaPago;
+  entrego: number;
+  detalles: DetalleVentaWrite[];
+}
+
 /**
  * ============================================
  * SERVICIO DE VENTAS
@@ -270,6 +340,54 @@ const ventasService = {
    */
   deleteConsulta: async (id: number): Promise<void> => {
     await api.delete(`/ventas/api/consultas/${id}/`);
+  },
+
+  // ==================== VENTAS ====================
+
+  /**
+   * Obtener listado paginado de ventas con filtros opcionales.
+   */
+  getVentas: async (params?: {
+    page?: number;
+    search?: string;
+    cliente?: number;
+    forma_pago?: string;
+    page_size?: number;
+  }): Promise<PaginatedResponse<VentaList>> => {
+    const response = await api.get("/ventas/api/ventas/", { params });
+    return response.data;
+  },
+
+  /**
+   * Obtener el detalle completo de una venta (con ítems anidados).
+   */
+  getVenta: async (id: number): Promise<Venta> => {
+    const response = await api.get(`/ventas/api/ventas/${id}/`);
+    return response.data;
+  },
+
+  /**
+   * Crear una nueva venta con sus ítems de detalle.
+   */
+  createVenta: async (data: VentaCreateUpdate): Promise<Venta> => {
+    const response = await api.post("/ventas/api/ventas/", data);
+    return response.data;
+  },
+
+  /**
+   * Actualizar una venta existente y sincronizar sus ítems.
+   */
+  updateVenta: async (id: number, data: VentaCreateUpdate): Promise<Venta> => {
+    const response = await api.put(`/ventas/api/ventas/${id}/`, data);
+    return response.data;
+  },
+
+  /**
+   * Eliminar una venta. El backend restaura el stock automáticamente
+   * mediante la señal ``devolver_stock_al_eliminar_venta``.
+   */
+  deleteVenta: async (id: number): Promise<void> => {
+    await api.delete(`/ventas/api/ventas/${id}/`);
   },
 };
 

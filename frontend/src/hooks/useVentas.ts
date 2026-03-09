@@ -3,6 +3,7 @@ import ventasService, {
   type ClienteCreateUpdate,
   type ObraSocial,
   type ConsultaCreateUpdate,
+  type VentaCreateUpdate,
 } from "../services/ventas.service";
 
 // ==================== HOOKS DE OBRAS SOCIALES ====================
@@ -314,6 +315,103 @@ export const useDeleteConsulta = () => {
     onSuccess: (_, deletedId) => {
       queryClient.removeQueries({ queryKey: ["consulta", deletedId] });
       queryClient.invalidateQueries({ queryKey: ["consultas"] });
+    },
+  });
+};
+
+// ==================== HOOKS DE VENTAS ====================
+
+/**
+ * Hook para obtener el listado paginado de ventas.
+ *
+ * @param params - Filtros opcionales: página, búsqueda, cliente, forma_pago.
+ * @returns Query paginada de ventas.
+ */
+export const useVentas = (params?: {
+  page?: number;
+  search?: string;
+  cliente?: number;
+  forma_pago?: string;
+  page_size?: number;
+}) => {
+  return useQuery({
+    queryKey: ["ventas", params],
+    queryFn: () => ventasService.getVentas(params),
+  });
+};
+
+/**
+ * Hook para obtener el detalle completo de una venta (con ítems anidados).
+ *
+ * @param id - ID de la venta. La query se deshabilita si es 0.
+ * @returns Query con la venta completa.
+ */
+export const useVenta = (id: number) => {
+  return useQuery({
+    queryKey: ["venta", id],
+    queryFn: () => ventasService.getVenta(id),
+    enabled: !!id,
+  });
+};
+
+/**
+ * Hook para crear una nueva venta con sus ítems de detalle.
+ *
+ * @remarks
+ * Invalida el listado de ventas al crear exitosamente.
+ *
+ * @returns Mutation que recibe los datos de la venta y la crea en la API.
+ */
+export const useCreateVenta = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: VentaCreateUpdate) => ventasService.createVenta(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["ventas"] });
+    },
+  });
+};
+
+/**
+ * Hook para actualizar una venta existente y sincronizar sus ítems.
+ *
+ * @remarks
+ * Actualiza el cache del detalle individual e invalida el listado.
+ *
+ * @returns Mutation que recibe `{ id, data }` y actualiza la venta.
+ */
+export const useUpdateVenta = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, data }: { id: number; data: VentaCreateUpdate }) =>
+      ventasService.updateVenta(id, data),
+    onSuccess: (updatedVenta) => {
+      queryClient.setQueryData(["venta", updatedVenta.id], updatedVenta);
+      queryClient.invalidateQueries({ queryKey: ["ventas"] });
+    },
+  });
+};
+
+/**
+ * Hook para eliminar una venta.
+ *
+ * @remarks
+ * El backend restaura el stock de los productos automáticamente
+ * mediante la señal `devolver_stock_al_eliminar_venta`.
+ * Invalida el listado de ventas al eliminar exitosamente.
+ *
+ * @returns Mutation que recibe el `id` de la venta a eliminar.
+ */
+export const useDeleteVenta = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: number) => ventasService.deleteVenta(id),
+    onSuccess: (_, deletedId) => {
+      queryClient.removeQueries({ queryKey: ["venta", deletedId] });
+      queryClient.invalidateQueries({ queryKey: ["ventas"] });
     },
   });
 };

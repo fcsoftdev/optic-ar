@@ -3,13 +3,15 @@ from rest_framework import viewsets, filters
 from rest_framework import serializers as drf_serializers
 from django_filters import rest_framework as df_filters
 from django_filters.rest_framework import DjangoFilterBackend
-from .models import ObraSocial, Cliente, Consulta
+from .models import ObraSocial, Cliente, Consulta, Venta
 from .serializers import (
     ObraSocialSerializer,
     ClienteSerializer,
     ClienteListSerializer,
     ConsultaSerializer,
     ConsultaListSerializer,
+    VentaSerializer,
+    VentaListSerializer,
 )
 
 
@@ -118,3 +120,43 @@ class ConsultaViewSet(viewsets.ModelViewSet):
         if self.action == "list":
             return ConsultaListSerializer
         return ConsultaSerializer
+
+
+class VentaViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet para gestionar Ventas.
+
+    Provee operaciones CRUD completas. Usa ``VentaListSerializer``
+    para el listado (sin detalles) y ``VentaSerializer`` para
+    crear, ver y actualizar ventas con sus ítems anidados.
+
+    Al eliminar una venta, la señal ``devolver_stock_al_eliminar_venta``
+    restaura automáticamente el stock de los productos involucrados.
+    """
+
+    queryset = (
+        Venta.objects.select_related("cliente")
+        .prefetch_related("detalles_ventas__producto")
+        .all()
+    )
+    filter_backends = [
+        DjangoFilterBackend,
+        filters.SearchFilter,
+        filters.OrderingFilter,
+    ]
+    filterset_fields = ["cliente", "forma_pago"]
+    search_fields = ["cliente__nombre_apellido", "cliente__dni"]
+    ordering_fields = ["fecha", "total_venta"]
+    ordering = ["-fecha"]
+
+    def get_serializer_class(self) -> Type[drf_serializers.Serializer]:
+        """
+        Selecciona el serializer según la acción actual.
+
+        Returns:
+            Type[Serializer]: VentaListSerializer para listados,
+            VentaSerializer para el resto de acciones.
+        """
+        if self.action == "list":
+            return VentaListSerializer
+        return VentaSerializer

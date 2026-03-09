@@ -8,6 +8,7 @@ router = DefaultRouter()
 router.register(r"obras-sociales", viewsets.ObraSocialViewSet)
 router.register(r"clientes", viewsets.ClienteViewSet)
 router.register(r"consultas", viewsets.ConsultaViewSet)
+router.register(r"ventas", viewsets.VentaViewSet)
 
 urlpatterns = [
     # API REST endpoints

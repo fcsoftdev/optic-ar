@@ -24,6 +24,8 @@ interface SearchableSelectProps {
   addIcon?: boolean;
   isClearable?: boolean;
   noOptionsMessage?: string;
+  /** Renderiza el menú en document.body para evitar clipping por overflow. Útil dentro de tablas o modales con scroll. */
+  portalMenu?: boolean;
 }
 
 const SearchableSelect: React.FC<SearchableSelectProps> = ({
@@ -39,6 +41,7 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
   addIcon = false,
   isClearable = false,
   noOptionsMessage = "No hay opciones",
+  portalMenu = false,
 }) => {
   const selectedOption = options.find((opt) => opt.value === value) || null;
 
@@ -68,7 +71,11 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
     }),
     menu: (provided) => ({
       ...provided,
-      zIndex: 1050,
+      zIndex: 9999,
+    }),
+    menuPortal: (provided) => ({
+      ...provided,
+      zIndex: 9999,
     }),
     option: (provided, state) => ({
       ...provided,
@@ -97,6 +104,8 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({
         styles={customStyles}
         noOptionsMessage={() => noOptionsMessage}
         className="flex-grow-1"
+        menuPortalTarget={portalMenu ? document.body : undefined}
+        menuPosition={portalMenu ? "fixed" : undefined}
       />
       {onManageClick && (
         <Button
