@@ -25,6 +25,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     # API REST
     path("api/", include("productos.urls")),
+    path("api/", include("compras.urls")),
     # Apps legacy
     path("ventas/", include("ventas.urls")),
     path("turnos/", include("turnos.urls")),

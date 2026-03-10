@@ -31,7 +31,7 @@ class Proveedor(models.Model):
 class Compra(models.Model):
     """Modelo para registrar el detalle de compras."""
 
-    proveedor = models.ForeignKey(Proveedor, null=True, on_delete=models.SET_NULL)
+    proveedor = models.ForeignKey(Proveedor, on_delete=models.PROTECT)
     fecha = models.DateField(default=date.today)
     total = models.DecimalField(
         max_digits=10, decimal_places=2, default=Decimal("0.00"), editable=False
