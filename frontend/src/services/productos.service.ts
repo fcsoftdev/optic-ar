@@ -114,6 +114,8 @@ const productosService = {
     marca?: number;
     categoria?: number;
     sub_categoria?: number;
+    page_size?: number;
+    ordering?: string;
   }): Promise<PaginatedResponse<ProductoList>> => {
     const response = await api.get("/api/productos/", { params });
     return response.data;
@@ -172,7 +174,7 @@ const productosService = {
    */
   updateProducto: async (
     id: number,
-    data: ProductoCreateUpdate
+    data: ProductoCreateUpdate,
   ): Promise<Producto> => {
     const response = await api.put(`/api/productos/${id}/`, data);
     return response.data;
@@ -349,7 +351,7 @@ const productosService = {
    */
   updateSubCategoria: async (
     id: number,
-    data: { nombre: string; categoria: number }
+    data: { nombre: string; categoria: number },
   ): Promise<SubCategoria> => {
     const response = await api.put(`/api/subcategorias/${id}/`, data);
     return response.data;

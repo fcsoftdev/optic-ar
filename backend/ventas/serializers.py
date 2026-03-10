@@ -306,6 +306,7 @@ class VentaListSerializer(serializers.ModelSerializer):
     cliente_nombre = serializers.CharField(
         source="cliente.nombre_apellido", read_only=True
     )
+    cliente_dni = serializers.CharField(source="cliente.dni", read_only=True)
     forma_pago_display = serializers.CharField(
         source="get_forma_pago_display", read_only=True
     )
@@ -317,6 +318,7 @@ class VentaListSerializer(serializers.ModelSerializer):
             "fecha",
             "cliente",
             "cliente_nombre",
+            "cliente_dni",
             "forma_pago",
             "forma_pago_display",
             "entrego",
@@ -342,6 +344,7 @@ class VentaSerializer(serializers.ModelSerializer):
     cliente_nombre = serializers.CharField(
         source="cliente.nombre_apellido", read_only=True
     )
+    cliente_dni = serializers.CharField(source="cliente.dni", read_only=True)
     forma_pago_display = serializers.CharField(
         source="get_forma_pago_display", read_only=True
     )
@@ -355,6 +358,7 @@ class VentaSerializer(serializers.ModelSerializer):
             "fecha",
             "cliente",
             "cliente_nombre",
+            "cliente_dni",
             "forma_pago",
             "forma_pago_display",
             "entrego",

@@ -2,7 +2,13 @@
  * @file VentaFormModal.tsx
  * @description Modal para crear o editar una Venta con sus ítems de detalle.
  */
-import React, { useEffect, useMemo } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   Alert,
   Badge,
@@ -18,9 +24,9 @@ import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PlusCircle, Trash3 } from "react-bootstrap-icons";
 import { useCreateVenta, useUpdateVenta, useVenta } from "../hooks/useVentas";
-import { useClientes } from "../hooks/useVentas";
-import { useProductos } from "../hooks/useProductos";
-import SearchableSelect from "./SearchableSelect";
+import AsyncSearchableSelect from "./AsyncSearchableSelect";
+import ventasService from "../services/ventas.service";
+import productosService from "../services/productos.service";
 import { ventaSchema, type VentaFormValues } from "../schemas/ventaSchema";
 import { FORMA_PAGO_LABELS, type VentaList } from "../services/ventas.service";
 
@@ -40,6 +46,18 @@ interface VentaFormModalProps {
 const DETALLE_VACIO = { id: null, producto: 0, cantidad: 1, precio_venta: 0 };
 
 /**
+ * Convierte "Nombre Apellido" → "Apellido, Nombre - DNI".
+ * Toma la última palabra como apellido y el resto como nombre.
+ */
+const formatClienteLabel = (nombreApellido: string, dni: string): string => {
+  const parts = nombreApellido.trim().split(/\s+/);
+  if (parts.length < 2) return `${nombreApellido} - ${dni}`;
+  const apellido = parts[parts.length - 1];
+  const nombre = parts.slice(0, -1).join(" ");
+  return `${apellido}, ${nombre} - ${dni}`;
+};
+
+/**
  * Formatea un número con separador de miles (.) y decimales (,) según el estándar argentino.
  *
  * @param valor - Número a formatear.
@@ -52,6 +70,60 @@ const fmtARS = (valor: number): string =>
         maximumFractionDigits: 2,
       })
     : "0,00";
+
+/**
+ * Input numérico con edición libre: permite escribir sin re-formatear en cada tecla.
+ * Muestra el valor formateado cuando pierde el foco (onBlur).
+ */
+const NumericInput: React.FC<{
+  value: number;
+  onChange: (v: number) => void;
+  isInvalid?: boolean;
+  size?: "sm" | "lg";
+}> = ({ value, onChange, isInvalid, size }) => {
+  const [raw, setRaw] = useState(() =>
+    fmtARS(Number.isFinite(value) ? value : 0),
+  );
+  const [focused, setFocused] = useState(false);
+
+  // Sincroniza el display cuando el valor cambia externamente (p.ej. auto-fill del precio)
+  useEffect(() => {
+    if (!focused) {
+      setRaw(fmtARS(Number.isFinite(value) ? value : 0));
+    }
+  }, [value, focused]);
+
+  const commit = (inputValue: string) => {
+    const num = parseFloat(inputValue.replace(/\./g, "").replace(",", "."));
+    const val = Number.isFinite(num) ? Math.round(num * 100) / 100 : 0;
+    onChange(val);
+    setRaw(fmtARS(val));
+  };
+
+  return (
+    <Form.Control
+      type="text"
+      inputMode="decimal"
+      size={size}
+      value={raw}
+      onChange={(e) => setRaw(e.target.value)}
+      onFocus={() => {
+        setFocused(true);
+        // Al enfocar muestra el número sin formato para facilitar la edición
+        setRaw(
+          Number.isFinite(value) && value !== 0
+            ? String(value).replace(".", ",")
+            : "",
+        );
+      }}
+      onBlur={(e) => {
+        setFocused(false);
+        commit(e.target.value);
+      }}
+      isInvalid={isInvalid}
+    />
+  );
+};
 
 /**
  * Modal con formulario para crear o editar una Venta.
@@ -76,36 +148,86 @@ const VentaFormModal: React.FC<VentaFormModalProps> = ({
     venta?.id ?? 0,
   );
 
-  // ── Selectores ─────────────────────────────────────────────────────────────
-  const { data: clientesData } = useClientes({ page_size: 9999 });
-  const { data: productosData } = useProductos({ page_size: 9999 } as any);
+  // ── Selectores asincrónicos con debounce ───────────────────────────────────
 
-  const clienteOptions = useMemo(
-    () =>
-      (clientesData?.results ?? []).map((c) => ({
-        value: c.id,
-        label: `${c.dni} — ${c.nombre_apellido}`,
-      })),
-    [clientesData],
-  );
-
-  const productoOptions = useMemo(
-    () =>
-      (productosData?.results ?? []).map((p) => ({
-        value: p.id,
-        label: `${p.nombre}${p.codigo ? ` (${p.codigo})` : ""}`,
-      })),
-    [productosData],
-  );
-
-  /** Mapa producto_id → precio_venta para autocompletar al seleccionar. */
-  const preciosPorProducto = useMemo(() => {
-    const map: Record<number, number> = {};
-    (productosData?.results ?? []).forEach((p) => {
-      map[p.id] = Number(p.precio_venta);
+  /**
+   * Carga clientes desde la API filtrando por el texto ingresado.
+   * Se usa como `loadOptions` en AsyncSearchableSelect.
+   *
+   * @param inputValue - Texto de búsqueda (DNI o nombre).
+   * @returns Primeros 20 clientes que coincidan.
+   */
+  const loadClientes = useCallback(async (inputValue: string) => {
+    const data = await ventasService.getClientes({
+      search: inputValue,
+      page_size: 20,
     });
-    return map;
-  }, [productosData]);
+    return data.results.map((c) => ({
+      value: c.id,
+      label: formatClienteLabel(c.nombre_apellido, c.dni),
+    }));
+  }, []);
+
+  /**
+   * Carga todos los clientes sin límite de página para mostrar la lista completa al desplegar.
+   */
+  const loadAllClientes = useCallback(async () => {
+    const data = await ventasService.getClientes({ page_size: 9999 });
+    return data.results.map((c) => ({
+      value: c.id,
+      label: formatClienteLabel(c.nombre_apellido, c.dni),
+    }));
+  }, []);
+
+  /**
+   * Mapa en memoria product_id → { precio_venta, label } para autocompletar al
+   * seleccionar un producto. Se llena a medida que el usuario busca productos.
+   */
+  const productoCacheRef = useRef<
+    Record<number, { precio: number; label: string }>
+  >({});
+
+  /**
+   * Carga productos desde la API filtrando por el texto ingresado.
+   * Almacena precio y label en el caché local para autocompletar el precio al seleccionar.
+   *
+   * @param inputValue - Texto de búsqueda (nombre o código).
+   * @returns Primeros 20 productos que coincidan.
+   */
+  const loadProductos = useCallback(async (inputValue: string) => {
+    const data = await productosService.getProductos({
+      search: inputValue,
+      page_size: 20,
+      ordering: "nombre",
+    });
+    return data.results.map((p) => {
+      const label = `${p.nombre}${p.codigo ? ` (${p.codigo})` : ""}`;
+      productoCacheRef.current[p.id] = {
+        precio: Number(p.precio_venta),
+        label,
+      };
+      return { value: p.id, label };
+    });
+  }, []);
+
+  /**
+   * Carga todos los productos sin límite de página para mostrar la lista completa al desplegar.
+   * También llena el caché de precios para autocompletar sin necesidad de buscar.
+   */
+  const loadAllProductos = useCallback(async () => {
+    const data = await productosService.getProductos({
+      page_size: 9999,
+      ordering: "nombre",
+    });
+    return data.results.map((p) => {
+      const label = `${p.nombre}${p.codigo ? ` (${p.codigo})` : ""}`;
+      productoCacheRef.current[p.id] = {
+        precio: Number(p.precio_venta),
+        label,
+      };
+      return { value: p.id, label };
+    });
+  }, []);
 
   // ── Mutations ──────────────────────────────────────────────────────────────
   const createVenta = useCreateVenta();
@@ -142,11 +264,39 @@ const VentaFormModal: React.FC<VentaFormModalProps> = ({
   const watchedDetalles = useWatch({ control, name: "detalles" });
   const watchedEntrego = useWatch({ control, name: "entrego" });
 
+  /**
+   * Label del cliente seleccionado para mostrar en el selector al editar.
+   * Se actualiza cuando el usuario elige un cliente en el AsyncSelect.
+   */
+  const [clienteSeleccionado, setClienteSeleccionado] = useState<{
+    value: number;
+    label: string;
+  } | null>(null);
+
   // ── Precarga de valores al editar ──────────────────────────────────────────
   useEffect(() => {
     if (!show) return;
 
     if (isEditing && ventaCompleta) {
+      // Precarga el label del cliente en el estado para mostrarlo en el selector
+      if (ventaCompleta.cliente_nombre) {
+        setClienteSeleccionado({
+          value: ventaCompleta.cliente,
+          label: formatClienteLabel(
+            ventaCompleta.cliente_nombre,
+            ventaCompleta.cliente_dni,
+          ),
+        });
+      }
+      // Precarga el caché de productos con los datos de los detalles
+      ventaCompleta.detalles_ventas.forEach((d) => {
+        if (d.producto && d.producto_nombre) {
+          productoCacheRef.current[d.producto] = {
+            precio: Number(d.precio_venta),
+            label: d.producto_nombre,
+          };
+        }
+      });
       reset({
         fecha: ventaCompleta.fecha,
         cliente: ventaCompleta.cliente,
@@ -210,6 +360,8 @@ const VentaFormModal: React.FC<VentaFormModalProps> = ({
 
   const handleClose = () => {
     reset();
+    setClienteSeleccionado(null);
+    productoCacheRef.current = {};
     onHide();
   };
 
@@ -221,11 +373,11 @@ const VentaFormModal: React.FC<VentaFormModalProps> = ({
    */
   const handleProductoChange = (index: number, productoId: number | null) => {
     setValue(`detalles.${index}.producto`, productoId ?? 0);
-    if (productoId && preciosPorProducto[productoId] != null) {
-      setValue(
-        `detalles.${index}.precio_venta`,
-        preciosPorProducto[productoId],
-      );
+    const cached = productoId
+      ? productoCacheRef.current[productoId]
+      : undefined;
+    if (cached != null) {
+      setValue(`detalles.${index}.precio_venta`, cached.precio);
     }
   };
 
@@ -299,12 +451,20 @@ const VentaFormModal: React.FC<VentaFormModalProps> = ({
                       name="cliente"
                       control={control}
                       render={({ field }) => (
-                        <SearchableSelect
-                          options={clienteOptions}
+                        <AsyncSearchableSelect
+                          loadOptions={loadClientes}
+                          loadAllOptions={loadAllClientes}
                           value={field.value}
-                          onChange={(v) => field.onChange(v)}
+                          onChange={(v) => {
+                            field.onChange(v);
+                            if (!v) setClienteSeleccionado(null);
+                          }}
+                          onSelectOption={(opt) => {
+                            if (opt) setClienteSeleccionado(opt);
+                          }}
                           placeholder="Buscar por DNI o nombre..."
                           isInvalid={!!errors.cliente}
+                          selectedOption={clienteSeleccionado}
                         />
                       )}
                     />
@@ -362,20 +522,9 @@ const VentaFormModal: React.FC<VentaFormModalProps> = ({
                       name="entrego"
                       control={control}
                       render={({ field }) => (
-                        <Form.Control
-                          type="text"
-                          inputMode="decimal"
-                          value={fmtARS(
-                            Number.isFinite(field.value) ? field.value : 0,
-                          )}
-                          onChange={(e) => {
-                            // Permite edición libre: remueve separadores de miles y convierte coma a punto
-                            const raw = e.target.value
-                              .replace(/\./g, "")
-                              .replace(",", ".");
-                            const num = parseFloat(raw);
-                            field.onChange(Number.isFinite(num) ? num : 0);
-                          }}
+                        <NumericInput
+                          value={field.value}
+                          onChange={field.onChange}
                           isInvalid={!!errors.entrego}
                         />
                       )}
@@ -439,8 +588,9 @@ const VentaFormModal: React.FC<VentaFormModalProps> = ({
                               name={`detalles.${index}.producto`}
                               control={control}
                               render={({ field: f }) => (
-                                <SearchableSelect
-                                  options={productoOptions}
+                                <AsyncSearchableSelect
+                                  loadOptions={loadProductos}
+                                  loadAllOptions={loadAllProductos}
                                   value={f.value || null}
                                   onChange={(v) =>
                                     handleProductoChange(index, v)
@@ -450,7 +600,18 @@ const VentaFormModal: React.FC<VentaFormModalProps> = ({
                                     !!(errors.detalles?.[index] as any)
                                       ?.producto
                                   }
-                                  portalMenu
+                                  selectedOption={
+                                    f.value
+                                      ? productoCacheRef.current[f.value]
+                                        ? {
+                                            value: f.value,
+                                            label:
+                                              productoCacheRef.current[f.value]
+                                                .label,
+                                          }
+                                        : null
+                                      : null
+                                  }
                                 />
                               )}
                             />
@@ -485,24 +646,14 @@ const VentaFormModal: React.FC<VentaFormModalProps> = ({
                               name={`detalles.${index}.precio_venta`}
                               control={control}
                               render={({ field: f }) => (
-                                <Form.Control
-                                  type="text"
-                                  inputMode="decimal"
-                                  size="sm"
-                                  value={fmtARS(
-                                    Number.isFinite(f.value) ? f.value : 0,
-                                  )}
-                                  onChange={(e) => {
-                                    const raw = e.target.value
-                                      .replace(/\./g, "")
-                                      .replace(",", ".");
-                                    const num = parseFloat(raw);
-                                    f.onChange(Number.isFinite(num) ? num : 0);
-                                  }}
+                                <NumericInput
+                                  value={f.value}
+                                  onChange={f.onChange}
                                   isInvalid={
                                     !!(errors.detalles?.[index] as any)
                                       ?.precio_venta
                                   }
+                                  size="sm"
                                 />
                               )}
                             />

@@ -141,6 +141,7 @@ export interface Venta {
   fecha: string;
   cliente: number;
   cliente_nombre: string;
+  cliente_dni: string;
   forma_pago: FormaPago;
   forma_pago_display: string;
   entrego: string;
@@ -155,6 +156,7 @@ export interface VentaList {
   fecha: string;
   cliente: number;
   cliente_nombre: string;
+  cliente_dni: string;
   forma_pago: FormaPago;
   forma_pago_display: string;
   entrego: string;
