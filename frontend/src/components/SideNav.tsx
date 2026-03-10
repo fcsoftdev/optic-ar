@@ -68,12 +68,6 @@ function SideNav({ show, onHide, setActiveSection }: SideNavProps) {
     },
     {
       type: "link",
-      label: "Caja manual",
-      href: "#caja-manual",
-      icon: <CashStack size={18} className="me-2" />,
-    },
-    {
-      type: "link",
       label: "Reporte de caja",
       href: "#reporte-caja",
       icon: <BarChartLine size={18} className="me-2" />,
