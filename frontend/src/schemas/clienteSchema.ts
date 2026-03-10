@@ -4,11 +4,12 @@ import { z } from "zod";
  * Esquema de validación Zod para el formulario de Cliente/Paciente.
  *
  * @remarks
- * Campos obligatorios: `nombre_apellido` y `dni`.
+ * Campos obligatorios: `apellido`, `nombre` y `dni`.
  * Transforma los campos opcionales vacíos a `undefined` antes de enviar al servidor.
  *
  * Reglas:
- * - `nombre_apellido`: requerido, máximo 150 caracteres.
+ * - `apellido`: requerido, máximo 100 caracteres.
+ * - `nombre`: requerido, máximo 100 caracteres.
  * - `dni`: requerido, exactamente 8 dígitos numéricos.
  * - `mail`: formato de email válido si se proporciona.
  * - `telefono`, `direccion`, `nro_afiliado`: opcionales con límite de caracteres.
@@ -16,10 +17,14 @@ import { z } from "zod";
  */
 export const clienteSchema = z
   .object({
-    nombre_apellido: z
+    apellido: z
+      .string()
+      .min(1, "El apellido es requerido")
+      .max(100, "El apellido no puede exceder 100 caracteres"),
+    nombre: z
       .string()
       .min(1, "El nombre es requerido")
-      .max(150, "El nombre no puede exceder 150 caracteres"),
+      .max(100, "El nombre no puede exceder 100 caracteres"),
     dni: z
       .string()
       .min(1, "El DNI es requerido")

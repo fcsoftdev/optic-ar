@@ -89,7 +89,7 @@ const ClienteList: React.FC = () => {
 
   const clienteOptions = (todosLosClientes?.results || []).map((c) => ({
     value: c.id,
-    label: `${c.nombre_apellido} (DNI: ${c.dni})`,
+    label: `${c.apellido}, ${c.nombre} (DNI: ${c.dni})`,
   }));
 
   const clientes = clientesData?.results || [];
@@ -293,7 +293,8 @@ const ClienteList: React.FC = () => {
             >
               <tr>
                 <th>DNI</th>
-                <th>Nombre y Apellido</th>
+                <th>Apellido</th>
+                <th>Nombre</th>
                 <th>Teléfono</th>
                 <th>Obra Social</th>
                 <th>Fecha Nacimiento</th>
@@ -304,7 +305,8 @@ const ClienteList: React.FC = () => {
               {clientes.map((cliente) => (
                 <tr key={cliente.id}>
                   <td>{cliente.dni}</td>
-                  <td>{cliente.nombre_apellido}</td>
+                  <td>{cliente.apellido}</td>
+                  <td>{cliente.nombre}</td>
                   <td>{cliente.telefono || "-"}</td>
                   <td>{cliente.obra_social_nombre || "-"}</td>
                   <td>
@@ -336,7 +338,10 @@ const ClienteList: React.FC = () => {
                         variant="outline-danger"
                         size="sm"
                         onClick={() =>
-                          handleDelete(cliente.id, cliente.nombre_apellido)
+                          handleDelete(
+                            cliente.id,
+                            `${cliente.apellido}, ${cliente.nombre}`,
+                          )
                         }
                         title="Eliminar"
                       >

@@ -17,7 +17,8 @@ export interface ObraSocial {
 /** Cliente/Paciente completo */
 export interface Cliente {
   id: number;
-  nombre_apellido: string;
+  apellido: string;
+  nombre: string;
   dni: string;
   fecha_nacimiento?: string;
   telefono?: string;
@@ -31,7 +32,8 @@ export interface Cliente {
 /** Cliente simplificado para listados */
 export interface ClienteList {
   id: number;
-  nombre_apellido: string;
+  apellido: string;
+  nombre: string;
   dni: string;
   telefono?: string;
   obra_social_nombre?: string;
@@ -48,7 +50,8 @@ export interface PaginatedResponse<T> {
 
 /** Datos para crear o actualizar un cliente */
 export interface ClienteCreateUpdate {
-  nombre_apellido: string;
+  apellido: string;
+  nombre: string;
   dni: string;
   fecha_nacimiento?: string;
   telefono?: string;

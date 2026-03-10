@@ -31,7 +31,8 @@ class ObraSocial(models.Model):
 class Cliente(models.Model):
     """Modelo para la registracion de Clientes."""
 
-    nombre_apellido = models.CharField("Nombre y apellido", max_length=150)
+    apellido = models.CharField("Apellido", max_length=100)
+    nombre = models.CharField("Nombre/s", max_length=100)
     dni = models.CharField(max_length=8, unique=True)
     fecha_nacimiento = models.DateField("Fecha de nacimiento", null=True, blank=True)
     telefono = models.CharField(max_length=16, null=True, blank=True)
@@ -48,14 +49,21 @@ class Cliente(models.Model):
         verbose_name = "Cliente/Paciente"
         verbose_name_plural = "Clientes/Pacientes"
 
+    @property
+    def nombre_apellido(self) -> str:
+        """Nombre completo en formato 'Apellido, Nombre' para compatibilidad."""
+        return f"{self.apellido}, {self.nombre}"
+
     def __str__(self):
         """Unicode representation of Cliente."""
-        return f"{self.dni}-{self.nombre_apellido}"
+        return f"{self.dni}-{self.apellido}, {self.nombre}"
 
     def save(self, *args, **kwargs):
         """Sobrescribir save para aplicar formateo TitleCase."""
-        if self.nombre_apellido:
-            self.nombre_apellido = self.nombre_apellido.title()
+        if self.apellido:
+            self.apellido = self.apellido.title()
+        if self.nombre:
+            self.nombre = self.nombre.title()
         if self.direccion:
             self.direccion = self.direccion.title()
         super().save(*args, **kwargs)

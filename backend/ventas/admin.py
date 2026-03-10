@@ -147,16 +147,17 @@ class ConsultaInline(admin.TabularInline):
 @admin.register(Cliente)
 class ClienteAdmin(admin.ModelAdmin):
     list_display = [
-        "nombre_apellido",
+        "apellido",
+        "nombre",
         "dni",
         "nro_afiliado",
         "obra_social",
         "ver_historia_clinica",
     ]
-    list_display_links = ["nombre_apellido"]
-    search_fields = ["nombre_apellido", "dni", "obra_social__nombre"]
+    list_display_links = ["apellido"]
+    search_fields = ["apellido", "nombre", "dni", "obra_social__nombre"]
     autocomplete_fields = ["obra_social"]
-    ordering = ["nombre_apellido"]
+    ordering = ["apellido", "nombre"]
 
     @admin.display(description="Historia Clínica")
     def ver_historia_clinica(self, obj):
@@ -245,7 +246,7 @@ class VentaAdmin(admin.ModelAdmin):
     fields = ["fecha", "cliente", "forma_pago", "total_venta", "entrego", "saldo"]
     readonly_fields = ["total_venta", "saldo"]
     list_display = ["fecha", "cliente", "forma_pago", "total_venta"]
-    search_fields = ["cliente_nombre_apellido", "cliente_dni"]
+    search_fields = ["cliente__apellido", "cliente__nombre", "cliente__dni"]
     inlines = [DetalleVentaInline]
     autocomplete_fields = ["cliente"]
 
@@ -331,7 +332,7 @@ class GraduacionInline(admin.StackedInline):
 @admin.register(Consulta)
 class ConsultaAdmin(admin.ModelAdmin):
     list_display = ["fecha", "cliente", "tiene_diagnostico", "tiene_tratamiento"]
-    search_fields = ["cliente__nombre_apellido"]
+    search_fields = ["cliente__apellido", "cliente__nombre"]
     autocomplete_fields = ["cliente"]
     inlines = [GraduacionInline]
 

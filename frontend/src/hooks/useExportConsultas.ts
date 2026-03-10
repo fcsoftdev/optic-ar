@@ -104,7 +104,11 @@ const useExportConsultas = () => {
     const doc = new jsPDF({ orientation: "landscape" });
 
     doc.setFontSize(14);
-    doc.text(`Historial de Consultas - ${cliente.nombre_apellido}`, 14, 16);
+    doc.text(
+      `Historial de Consultas - ${cliente.apellido}, ${cliente.nombre}`,
+      14,
+      16,
+    );
     doc.setFontSize(10);
     doc.text(`DNI: ${cliente.dni}`, 14, 23);
     doc.text(`Generado: ${new Date().toLocaleDateString("es-AR")}`, 14, 29);
@@ -154,7 +158,7 @@ const useExportConsultas = () => {
       },
     });
 
-    doc.save(`consultas_${cliente.nombre_apellido.replace(/\s+/g, "_")}.pdf`);
+    doc.save(`consultas_${cliente.apellido}_${cliente.nombre}.pdf`);
   };
 
   /**
@@ -216,7 +220,7 @@ const useExportConsultas = () => {
 
     XLSX.writeFile(
       libro,
-      `consultas_${cliente.nombre_apellido.replace(/\s+/g, "_")}.xlsx`,
+      `consultas_${cliente.apellido}_${cliente.nombre}.xlsx`,
     );
   };
 
@@ -259,7 +263,7 @@ const useExportConsultas = () => {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `consultas_${cliente.nombre_apellido.replace(/\s+/g, "_")}.csv`;
+    link.download = `consultas_${cliente.apellido}_${cliente.nombre}.csv`;
     link.click();
     URL.revokeObjectURL(url);
   };

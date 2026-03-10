@@ -68,9 +68,9 @@ class ClienteViewSet(viewsets.ModelViewSet):
         filters.OrderingFilter,
     ]
     filterset_fields = ["obra_social"]
-    search_fields = ["dni", "nombre_apellido", "mail"]
-    ordering_fields = ["nombre_apellido", "dni", "fecha_nacimiento"]
-    ordering = ["nombre_apellido"]
+    search_fields = ["dni", "apellido", "nombre", "mail"]
+    ordering_fields = ["apellido", "nombre", "dni", "fecha_nacimiento"]
+    ordering = ["apellido", "nombre"]
 
     def get_serializer_class(self) -> Type[drf_serializers.Serializer]:
         """
@@ -105,8 +105,8 @@ class ConsultaViewSet(viewsets.ModelViewSet):
         filters.OrderingFilter,
     ]
     filterset_class = ConsultaFilter
-    search_fields = ["cliente__nombre_apellido", "motivo"]
-    ordering_fields = ["fecha", "cliente__nombre_apellido"]
+    search_fields = ["cliente__apellido", "cliente__nombre", "motivo"]
+    ordering_fields = ["fecha", "cliente__apellido"]
     ordering = ["-fecha"]
 
     def get_serializer_class(self) -> Type[drf_serializers.Serializer]:
@@ -145,7 +145,7 @@ class VentaViewSet(viewsets.ModelViewSet):
         filters.OrderingFilter,
     ]
     filterset_fields = ["cliente", "forma_pago"]
-    search_fields = ["cliente__nombre_apellido", "cliente__dni"]
+    search_fields = ["cliente__apellido", "cliente__nombre", "cliente__dni"]
     ordering_fields = ["fecha", "total_venta"]
     ordering = ["-fecha"]
 

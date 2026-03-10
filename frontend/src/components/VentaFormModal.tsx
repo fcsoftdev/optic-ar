@@ -46,16 +46,13 @@ interface VentaFormModalProps {
 const DETALLE_VACIO = { id: null, producto: 0, cantidad: 1, precio_venta: 0 };
 
 /**
- * Convierte "Nombre Apellido" → "Apellido, Nombre - DNI".
- * Toma la última palabra como apellido y el resto como nombre.
+ * Convierte apellido y nombre en la etiqueta del selector: "Apellido, Nombre - DNI".
  */
-const formatClienteLabel = (nombreApellido: string, dni: string): string => {
-  const parts = nombreApellido.trim().split(/\s+/);
-  if (parts.length < 2) return `${nombreApellido} - ${dni}`;
-  const apellido = parts[parts.length - 1];
-  const nombre = parts.slice(0, -1).join(" ");
-  return `${apellido}, ${nombre} - ${dni}`;
-};
+const formatClienteLabel = (
+  apellido: string,
+  nombre: string,
+  dni: string,
+): string => `${apellido}, ${nombre} - ${dni}`;
 
 /**
  * Formatea un número con separador de miles (.) y decimales (,) según el estándar argentino.
@@ -164,7 +161,7 @@ const VentaFormModal: React.FC<VentaFormModalProps> = ({
     });
     return data.results.map((c) => ({
       value: c.id,
-      label: formatClienteLabel(c.nombre_apellido, c.dni),
+      label: formatClienteLabel(c.apellido, c.nombre, c.dni),
     }));
   }, []);
 
@@ -175,7 +172,7 @@ const VentaFormModal: React.FC<VentaFormModalProps> = ({
     const data = await ventasService.getClientes({ page_size: 9999 });
     return data.results.map((c) => ({
       value: c.id,
-      label: formatClienteLabel(c.nombre_apellido, c.dni),
+      label: formatClienteLabel(c.apellido, c.nombre, c.dni),
     }));
   }, []);
 
@@ -282,10 +279,7 @@ const VentaFormModal: React.FC<VentaFormModalProps> = ({
       if (ventaCompleta.cliente_nombre) {
         setClienteSeleccionado({
           value: ventaCompleta.cliente,
-          label: formatClienteLabel(
-            ventaCompleta.cliente_nombre,
-            ventaCompleta.cliente_dni,
-          ),
+          label: `${ventaCompleta.cliente_nombre} - ${ventaCompleta.cliente_dni}`,
         });
       }
       // Precarga el caché de productos con los datos de los detalles

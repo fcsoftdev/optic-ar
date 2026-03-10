@@ -55,7 +55,8 @@ const ClienteFormModal: React.FC<ClienteFormModalProps> = ({
   } = useForm<ClienteFormData>({
     resolver: zodResolver(clienteSchema) as any,
     defaultValues: {
-      nombre_apellido: "",
+      apellido: "",
+      nombre: "",
       dni: "",
       fecha_nacimiento: "",
       telefono: "",
@@ -74,7 +75,8 @@ const ClienteFormModal: React.FC<ClienteFormModalProps> = ({
   useEffect(() => {
     if (cliente && clienteCompleto) {
       reset({
-        nombre_apellido: clienteCompleto.nombre_apellido,
+        apellido: clienteCompleto.apellido,
+        nombre: clienteCompleto.nombre,
         dni: clienteCompleto.dni,
         fecha_nacimiento: clienteCompleto.fecha_nacimiento || "",
         telefono: clienteCompleto.telefono || "",
@@ -85,7 +87,8 @@ const ClienteFormModal: React.FC<ClienteFormModalProps> = ({
       });
     } else if (!cliente) {
       reset({
-        nombre_apellido: "",
+        apellido: "",
+        nombre: "",
         dni: "",
         fecha_nacimiento: "",
         telefono: "",
@@ -151,28 +154,55 @@ const ClienteFormModal: React.FC<ClienteFormModalProps> = ({
               <Col md={6}>
                 <Form.Group>
                   <Form.Label>
-                    Nombre y Apellido <span className="text-danger">*</span>
+                    Apellido <span className="text-danger">*</span>
                   </Form.Label>
                   <Controller
-                    name="nombre_apellido"
+                    name="apellido"
                     control={control}
                     render={({ field }) => (
                       <Form.Control
                         {...field}
                         type="text"
-                        isInvalid={!!errors.nombre_apellido}
-                        placeholder="Ej: Juan Pérez"
+                        isInvalid={!!errors.apellido}
+                        placeholder="Ej: Pérez"
                       />
                     )}
                   />
-                  {errors.nombre_apellido && (
+                  {errors.apellido && (
                     <Form.Control.Feedback type="invalid">
-                      {errors.nombre_apellido.message}
+                      {errors.apellido.message}
                     </Form.Control.Feedback>
                   )}
                 </Form.Group>
               </Col>
 
+              <Col md={6}>
+                <Form.Group>
+                  <Form.Label>
+                    Nombre/s <span className="text-danger">*</span>
+                  </Form.Label>
+                  <Controller
+                    name="nombre"
+                    control={control}
+                    render={({ field }) => (
+                      <Form.Control
+                        {...field}
+                        type="text"
+                        isInvalid={!!errors.nombre}
+                        placeholder="Ej: Juan Carlos"
+                      />
+                    )}
+                  />
+                  {errors.nombre && (
+                    <Form.Control.Feedback type="invalid">
+                      {errors.nombre.message}
+                    </Form.Control.Feedback>
+                  )}
+                </Form.Group>
+              </Col>
+            </Row>
+
+            <Row className="mb-3">
               <Col md={6}>
                 <Form.Group>
                   <Form.Label>

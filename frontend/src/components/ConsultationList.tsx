@@ -76,7 +76,7 @@ const ConsultationList: React.FC = () => {
   /** Opciones formateadas para el selector de pacientes en el modal. */
   const clienteOptions = (clientesData?.results || []).map((c) => ({
     value: c.id,
-    label: `${c.nombre_apellido} (DNI: ${c.dni})`,
+    label: `${c.apellido}, ${c.nombre} (DNI: ${c.dni})`,
   }));
 
   /**

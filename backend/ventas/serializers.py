@@ -33,7 +33,8 @@ class ClienteSerializer(serializers.ModelSerializer):
         model = Cliente
         fields = [
             "id",
-            "nombre_apellido",
+            "apellido",
+            "nombre",
             "dni",
             "fecha_nacimiento",
             "telefono",
@@ -98,7 +99,8 @@ class ClienteListSerializer(serializers.ModelSerializer):
         model = Cliente
         fields = [
             "id",
-            "nombre_apellido",
+            "apellido",
+            "nombre",
             "dni",
             "telefono",
             "obra_social_nombre",

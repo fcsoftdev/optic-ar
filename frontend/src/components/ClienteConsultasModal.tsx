@@ -101,7 +101,9 @@ const ClienteConsultasModal: React.FC<ClienteConsultasModalProps> = ({
       <Modal.Header closeButton>
         <Modal.Title>
           Historial de Consultas —{" "}
-          <span className="text-primary">{cliente?.nombre_apellido}</span>{" "}
+          <span className="text-primary">
+            {cliente?.apellido}, {cliente?.nombre}
+          </span>{" "}
           <Badge bg="secondary" pill>
             {data?.count ?? 0}
           </Badge>
