@@ -21,7 +21,7 @@ import {
   useDeleteConsulta,
 } from "../hooks/useVentas";
 import type { ConsultaList } from "../services/ventas.service";
-import AddButton from "./AddButton";
+import ListHeader from "./ListHeader";
 import ConsultationFormModal from "./ConsultationFormModal";
 import PaginationBar from "./PaginationBar";
 
@@ -146,25 +146,15 @@ const ConsultationList: React.FC = () => {
     >
       {/* Header y filtros — fijos arriba */}
       <div style={{ flex: "0 0 auto" }}>
-        <Row className="mb-3 align-items-center">
-          <Col>
-            <h4 className="mb-0">
-              Consultas{" "}
-              <Badge bg="secondary" pill>
-                {consultasData?.count ?? 0}
-              </Badge>
-            </h4>
-          </Col>
-          <Col xs="auto">
-            <AddButton
-              label="Consulta"
-              onClick={() => {
-                setEditingConsulta(null);
-                setShowModal(true);
-              }}
-            />
-          </Col>
-        </Row>
+        <ListHeader
+          title="Consultas"
+          count={consultasData?.count ?? 0}
+          addLabel="Consulta"
+          onAdd={() => {
+            setEditingConsulta(null);
+            setShowModal(true);
+          }}
+        />
 
         <Row className="mb-3 g-2 align-items-end">
           <Col md={4}>

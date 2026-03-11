@@ -3,7 +3,8 @@
  * @description Componente que muestra la lista de proveedores.
  */
 
-import { Tab, Table } from "react-bootstrap";
+import { Table } from "react-bootstrap";
+import ListHeader from "./ListHeader";
 
 /**
  * @interface Proveedor
@@ -41,7 +42,7 @@ const mockProveedores: Proveedor[] = [
 function SuppliersList() {
   return (
     <>
-      <h5>Lista de Proveedores</h5>
+      <ListHeader title="Lista de Proveedores" count={0} />
       <Table className="table table-striped table-bordered table-hover">
         <thead>
           <tr>

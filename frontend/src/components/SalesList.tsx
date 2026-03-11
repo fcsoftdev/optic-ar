@@ -14,17 +14,10 @@ import {
   Spinner,
   Table,
 } from "react-bootstrap";
-import {
-  CashStack,
-  Pencil,
-  PlusCircle,
-  Search,
-  Trash,
-  XCircle,
-} from "react-bootstrap-icons";
+import { Pencil, Search, Trash, XCircle } from "react-bootstrap-icons";
 import { useDeleteVenta, useVentas } from "../hooks/useVentas";
 import type { VentaList } from "../services/ventas.service";
-import AddButton from "./AddButton";
+import ListHeader from "./ListHeader";
 import PaginationBar from "./PaginationBar";
 import VentaFormModal from "./VentaFormModal";
 
@@ -112,22 +105,12 @@ const SalesList: React.FC = () => {
     >
       {/* ── Encabezado / Filtros ────────────────────────────────────── */}
       <div className="mb-3">
-        <Row className="align-items-center g-2">
-          <Col>
-            <h5 className="mb-0 d-flex align-items-center gap-2">
-              <CashStack size={20} />
-              Ventas
-              {ventasData?.count != null && (
-                <Badge bg="secondary" pill>
-                  {ventasData.count}
-                </Badge>
-              )}
-            </h5>
-          </Col>
-          <Col xs="auto">
-            <AddButton label="Nueva Venta" onClick={handleNuevaVenta} />
-          </Col>
-        </Row>
+        <ListHeader
+          title="Ventas"
+          count={ventasData?.count ?? 0}
+          addLabel="Venta"
+          onAdd={handleNuevaVenta}
+        />
 
         <Row className="mt-3 g-2">
           <Col md={5}>

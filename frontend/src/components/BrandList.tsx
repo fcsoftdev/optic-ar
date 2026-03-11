@@ -23,7 +23,7 @@ import {
 } from "react-bootstrap";
 import { PencilSquare, Trash } from "react-bootstrap-icons";
 import { useMarcas, useDeleteMarca } from "../hooks/useProductos";
-import AddButton from "./AddButton";
+import ListHeader from "./ListHeader";
 import MarcaFormModal from "./MarcaFormModal";
 import PaginationBar from "./PaginationBar";
 import type { Marca } from "../services/productos.service";
@@ -169,19 +169,12 @@ function BrandList() {
   return (
     <>
       {/* Header con título y botón de crear */}
-      <Row className="mb-3 align-items-center">
-        <Col>
-          <h4 className="mb-0">
-            Marcas{" "}
-            <Badge bg="secondary" pill>
-              {!Array.isArray(data) && data?.count ? data.count : marcas.length}
-            </Badge>
-          </h4>
-        </Col>
-        <Col xs="auto">
-          <AddButton label="Marca" onClick={handleAddMarca} />
-        </Col>
-      </Row>
+      <ListHeader
+        title="Marcas"
+        count={!Array.isArray(data) && data?.count ? data.count : marcas.length}
+        addLabel="Marca"
+        onAdd={handleAddMarca}
+      />
 
       {/* Barra de búsqueda y acciones */}
       <Row className="mb-3">

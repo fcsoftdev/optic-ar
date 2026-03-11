@@ -38,10 +38,12 @@ const mockGastos: Gastos[] = [
   },
 ];
 
+import ListHeader from "./ListHeader";
+
 function ExpensesList() {
   return (
     <>
-      <h5 className="mb-3">Listado de Gastos</h5>
+      <ListHeader title="Listado de Gastos" count={0} />
       <table className="table table-striped table-bordered table-hover">
         <thead>
           <tr>

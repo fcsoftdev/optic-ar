@@ -40,10 +40,12 @@ const mockCustomers: Customer[] = [
 /**
  * Componente para listar los clientes.
  */
+import ListHeader from "./ListHeader";
+
 function CustomerList() {
   return (
     <>
-      <h5 className="mb-3">Listado de Clientes</h5>
+      <ListHeader title="Listado de Clientes" count={0} />
       <table className="table table-striped table-bordered table-hover">
         <thead>
           <tr>

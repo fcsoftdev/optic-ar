@@ -10,7 +10,7 @@ import {
   Badge,
 } from "react-bootstrap";
 import { PencilSquare, Trash } from "react-bootstrap-icons";
-import AddButton from "./AddButton";
+import ListHeader from "./ListHeader";
 import PaginationBar from "./PaginationBar";
 import {
   useProductos,
@@ -195,28 +195,19 @@ const ProductList: React.FC = (): JSX.Element => {
       }}
     >
       <div style={{ flex: "0 0 auto" }}>
-        <div className="d-flex justify-content-between align-items-center mb-3">
-          <h4 className="mb-0">
-            Productos {""}
-            <Badge bg="secondary" pill>
-              {data?.count || 0}
-            </Badge>
-          </h4>
-          <div>
-            {selectedProducts.length > 0 && (
-              <Button
-                variant="danger"
-                size="sm"
-                className="me-2"
-                onClick={handleDeleteSelected}
-              >
-                <Trash size={16} className="me-1" />
-                Eliminar seleccionados ({selectedProducts.length})
-              </Button>
-            )}
-            <AddButton label="Producto" onClick={handleAddProduct} />
-          </div>
-        </div>
+        <ListHeader
+          title="Productos"
+          count={data?.count || 0}
+          addLabel="Producto"
+          onAdd={handleAddProduct}
+        >
+          {selectedProducts.length > 0 && (
+            <Button variant="danger" size="sm" onClick={handleDeleteSelected}>
+              <Trash size={16} className="me-1" />
+              Eliminar seleccionados ({selectedProducts.length})
+            </Button>
+          )}
+        </ListHeader>
 
         <Form className="mb-3" onSubmit={handleSearch}>
           <Row className="g-2 align-items-center">

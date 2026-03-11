@@ -20,7 +20,7 @@ import {
   useObrasSocialesPaginadas,
 } from "../hooks/useVentas";
 import type { ObraSocial } from "../services/ventas.service";
-import AddButton from "./AddButton";
+import ListHeader from "./ListHeader";
 import ObraSocialFormModal from "./ObraSocialFormModal";
 import PaginationBar from "./PaginationBar";
 
@@ -123,25 +123,15 @@ const InsuranceProvider: React.FC = () => {
       {/* Header y búsqueda - fijos arriba */}
       <div style={{ flex: "0 0 auto" }}>
         {/* Header */}
-        <Row className="mb-3 align-items-center">
-          <Col>
-            <h4 className="mb-0">
-              Obras Sociales{" "}
-              <Badge bg="secondary" pill>
-                {obrasSocialesData?.count ?? 0}
-              </Badge>
-            </h4>
-          </Col>
-          <Col xs="auto">
-            <AddButton
-              label="Obra Social"
-              onClick={() => {
-                setEditingObraSocial(null);
-                setShowModal(true);
-              }}
-            />
-          </Col>
-        </Row>
+        <ListHeader
+          title="Obras Sociales"
+          count={obrasSocialesData?.count ?? 0}
+          addLabel="Obra Social"
+          onAdd={() => {
+            setEditingObraSocial(null);
+            setShowModal(true);
+          }}
+        />
 
         {/* Búsqueda */}
         <Row className="mb-3 g-2">

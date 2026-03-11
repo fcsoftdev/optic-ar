@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import {
   Alert,
-  Badge,
   Button,
   Col,
   Form,
@@ -27,7 +26,7 @@ import type {
   ClienteList as ClienteListType,
   ConsultaList,
 } from "../services/ventas.service";
-import AddButton from "./AddButton";
+import ListHeader from "./ListHeader";
 import ClienteConsultasModal from "./ClienteConsultasModal";
 import ClienteFormModal from "./ClienteFormModal";
 import ConsultationFormModal from "./ConsultationFormModal";
@@ -209,25 +208,15 @@ const ClienteList: React.FC = () => {
       {/* Header y filtros - fijos arriba */}
       <div style={{ flex: "0 0 auto" }}>
         {/* Header */}
-        <Row className="mb-3 align-items-center">
-          <Col>
-            <h4 className="mb-0">
-              Clientes/Pacientes{" "}
-              <Badge bg="secondary" pill>
-                {clientesData?.count ?? 0}
-              </Badge>
-            </h4>
-          </Col>
-          <Col xs="auto">
-            <AddButton
-              label="Cliente"
-              onClick={() => {
-                setEditingCliente(null);
-                setShowModal(true);
-              }}
-            />
-          </Col>
-        </Row>
+        <ListHeader
+          title="Clientes/Pacientes"
+          count={clientesData?.count ?? 0}
+          addLabel="Cliente"
+          onAdd={() => {
+            setEditingCliente(null);
+            setShowModal(true);
+          }}
+        />
 
         {/* Filtros */}
         <Row className="mb-3 g-2">

@@ -14,16 +14,10 @@ import {
   Spinner,
   Table,
 } from "react-bootstrap";
-import {
-  CartCheck,
-  Pencil,
-  PlusCircle,
-  Search,
-  Trash,
-  XCircle,
-} from "react-bootstrap-icons";
+import { Pencil, Search, Trash, XCircle } from "react-bootstrap-icons";
 import { useCompras, useDeleteCompra } from "../hooks/useCompras";
 import type { CompraList } from "../services/compras.service";
+import ListHeader from "./ListHeader";
 import PaginationBar from "./PaginationBar";
 import CompraFormModal from "./CompraFormModal";
 
@@ -113,30 +107,12 @@ const PurchaseList: React.FC = () => {
     >
       {/* ── Encabezado / Filtros ────────────────────────────────────── */}
       <div className="mb-3">
-        <Row className="align-items-center g-2">
-          <Col>
-            <h5 className="mb-0 d-flex align-items-center gap-2">
-              <CartCheck size={20} />
-              Compras
-              {comprasData?.count != null && (
-                <Badge bg="secondary" pill>
-                  {comprasData.count}
-                </Badge>
-              )}
-            </h5>
-          </Col>
-          <Col xs="auto">
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={handleNuevaCompra}
-              className="d-flex align-items-center gap-1"
-            >
-              <PlusCircle size={15} />
-              Nueva Compra
-            </Button>
-          </Col>
-        </Row>
+        <ListHeader
+          title="Compras"
+          count={comprasData?.count ?? 0}
+          addLabel="Compra"
+          onAdd={handleNuevaCompra}
+        />
 
         <Row className="mt-3 g-2">
           <Col md={5}>
