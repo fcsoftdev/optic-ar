@@ -3,8 +3,13 @@ from typing import Type
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, serializers as drf_serializers, viewsets
 
-from .models import Compra, Proveedor
-from .serializers import CompraListSerializer, CompraSerializer, ProveedorSerializer
+from .models import Compra, Gasto, Proveedor
+from .serializers import (
+    CompraListSerializer,
+    CompraSerializer,
+    GastoSerializer,
+    ProveedorSerializer,
+)
 
 
 class ProveedorViewSet(viewsets.ModelViewSet):
@@ -63,3 +68,19 @@ class CompraViewSet(viewsets.ModelViewSet):
         if self.action == "list":
             return CompraListSerializer
         return CompraSerializer
+
+
+class GastoViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet para gestionar Gastos.
+
+    Provee operaciones CRUD completas con soporte de búsqueda
+    por descripción y ordenamiento por fecha y total.
+    """
+
+    queryset = Gasto.objects.all()
+    serializer_class = GastoSerializer
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ["descripcion"]
+    ordering_fields = ["fecha", "total"]
+    ordering = ["-fecha"]

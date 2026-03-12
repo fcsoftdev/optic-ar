@@ -73,3 +73,26 @@ export const proveedorSchema = z.object({
 });
 
 export type ProveedorFormData = z.infer<typeof proveedorSchema>;
+
+/**
+ * Esquema de validación Zod para el formulario de Gasto.
+ *
+ * @remarks
+ * - `fecha`: requerida.
+ * - `descripcion`: entre 2 y 50 caracteres.
+ * - `total`: número positivo con hasta 2 decimales.
+ */
+export const gastoSchema = z.object({
+  fecha: z.string().min(1, "La fecha es requerida"),
+  descripcion: z
+    .string()
+    .min(2, "La descripción debe tener al menos 2 caracteres")
+    .max(50, "La descripción no puede exceder 50 caracteres")
+    .trim(),
+  total: z
+    .number({ error: "Ingrese el total" })
+    .multipleOf(0.01)
+    .min(0, "El total no puede ser negativo"),
+});
+
+export type GastoFormData = z.infer<typeof gastoSchema>;

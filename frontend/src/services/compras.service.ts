@@ -62,6 +62,21 @@ export interface CompraCreateUpdate {
   detalles: DetalleCompraWrite[];
 }
 
+/** Gasto varios */
+export interface Gasto {
+  id: number;
+  fecha: string;
+  descripcion: string;
+  total: string;
+}
+
+/** Datos para crear o actualizar un gasto */
+export interface GastoCreateUpdate {
+  fecha: string;
+  descripcion: string;
+  total: number;
+}
+
 /** Respuesta paginada genérica */
 export interface PaginatedResponse<T> {
   count: number;
@@ -200,6 +215,55 @@ const comprasService = {
    */
   deleteCompra: async (id: number): Promise<void> => {
     await api.delete(`/api/compras/${id}/`);
+  },
+
+  // ── Gastos ───────────────────────────────────────────────────────────────
+
+  /**
+   * Obtiene el listado paginado de gastos.
+   *
+   * @param params - Filtros opcionales: search, page, page_size.
+   * @returns Respuesta paginada con gastos.
+   */
+  getGastos: async (params?: {
+    search?: string;
+    page?: number;
+    page_size?: number;
+  }): Promise<PaginatedResponse<Gasto>> => {
+    const response = await api.get("/api/gastos/", { params });
+    return response.data;
+  },
+
+  /**
+   * Crea un nuevo gasto.
+   *
+   * @param data - Datos del gasto.
+   * @returns Gasto creado.
+   */
+  createGasto: async (data: GastoCreateUpdate): Promise<Gasto> => {
+    const response = await api.post("/api/gastos/", data);
+    return response.data;
+  },
+
+  /**
+   * Actualiza un gasto existente.
+   *
+   * @param id - ID del gasto.
+   * @param data - Nuevos datos del gasto.
+   * @returns Gasto actualizado.
+   */
+  updateGasto: async (id: number, data: GastoCreateUpdate): Promise<Gasto> => {
+    const response = await api.put(`/api/gastos/${id}/`, data);
+    return response.data;
+  },
+
+  /**
+   * Elimina un gasto.
+   *
+   * @param id - ID del gasto a eliminar.
+   */
+  deleteGasto: async (id: number): Promise<void> => {
+    await api.delete(`/api/gastos/${id}/`);
   },
 };
 

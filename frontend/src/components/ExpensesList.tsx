@@ -1,69 +1,262 @@
 /**
  * @file ExpensesList.tsx
- * @description Componente que muestra la lista de gastos.
+ * @description ABM completo de Gastos con búsqueda, paginación y formulario modal.
  */
-
-/**
- * @interface Gastos
- * @description Define la estructura del objeto gastos.
- */
-interface Gastos {
-  id: number;
-  feccha: string;
-  descripcion: string;
-  total: number;
-}
-
-/**
- * Datos mock de gastos para mostrar en la tabla.
- */
-const mockGastos: Gastos[] = [
-  {
-    id: 1,
-    feccha: "2024-01-15",
-    descripcion: "Compra de lentes",
-    total: 150.0,
-  },
-  {
-    id: 2,
-    feccha: "2024-02-10",
-    descripcion: "Pago de servicios",
-    total: 200.0,
-  },
-  {
-    id: 3,
-    feccha: "2024-03-05",
-    descripcion: "Mantenimiento de equipos",
-    total: 300.0,
-  },
-];
-
+import { useEffect, useState } from "react";
+import {
+  Alert,
+  Button,
+  Col,
+  Form,
+  InputGroup,
+  Row,
+  Spinner,
+  Table,
+} from "react-bootstrap";
+import { Pencil, Search, Trash, XCircle } from "react-bootstrap-icons";
+import { useDeleteGasto, useGastos } from "../hooks/useCompras";
+import type { Gasto } from "../services/compras.service";
+import GastoFormModal from "./GastoFormModal";
 import ListHeader from "./ListHeader";
+import PaginationBar from "./PaginationBar";
 
+/** Formatea un valor a pesos argentinos con 2 decimales. */
+const fmtARS = (value: string | number) =>
+  `$ ${parseFloat(String(value)).toLocaleString("es-AR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
+
+/**
+ * Componente ABM para la gestión del listado de Gastos.
+ *
+ * @remarks
+ * Implementa búsqueda con debounce (500ms) y paginación inteligente.
+ */
 function ExpensesList() {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [showModal, setShowModal] = useState(false);
+  const [editingGasto, setEditingGasto] = useState<Gasto | null>(null);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  // Debounce para búsqueda
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+      setCurrentPage(1);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  const {
+    data: gastosData,
+    isLoading,
+    error,
+  } = useGastos({
+    page: currentPage,
+    search: debouncedSearchTerm || undefined,
+  });
+
+  const deleteGasto = useDeleteGasto();
+
+  const gastos = gastosData?.results ?? [];
+  const totalPages = gastosData?.count ? Math.ceil(gastosData.count / 10) : 1;
+
+  /** Abre el modal para crear un nuevo gasto. */
+  const handleNuevoGasto = () => {
+    setEditingGasto(null);
+    setShowModal(true);
+  };
+
+  /**
+   * Abre el modal con los datos del gasto para editar.
+   *
+   * @param gasto - Gasto a editar.
+   */
+  const handleEdit = (gasto: Gasto) => {
+    setEditingGasto(gasto);
+    setDeleteConfirmId(null);
+    setShowModal(true);
+  };
+
+  /**
+   * Activa la fila de confirmación de eliminación.
+   *
+   * @param id - ID del gasto a eliminar.
+   */
+  const handleDeleteRequest = (id: number) => {
+    setDeleteConfirmId(id);
+    setDeleteError(null);
+  };
+
+  /** Confirma y ejecuta la eliminación del gasto. */
+  const handleDeleteConfirm = async () => {
+    if (!deleteConfirmId) return;
+    try {
+      await deleteGasto.mutateAsync(deleteConfirmId);
+      setDeleteConfirmId(null);
+      setDeleteError(null);
+    } catch {
+      setDeleteError("No se pudo eliminar el gasto.");
+    }
+  };
+
   return (
     <>
-      <ListHeader title="Listado de Gastos" count={0} />
-      <table className="table table-striped table-bordered table-hover">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Fecha</th>
-            <th>Descripción</th>
-            <th>Total ($)</th>
-          </tr>
-        </thead>
-        <tbody>
-          {mockGastos.map((gasto) => (
-            <tr key={gasto.id}>
-              <td>{gasto.id}</td>
-              <td>{gasto.feccha}</td>
-              <td>{gasto.descripcion}</td>
-              <td>{gasto.total.toFixed(2)}</td>
+      <ListHeader
+        title="Listado de Gastos"
+        count={gastosData?.count ?? 0}
+        addLabel="Gasto"
+        onAdd={handleNuevoGasto}
+      />
+
+      {/* Barra de búsqueda */}
+      <Row className="mb-3">
+        <Col>
+          <InputGroup>
+            <InputGroup.Text>
+              <Search />
+            </InputGroup.Text>
+            <Form.Control
+              type="text"
+              placeholder="Buscar por descripción..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            {searchTerm && (
+              <Button
+                variant="outline-secondary"
+                onClick={() => setSearchTerm("")}
+              >
+                <XCircle />
+              </Button>
+            )}
+          </InputGroup>
+        </Col>
+      </Row>
+
+      {/* Error global */}
+      {deleteError && (
+        <Alert
+          variant="danger"
+          dismissible
+          onClose={() => setDeleteError(null)}
+        >
+          {deleteError}
+        </Alert>
+      )}
+
+      {/* Tabla */}
+      {isLoading ? (
+        <div className="text-center py-5">
+          <Spinner animation="border" variant="primary" />
+        </div>
+      ) : error ? (
+        <Alert variant="danger">Error al cargar los gastos.</Alert>
+      ) : gastos.length === 0 ? (
+        <Alert variant="info">No se encontraron gastos.</Alert>
+      ) : (
+        <Table striped bordered hover responsive>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Fecha</th>
+              <th>Descripción</th>
+              <th className="text-end">Total</th>
+              <th className="text-center">Acciones</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {gastos.map((gasto) => (
+              <>
+                <tr key={gasto.id}>
+                  <td>{gasto.id}</td>
+                  <td>{gasto.fecha}</td>
+                  <td>{gasto.descripcion}</td>
+                  <td className="text-end">{fmtARS(gasto.total)}</td>
+                  <td className="text-center">
+                    <Button
+                      size="sm"
+                      variant="outline-warning"
+                      className="me-1"
+                      title="Editar"
+                      onClick={() => handleEdit(gasto)}
+                    >
+                      <Pencil />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline-danger"
+                      title="Eliminar"
+                      onClick={() => handleDeleteRequest(gasto.id)}
+                    >
+                      <Trash />
+                    </Button>
+                  </td>
+                </tr>
+
+                {/* Fila de confirmación de eliminación */}
+                {deleteConfirmId === gasto.id && (
+                  <tr key={`confirm-${gasto.id}`} className="table-warning">
+                    <td colSpan={5}>
+                      <div className="d-flex align-items-center gap-2 flex-wrap">
+                        <span>
+                          ¿Eliminar el gasto{" "}
+                          <strong>{gasto.descripcion}</strong>?
+                        </span>
+                        <Button
+                          size="sm"
+                          variant="danger"
+                          onClick={handleDeleteConfirm}
+                          disabled={deleteGasto.isPending}
+                        >
+                          {deleteGasto.isPending ? (
+                            <Spinner size="sm" animation="border" />
+                          ) : (
+                            "Sí, eliminar"
+                          )}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          onClick={() => setDeleteConfirmId(null)}
+                        >
+                          Cancelar
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </>
+            ))}
+          </tbody>
+        </Table>
+      )}
+
+      {/* Paginación */}
+      {totalPages > 1 && (
+        <PaginationBar
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          totalItems={gastosData?.count ?? 0}
+          pageItems={gastos.length}
+          itemLabel="gasto(s)"
+        />
+      )}
+
+      {/* Modal de formulario */}
+      <GastoFormModal
+        show={showModal}
+        onHide={() => {
+          setShowModal(false);
+          setEditingGasto(null);
+        }}
+        gasto={editingGasto}
+      />
     </>
   );
 }

@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import comprasService, {
   type CompraCreateUpdate,
+  type GastoCreateUpdate,
   type Proveedor,
 } from "../services/compras.service";
 
@@ -167,6 +168,74 @@ export const useDeleteCompra = () => {
       await queryClient.invalidateQueries({ queryKey: ["compras"] });
       await queryClient.refetchQueries({ queryKey: ["compras"] });
       await queryClient.invalidateQueries({ queryKey: ["productos"] });
+    },
+  });
+};
+
+// ==================== HOOKS DE GASTOS ====================
+
+/**
+ * Hook para obtener el listado paginado de gastos.
+ *
+ * @param params - Filtros opcionales: search, page, page_size.
+ * @returns Query paginada de gastos.
+ */
+export const useGastos = (params?: {
+  search?: string;
+  page?: number;
+  page_size?: number;
+}) => {
+  return useQuery({
+    queryKey: ["gastos", params],
+    queryFn: () => comprasService.getGastos(params),
+  });
+};
+
+/**
+ * Hook para crear un nuevo gasto.
+ *
+ * @returns Mutation para crear un gasto, invalida el cache al éxito.
+ */
+export const useCreateGasto = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: GastoCreateUpdate) => comprasService.createGasto(data),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["gastos"] });
+      await queryClient.refetchQueries({ queryKey: ["gastos"] });
+    },
+  });
+};
+
+/**
+ * Hook para actualizar un gasto existente.
+ *
+ * @returns Mutation para actualizar un gasto dado su ID y datos.
+ */
+export const useUpdateGasto = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: number; data: GastoCreateUpdate }) =>
+      comprasService.updateGasto(id, data),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["gastos"] });
+      await queryClient.refetchQueries({ queryKey: ["gastos"] });
+    },
+  });
+};
+
+/**
+ * Hook para eliminar un gasto.
+ *
+ * @returns Mutation para eliminar un gasto dado su ID.
+ */
+export const useDeleteGasto = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => comprasService.deleteGasto(id),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["gastos"] });
+      await queryClient.refetchQueries({ queryKey: ["gastos"] });
     },
   });
 };

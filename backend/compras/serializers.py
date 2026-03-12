@@ -4,7 +4,7 @@ from rest_framework import serializers
 
 from productos.models import Producto
 
-from .models import Compra, DetalleCompra, Proveedor
+from .models import Compra, DetalleCompra, Gasto, Proveedor
 
 
 class ProveedorSerializer(serializers.ModelSerializer):
@@ -215,3 +215,11 @@ class CompraSerializer(serializers.ModelSerializer):
         instance.total = sum(d.subtotal for d in instance.detalles_productos.all())
         instance.save(update_fields=["total"])
         return instance
+
+
+class GastoSerializer(serializers.ModelSerializer):
+    """Serializer completo para el modelo Gasto."""
+
+    class Meta:
+        model = Gasto
+        fields = ["id", "fecha", "descripcion", "total"]
