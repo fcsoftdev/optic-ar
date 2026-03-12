@@ -8,28 +8,28 @@ Define arquitectura, convenciones, estándares de documentación, patrones
 frontend/backend, configuración del entorno y reglas para generación de
 código por agentes de IA.
 
-------------------------------------------------------------------------
+---
 
 ## 2. Arquitectura
 
 ### Backend
 
--   Python 3.10
--   Django 5.2.4
--   Django REST Framework 3.15.2
+- Python 3.10
+- Django 5.2.4
+- Django REST Framework 3.15.2
 
 ### Frontend
 
--   React 19.1.1
--   TypeScript
--   Vite 7.1.11
+- React 19.1.1
+- TypeScript
+- Vite 7.1.11
 
 ### Base de datos
 
--   SQLite (desarrollo)
--   PostgreSQL (producción)
+- SQLite (desarrollo)
+- PostgreSQL (producción)
 
-------------------------------------------------------------------------
+---
 
 ## 3. Estructura del Monorepo
 
@@ -37,7 +37,7 @@ optic-ar/ ├── backend/ │ ├── config/ │ ├── productos/ │ 
 ├── compras/ │ ├── contabilidad/ │ └── turnos/ └── frontend/ └── src/
 ├── components/ ├── hooks/ ├── services/ └── schemas/
 
-------------------------------------------------------------------------
+---
 
 ## 4. Backend (Django)
 
@@ -47,7 +47,7 @@ Se utilizan ViewSets de DRF con router automático.
 
 Ejemplo:
 
-``` python
+```python
 router = DefaultRouter()
 router.register(r"productos", viewsets.ProductoViewSet)
 ```
@@ -60,7 +60,7 @@ Base API:
 
 /api/
 
-------------------------------------------------------------------------
+---
 
 ### Paginación
 
@@ -70,27 +70,27 @@ config/settings/base.py
 
 PAGE_SIZE = 10
 
-------------------------------------------------------------------------
+---
 
 ### Convenciones en modelos
 
 Normalización de nombres:
 
-``` python
+```python
 nombre = nombre.title()
 ```
 
-------------------------------------------------------------------------
+---
 
 ### Campos monetarios
 
-``` python
+```python
 DecimalField(max_digits=10, decimal_places=2)
 ```
 
 Valores expresados en pesos argentinos.
 
-------------------------------------------------------------------------
+---
 
 ## 5. Estándares Python
 
@@ -98,13 +98,13 @@ Valores expresados en pesos argentinos.
 
 Reglas:
 
--   Usar triple comillas
--   Primera línea resumen breve
--   Descripción extendida después de línea en blanco
--   Documentar módulos, clases, funciones y métodos
--   Comentarios en español técnico
+- Usar triple comillas
+- Primera línea resumen breve
+- Descripción extendida después de línea en blanco
+- Documentar módulos, clases, funciones y métodos
+- Comentarios en español técnico
 
-------------------------------------------------------------------------
+---
 
 ### Type Hints (PEP484)
 
@@ -112,7 +112,7 @@ Todas las funciones deben usar anotaciones de tipo.
 
 Ejemplo:
 
-``` python
+```python
 from typing import List, Dict
 
 def procesar_datos(entradas: List[float]) -> Dict[str, float]:
@@ -123,23 +123,23 @@ def procesar_datos(entradas: List[float]) -> Dict[str, float]:
     }
 ```
 
-------------------------------------------------------------------------
+---
 
 ## 6. Frontend (React + TypeScript)
 
 Librerías obligatorias:
 
--   TypeScript
--   React Bootstrap
--   React Query
--   Zustand
--   Axios
--   Zod
--   React Hook Form
+- TypeScript
+- React Bootstrap
+- React Query
+- Zustand
+- Axios
+- Zod
+- React Hook Form
 
 El código debe ser modular, reutilizable y responsivo.
 
-------------------------------------------------------------------------
+---
 
 ## 7. Arquitectura Frontend
 
@@ -148,7 +148,7 @@ Separación de responsabilidades:
 services → llamadas HTTP hooks → lógica React Query schemas →
 validaciones components → UI
 
-------------------------------------------------------------------------
+---
 
 ### Services
 
@@ -156,43 +156,43 @@ Contienen únicamente llamadas HTTP.
 
 Ejemplo:
 
-``` ts
+```ts
 export const createMarca = async (nombre: string) => {
-  const response = await api.post("/api/marcas/", { nombre })
-  return response.data
-}
+  const response = await api.post("/api/marcas/", { nombre });
+  return response.data;
+};
 ```
 
-------------------------------------------------------------------------
+---
 
 ### Hooks (React Query)
 
 Gestionan:
 
--   cache
--   mutaciones
--   invalidaciones
--   refetch
+- cache
+- mutaciones
+- invalidaciones
+- refetch
 
 Regla obligatoria:
 
 invalidateQueries + refetchQueries después de mutaciones.
 
-------------------------------------------------------------------------
+---
 
 ## 8. Formularios
 
 Usar:
 
--   react-hook-form
--   zod
--   @hookform/resolvers
+- react-hook-form
+- zod
+- @hookform/resolvers
 
 Validación de precios:
 
 z.number().multipleOf(0.01)
 
-------------------------------------------------------------------------
+---
 
 ## 9. Componentes reutilizables
 
@@ -206,21 +206,21 @@ number \| null \| undefined
 
 Usado para:
 
--   Marca
--   Categoría
--   Subcategoría
+- Marca
+- Categoría
+- Subcategoría
 
-------------------------------------------------------------------------
+---
 
 ### EntityManagerModal
 
 CRUD completo para:
 
--   Marca
--   Categoría
--   SubCategoría
+- Marca
+- Categoría
+- SubCategoría
 
-------------------------------------------------------------------------
+---
 
 ## 10. Estado Global
 
@@ -228,16 +228,16 @@ Gestionado con Zustand.
 
 Ejemplo:
 
-``` ts
-import { create } from "zustand"
+```ts
+import { create } from "zustand";
 
 export const useUserStore = create((set) => ({
   user: null,
-  setUser: (user) => set({ user })
-}))
+  setUser: (user) => set({ user }),
+}));
 ```
 
-------------------------------------------------------------------------
+---
 
 ## 11. Layout UI
 
@@ -245,7 +245,7 @@ React Bootstrap Grid:
 
 md → 3 / 9 columnas lg → 2 / 10 columnas
 
-------------------------------------------------------------------------
+---
 
 ### Sticky elements
 
@@ -253,7 +253,7 @@ Header y paginación usan:
 
 position: sticky
 
-------------------------------------------------------------------------
+---
 
 ## 12. Paginación UI
 
@@ -263,7 +263,7 @@ Paginación inteligente:
 
 Implementado en ProductList.tsx
 
-------------------------------------------------------------------------
+---
 
 ## 13. Configuración del Entorno
 
@@ -276,7 +276,7 @@ Frontend:
 
 cd frontend npm install npm run dev
 
-------------------------------------------------------------------------
+---
 
 ## 14. Variables de Entorno
 
@@ -284,7 +284,7 @@ Frontend:
 
 VITE_API_URL=http://127.0.0.1:8000
 
-------------------------------------------------------------------------
+---
 
 ## 15. Debugging
 
@@ -296,13 +296,13 @@ Verificar:
 
 config/settings/dev.py
 
-------------------------------------------------------------------------
+---
 
 ### React Query DevTools
 
 @tanstack/react-query-devtools
 
-------------------------------------------------------------------------
+---
 
 ### Error común
 
@@ -314,7 +314,7 @@ Correcto:
 
 /api/productos/
 
-------------------------------------------------------------------------
+---
 
 ## 16. Testing
 
@@ -326,15 +326,15 @@ Frontend:
 
 estructura preparada.
 
-------------------------------------------------------------------------
+---
 
 ## 17. Estilos
 
--   Bootstrap 5.3
--   CSS Modules
--   react-bootstrap-icons
+- Bootstrap 5.3
+- CSS Modules
+- react-bootstrap-icons
 
-------------------------------------------------------------------------
+---
 
 ## 18. Documentación TypeScript (TSDoc)
 
@@ -344,7 +344,7 @@ Usar:
 
 Comentarios en español técnico.
 
-------------------------------------------------------------------------
+---
 
 ## 19. Principios para Agentes IA
 
@@ -358,3 +358,10 @@ Comentarios en español técnico.
 8.  Documentar con PEP257 y TSDoc.
 9.  Comentarios claros en español.
 10. Código modular y mantenible.
+
+## 20. Memory
+
+You have access to Engram persistent memory via MCP tools (mem_save, mem_search, mem_session_summary, etc.).
+
+- Save proactively after significant work — don't wait to be asked.
+- After any compaction or context reset, call `mem_context` to recover session state before continuing.
