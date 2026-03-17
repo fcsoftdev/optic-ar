@@ -358,6 +358,7 @@ Comentarios en español técnico.
 8.  Documentar con PEP257 y TSDoc.
 9.  Comentarios claros en español.
 10. Código modular y mantenible.
+11. Siempre usa context7 cuando generes codigo o cuando recuperes documentacion de librerias
 
 ## 20. Memory
 
