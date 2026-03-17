@@ -97,7 +97,9 @@ const TurnoFormModal: React.FC<TurnoFormModalProps> = ({
     const minutosMax = hC * 60 + mC;
 
     while (minutos < minutosMax) {
-      const h = Math.floor(minutos / 60).toString().padStart(2, "0");
+      const h = Math.floor(minutos / 60)
+        .toString()
+        .padStart(2, "0");
       const m = (minutos % 60).toString().padStart(2, "0");
       slots.push(`${h}:${m}`);
       minutos += duracion;
@@ -264,10 +266,7 @@ const TurnoFormModal: React.FC<TurnoFormModalProps> = ({
                   name="hora_inicio"
                   control={control}
                   render={({ field }) => (
-                    <Form.Select
-                      {...field}
-                      isInvalid={!!errors.hora_inicio}
-                    >
+                    <Form.Select {...field} isInvalid={!!errors.hora_inicio}>
                       {slotsHora.map((slot) => (
                         <option key={slot} value={slot}>
                           {slot}

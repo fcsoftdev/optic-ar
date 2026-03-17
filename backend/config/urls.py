@@ -26,6 +26,7 @@ urlpatterns = [
     # API REST
     path("api/", include("productos.urls")),
     path("api/", include("compras.urls")),
+    path("api/", include("contabilidad.urls")),
     path("api/", include("turnos.api_urls")),
     # Apps legacy
     path("ventas/", include("ventas.urls")),

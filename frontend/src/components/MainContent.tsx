@@ -11,6 +11,7 @@ import ExpensesList from "./ExpensesList";
 import SuppliersList from "./SuppliersList";
 import SalesList from "./SalesList";
 import TurnosCalendar from "./TurnosCalendar";
+import ReporteCaja from "./ReporteCaja";
 
 interface MainContentProps {
   children?: ReactNode;
@@ -46,6 +47,7 @@ function MainContent({ children, activeSection }: MainContentProps) {
         {activeSection === "proveedores" && <SuppliersList />}
         {activeSection === "ventas" && <SalesList />}
         {activeSection === "turnos" && <TurnosCalendar />}
+        {activeSection === "reporte-caja" && <ReporteCaja />}
       </div>
     </Col>
   );
