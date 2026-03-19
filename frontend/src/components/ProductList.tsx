@@ -1,14 +1,5 @@
 import React, { useState, useEffect, type JSX } from "react";
-import {
-  Button,
-  Col,
-  Form,
-  Row,
-  Table,
-  Spinner,
-  Alert,
-  Badge,
-} from "react-bootstrap";
+import { Button, Col, Form, Row, Table, Spinner, Alert } from "react-bootstrap";
 import { PencilSquare, Trash } from "react-bootstrap-icons";
 import ListHeader from "./ListHeader";
 import PaginationBar from "./PaginationBar";
