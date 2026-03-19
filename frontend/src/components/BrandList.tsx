@@ -222,7 +222,7 @@ function BrandList() {
                   onChange={handleSelectAll}
                 />
               </th>
-              <th style={{ width: "80px" }}>ID</th>
+              <th style={{ width: "80px" }}>#</th>
               <th>Nombre</th>
               <th style={{ width: "150px" }}>Acciones</th>
             </tr>

@@ -171,7 +171,6 @@ const PurchaseList: React.FC = () => {
               style={{ position: "sticky", top: 0, zIndex: 1 }}
             >
               <tr>
-                <th>#</th>
                 <th>Fecha</th>
                 <th>Proveedor</th>
                 <th className="text-center">Ítems</th>
@@ -182,7 +181,6 @@ const PurchaseList: React.FC = () => {
             <tbody>
               {compras.map((c) => (
                 <tr key={c.id}>
-                  <td className="text-muted">{c.id}</td>
                   <td className="text-nowrap">
                     {new Date(c.fecha + "T00:00:00").toLocaleDateString(
                       "es-AR",

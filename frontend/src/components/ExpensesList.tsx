@@ -162,7 +162,6 @@ function ExpensesList() {
         <Table striped bordered hover responsive>
           <thead className="table-dark">
             <tr>
-              <th>#</th>
               <th>Fecha</th>
               <th>Descripción</th>
               <th className="text-end">Total</th>
@@ -173,7 +172,6 @@ function ExpensesList() {
             {gastos.map((gasto) => (
               <>
                 <tr key={gasto.id}>
-                  <td>{gasto.id}</td>
                   <td>{gasto.fecha}</td>
                   <td>{gasto.descripcion}</td>
                   <td className="text-end">{fmtARS(gasto.total)}</td>
@@ -201,7 +199,7 @@ function ExpensesList() {
                 {/* Fila de confirmación de eliminación */}
                 {deleteConfirmId === gasto.id && (
                   <tr key={`confirm-${gasto.id}`} className="table-warning">
-                    <td colSpan={5}>
+                    <td colSpan={4}>
                       <div className="d-flex align-items-center gap-2 flex-wrap">
                         <span>
                           ¿Eliminar el gasto{" "}

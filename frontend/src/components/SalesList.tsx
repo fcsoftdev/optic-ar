@@ -169,7 +169,6 @@ const SalesList: React.FC = () => {
               style={{ position: "sticky", top: 0, zIndex: 1 }}
             >
               <tr>
-                <th>#</th>
                 <th>Fecha</th>
                 <th>Cliente</th>
                 <th>Forma de pago</th>
@@ -184,7 +183,6 @@ const SalesList: React.FC = () => {
                 const saldo = Number(v.saldo);
                 return (
                   <tr key={v.id}>
-                    <td className="text-muted">{v.id}</td>
                     <td className="text-nowrap">
                       {new Date(v.fecha).toLocaleDateString("es-AR")}
                     </td>
