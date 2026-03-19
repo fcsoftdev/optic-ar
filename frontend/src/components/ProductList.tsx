@@ -312,6 +312,7 @@ const ProductList: React.FC = (): JSX.Element => {
               zIndex: 1,
               boxShadow: "0 2px 2px -1px rgba(0, 0, 0, 0.1)",
             }}
+            className="table-dark"
           >
             <tr>
               <th style={{ width: "50px" }}>

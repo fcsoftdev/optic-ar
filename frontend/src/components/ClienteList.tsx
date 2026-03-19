@@ -277,7 +277,7 @@ const ClienteList: React.FC = () => {
         ) : (
           <Table striped bordered hover responsive>
             <thead
-              className="table-light"
+              className="table-dark"
               style={{ position: "sticky", top: 0, zIndex: 1 }}
             >
               <tr>

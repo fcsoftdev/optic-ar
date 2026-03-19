@@ -160,7 +160,7 @@ function ExpensesList() {
         <Alert variant="info">No se encontraron gastos.</Alert>
       ) : (
         <Table striped bordered hover responsive>
-          <thead>
+          <thead className="table-dark">
             <tr>
               <th>#</th>
               <th>Fecha</th>

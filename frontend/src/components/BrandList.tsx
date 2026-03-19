@@ -11,16 +11,7 @@
  * - Integración con React Query para cache optimizado
  */
 import React, { useState, useEffect } from "react";
-import {
-  Button,
-  Col,
-  Form,
-  Row,
-  Table,
-  Spinner,
-  Alert,
-  Badge,
-} from "react-bootstrap";
+import { Button, Col, Form, Row, Table, Spinner, Alert } from "react-bootstrap";
 import { PencilSquare, Trash } from "react-bootstrap-icons";
 import { useMarcas, useDeleteMarca } from "../hooks/useProductos";
 import ListHeader from "./ListHeader";
@@ -219,6 +210,7 @@ function BrandList() {
               zIndex: 1,
               boxShadow: "0 2px 2px -1px rgba(0, 0, 0, 0.1)",
             }}
+            className="table-dark"
           >
             <tr>
               <th style={{ width: "50px" }}>
