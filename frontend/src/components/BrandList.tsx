@@ -12,7 +12,7 @@
  */
 import React, { useState, useEffect } from "react";
 import { Button, Col, Form, Row, Table, Spinner, Alert } from "react-bootstrap";
-import { PencilSquare, Trash } from "react-bootstrap-icons";
+import { PencilSquare, Tags, Trash } from "react-bootstrap-icons";
 import { useMarcas, useDeleteMarca } from "../hooks/useProductos";
 import ListHeader from "./ListHeader";
 import MarcaFormModal from "./MarcaFormModal";
@@ -163,6 +163,7 @@ function BrandList() {
       <ListHeader
         title="Marcas"
         count={!Array.isArray(data) && data?.count ? data.count : marcas.length}
+        icon={<Tags size={26} viewBox="0 0 16 16" />}
         addLabel="Marca"
         onAdd={handleAddMarca}
       />

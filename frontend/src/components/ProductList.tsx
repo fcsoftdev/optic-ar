@@ -1,6 +1,6 @@
 import React, { useState, useEffect, type JSX } from "react";
 import { Button, Col, Form, Row, Table, Spinner, Alert } from "react-bootstrap";
-import { PencilSquare, Trash } from "react-bootstrap-icons";
+import { BoxSeam, PencilSquare, Trash } from "react-bootstrap-icons";
 import ListHeader from "./ListHeader";
 import PaginationBar from "./PaginationBar";
 import {
@@ -189,6 +189,7 @@ const ProductList: React.FC = (): JSX.Element => {
         <ListHeader
           title="Productos"
           count={data?.count || 0}
+          icon={<BoxSeam size={26} viewBox="0 0 16 16" />}
           addLabel="Producto"
           onAdd={handleAddProduct}
         >

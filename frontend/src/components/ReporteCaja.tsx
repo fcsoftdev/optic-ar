@@ -135,7 +135,7 @@ function ReporteCaja() {
     >
       {/* Encabezado */}
       <div className="d-flex align-items-center gap-2 mb-4">
-        <BarChartLine size={28} className="text-primary" />
+        <BarChartLine size={26} className="text-primary" />
         <h4 className="mb-0">Reporte de Caja</h4>
       </div>
 

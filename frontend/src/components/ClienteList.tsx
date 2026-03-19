@@ -12,6 +12,7 @@ import {
 import {
   Pencil,
   ClipboardPulse,
+  People,
   Search,
   Trash,
   XCircle,
@@ -211,6 +212,7 @@ const ClienteList: React.FC = () => {
         <ListHeader
           title="Clientes/Pacientes"
           count={clientesData?.count ?? 0}
+          icon={<People size={26} viewBox="0 0 16 16" />}
           addLabel="Cliente"
           onAdd={() => {
             setEditingCliente(null);

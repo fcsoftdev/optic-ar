@@ -14,8 +14,9 @@ import {
   Table,
 } from "react-bootstrap";
 import {
-  Pencil,
   CartCheck,
+  Pencil,
+  People,
   Search,
   Trash,
   XCircle,
@@ -151,6 +152,7 @@ function SuppliersList() {
         <ListHeader
           title="Proveedores"
           count={proveedoresData?.count ?? 0}
+          icon={<People size={26} viewBox="0 0 16 16" />}
           addLabel="Proveedor"
           onAdd={handleNuevoProveedor}
         />

@@ -10,6 +10,8 @@ interface ListHeaderProps {
   title: string;
   /** Cantidad total de registros mostrada en el badge. */
   count: number;
+  /** Icono de react-bootstrap-icons a mostrar junto al título (en color azul primario). */
+  icon?: React.ReactNode;
   /** Etiqueta para el botón de agregar. Ejemplo: "Cliente", "Producto". Si no se provee, no se renderiza el botón. */
   addLabel?: string;
   /** Callback ejecutado al hacer click en el botón de agregar. */
@@ -46,6 +48,7 @@ interface ListHeaderProps {
 const ListHeader: React.FC<ListHeaderProps> = ({
   title,
   count,
+  icon,
   addLabel,
   onAdd,
   children,
@@ -55,11 +58,14 @@ const ListHeader: React.FC<ListHeaderProps> = ({
   return (
     <Row className="mb-3 align-items-center">
       <Col>
-        <h4 className="mb-0">
-          {title}{" "}
-          <Badge bg="secondary" pill>
-            {count}
-          </Badge>
+        <h4 className="mb-0 d-flex align-items-center gap-2">
+          {icon && <span className="text-primary lh-1">{icon}</span>}
+          <span>
+            {title}{" "}
+            <Badge bg="secondary" pill>
+              {count}
+            </Badge>
+          </span>
         </h4>
       </Col>
       {hasActions && (

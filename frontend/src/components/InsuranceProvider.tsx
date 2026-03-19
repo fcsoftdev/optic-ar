@@ -13,7 +13,13 @@ import {
   Spinner,
   Table,
 } from "react-bootstrap";
-import { Pencil, Search, Trash, XCircle } from "react-bootstrap-icons";
+import {
+  CardHeading,
+  Pencil,
+  Search,
+  Trash,
+  XCircle,
+} from "react-bootstrap-icons";
 import {
   useDeleteObraSocial,
   useObrasSocialesPaginadas,
@@ -125,6 +131,7 @@ const InsuranceProvider: React.FC = () => {
         <ListHeader
           title="Obras Sociales"
           count={obrasSocialesData?.count ?? 0}
+          icon={<CardHeading size={26} viewBox="0 0 16 16" />}
           addLabel="Obra Social"
           onAdd={() => {
             setEditingObraSocial(null);

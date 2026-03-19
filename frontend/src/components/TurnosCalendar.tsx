@@ -17,7 +17,7 @@ import type {
 import esLocale from "@fullcalendar/core/locales/es";
 import { useState } from "react";
 import { Alert, Button, Spinner } from "react-bootstrap";
-import { GearFill } from "react-bootstrap-icons";
+import { Calendar3, GearFill } from "react-bootstrap-icons";
 import {
   useConfigCalendario,
   useTurnos,
@@ -26,6 +26,7 @@ import {
 import type { Turno } from "../services/turnos.service";
 import ConfigCalendarioModal from "./ConfigCalendarioModal";
 import TurnoFormModal from "./TurnoFormModal";
+import ListHeader from "./ListHeader";
 
 /** Convierte fecha y hora string a ISO datetime para FullCalendar. */
 const toISO = (fecha: string, hora: string): string => `${fecha}T${hora}`;
@@ -217,9 +218,18 @@ function TurnosCalendar() {
   }));
 
   return (
-    <div>
-      <div className="d-flex justify-content-between align-items-center mb-3">
-        <h4 className="mb-0">Turnos</h4>
+    <div
+      style={{
+        height: "calc(100vh - 100px)",
+        overflowY: "auto",
+        paddingRight: "1rem",
+      }}
+    >
+      <ListHeader
+        title="Turnos"
+        count={turnos.length}
+        icon={<Calendar3 size={26} viewBox="0 0 16 16" />}
+      >
         <Button
           variant="outline-secondary"
           size="sm"
@@ -229,7 +239,7 @@ function TurnosCalendar() {
           <GearFill className="me-1" />
           Configurar
         </Button>
-      </div>
+      </ListHeader>
 
       {error && (
         <Alert variant="danger" className="mb-3">

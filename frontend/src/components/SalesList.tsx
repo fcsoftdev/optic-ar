@@ -14,7 +14,13 @@ import {
   Spinner,
   Table,
 } from "react-bootstrap";
-import { Pencil, Search, Trash, XCircle } from "react-bootstrap-icons";
+import {
+  CartCheck,
+  Pencil,
+  Search,
+  Trash,
+  XCircle,
+} from "react-bootstrap-icons";
 import { useDeleteVenta, useVentas } from "../hooks/useVentas";
 import type { VentaList } from "../services/ventas.service";
 import ListHeader from "./ListHeader";
@@ -108,6 +114,7 @@ const SalesList: React.FC = () => {
         <ListHeader
           title="Ventas"
           count={ventasData?.count ?? 0}
+          icon={<CartCheck size={26} viewBox="0 0 16 16" />}
           addLabel="Venta"
           onAdd={handleNuevaVenta}
         />

@@ -3,6 +3,7 @@
  * @description ABM completo de Gastos con búsqueda, paginación y formulario modal.
  */
 import { useEffect, useState } from "react";
+import React from "react";
 import {
   Alert,
   Button,
@@ -13,7 +14,7 @@ import {
   Spinner,
   Table,
 } from "react-bootstrap";
-import { Pencil, Search, Trash, XCircle } from "react-bootstrap-icons";
+import { Cash, Pencil, Search, Trash, XCircle } from "react-bootstrap-icons";
 import { useDeleteGasto, useGastos } from "../hooks/useCompras";
 import type { Gasto } from "../services/compras.service";
 import GastoFormModal from "./GastoFormModal";
@@ -109,6 +110,7 @@ function ExpensesList() {
       <ListHeader
         title="Listado de Gastos"
         count={gastosData?.count ?? 0}
+        icon={<Cash size={26} viewBox="0 0 16 16" />}
         addLabel="Gasto"
         onAdd={handleNuevoGasto}
       />
@@ -170,8 +172,8 @@ function ExpensesList() {
           </thead>
           <tbody>
             {gastos.map((gasto) => (
-              <>
-                <tr key={gasto.id}>
+              <React.Fragment key={gasto.id}>
+                <tr>
                   <td>{gasto.fecha}</td>
                   <td>{gasto.descripcion}</td>
                   <td className="text-end">{fmtARS(gasto.total)}</td>
@@ -228,8 +230,8 @@ function ExpensesList() {
                     </td>
                   </tr>
                 )}
-              </>
-            ))}
+              </React.Fragment>
+            ))}{" "}
           </tbody>
         </Table>
       )}

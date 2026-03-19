@@ -13,7 +13,14 @@ import {
   Spinner,
   Table,
 } from "react-bootstrap";
-import { EyeFill, Pencil, Search, Trash, XCircle } from "react-bootstrap-icons";
+import {
+  EyeFill,
+  FileMedical,
+  Pencil,
+  Search,
+  Trash,
+  XCircle,
+} from "react-bootstrap-icons";
 import {
   useClientes,
   useConsultas,
@@ -148,6 +155,7 @@ const ConsultationList: React.FC = () => {
         <ListHeader
           title="Consultas"
           count={consultasData?.count ?? 0}
+          icon={<FileMedical size={26} viewBox="0 0 16 16" />}
           addLabel="Consulta"
           onAdd={() => {
             setEditingConsulta(null);

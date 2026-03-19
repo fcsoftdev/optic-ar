@@ -14,7 +14,7 @@ import {
   Spinner,
   Table,
 } from "react-bootstrap";
-import { Pencil, Search, Trash, XCircle } from "react-bootstrap-icons";
+import { Bag, Pencil, Search, Trash, XCircle } from "react-bootstrap-icons";
 import { useCompras, useDeleteCompra } from "../hooks/useCompras";
 import type { CompraList } from "../services/compras.service";
 import ListHeader from "./ListHeader";
@@ -110,6 +110,7 @@ const PurchaseList: React.FC = () => {
         <ListHeader
           title="Compras"
           count={comprasData?.count ?? 0}
+          icon={<Bag size={26} viewBox="0 0 16 16" />}
           addLabel="Compra"
           onAdd={handleNuevaCompra}
         />
