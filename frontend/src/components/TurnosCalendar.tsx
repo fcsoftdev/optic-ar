@@ -15,6 +15,7 @@ import type {
   EventDropArg,
 } from "@fullcalendar/core";
 import esLocale from "@fullcalendar/core/locales/es";
+import axios from "axios";
 import { useState } from "react";
 import { Alert, Button, Spinner } from "react-bootstrap";
 import { Calendar3, GearFill } from "react-bootstrap-icons";
@@ -186,8 +187,13 @@ function TurnosCalendar() {
         id: turnoId,
         data: { fecha, hora_inicio },
       });
-    } catch {
+    } catch (error) {
       arg.revert();
+      if (axios.isAxiosError(error) && error.response?.status === 403) {
+        setDragError("No tenés permisos para modificar turnos.");
+      } else {
+        setDragError("Error al mover el turno. Intente nuevamente.");
+      }
     }
   };
 
@@ -203,8 +209,13 @@ function TurnosCalendar() {
     const hora_fin = end.toTimeString().slice(0, 5);
     try {
       await updateTurno.mutateAsync({ id: turnoId, data: { hora_fin } });
-    } catch {
+    } catch (error) {
       arg.revert();
+      if (axios.isAxiosError(error) && error.response?.status === 403) {
+        setDragError("No tenés permisos para modificar turnos.");
+      } else {
+        setDragError("Error al redimensionar el turno. Intente nuevamente.");
+      }
     }
   };
 

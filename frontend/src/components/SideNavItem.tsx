@@ -14,6 +14,10 @@ interface MenuItem {
   label?: string;
   href?: string;
   icon?: ReactNode;
+  /** Permiso de Django requerido ("app_label.codename"). Sin este campo, siempre visible. */
+  perm?: string;
+  /** Si es true, el item solo se muestra a usuarios con is_staff=true. */
+  requiresStaff?: boolean;
 }
 
 /**

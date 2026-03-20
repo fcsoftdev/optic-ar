@@ -208,6 +208,12 @@ const TurnoFormModal: React.FC<TurnoFormModalProps> = ({
       onHide();
     } catch (error) {
       console.error("Error al eliminar turno:", error);
+      setDeleteConfirm(false);
+      if (axios.isAxiosError(error) && error.response?.status === 403) {
+        setApiErrors(["No tenés permisos para eliminar turnos."]);
+      } else {
+        setApiErrors(["Error al eliminar el turno. Intente nuevamente."]);
+      }
     }
   };
 

@@ -3,7 +3,8 @@
  * @description Modal para editar la configuración del calendario de turnos.
  */
 import { zodResolver } from "@hookform/resolvers/zod";
-import React, { useEffect } from "react";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
 import {
   Alert,
   Badge,
@@ -61,6 +62,7 @@ const ConfigCalendarioModal: React.FC<ConfigCalendarioModalProps> = ({
 }) => {
   const { data: config, isLoading } = useConfigCalendario();
   const updateConfig = useUpdateConfigCalendario();
+  const [apiError, setApiError] = useState<string | null>(null);
 
   const {
     control,
@@ -96,6 +98,7 @@ const ConfigCalendarioModal: React.FC<ConfigCalendarioModalProps> = ({
    * @param data - Datos validados por Zod.
    */
   const onSubmit = async (data: ConfigCalendarioFormData) => {
+    setApiError(null);
     try {
       await updateConfig.mutateAsync({
         hora_apertura: `${data.hora_apertura}:00`,
@@ -106,6 +109,13 @@ const ConfigCalendarioModal: React.FC<ConfigCalendarioModalProps> = ({
       onHide();
     } catch (error) {
       console.error("Error al guardar configuración:", error);
+      if (axios.isAxiosError(error) && error.response?.status === 403) {
+        setApiError(
+          "No tenés permisos para modificar la configuración del calendario.",
+        );
+      } else {
+        setApiError("Error al guardar la configuración. Intente nuevamente.");
+      }
     }
   };
 
@@ -264,9 +274,9 @@ const ConfigCalendarioModal: React.FC<ConfigCalendarioModalProps> = ({
               </Col>
             </Row>
 
-            {updateConfig.error && (
+            {apiError && (
               <Alert variant="danger" className="mt-3 mb-0">
-                Error al guardar la configuración. Intente nuevamente.
+                {apiError}
               </Alert>
             )}
           </Form>

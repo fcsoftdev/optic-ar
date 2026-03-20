@@ -1,6 +1,8 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Button, Container, Nav, Navbar, NavDropdown } from "react-bootstrap";
 import { Eyeglasses, List, PersonCircle } from "react-bootstrap-icons";
+import { useAuthStore } from "../stores/useAuthStore";
+import { useAuth } from "../hooks/useAuth";
 
 interface HeaderProps {
   onToggleSidebar?: () => void;
@@ -12,24 +14,26 @@ interface HeaderProps {
  * Muestra la barra de navegación principal con:
  * - Logo y nombre de la aplicación
  * - Botón hamburguesa para móviles
- * - Menú de usuario con opciones de perfil y logout
+ * - Menú de usuario con nombre real, perfil y logout
  *
  * @param onToggleSidebar - Función para mostrar/ocultar el sidebar en móviles
  */
 function Header({ onToggleSidebar }: HeaderProps) {
+  const { user } = useAuthStore();
+  const { logout } = useAuth();
+
   /**
-   * Maneja el cierre de sesión del usuario.
+   * Maneja el cierre de sesión: blacklistea el refresh token y limpia el store.
    */
   const handleLogout = (): void => {
-    console.log("Cerrando sesión...");
-    // TODO: Implementar lógica de logout con API
+    logout();
   };
 
   /**
    * Navega al perfil del usuario.
    */
   const handleProfile = (): void => {
-    console.log("Ir a administrador de perfil...");
+    console.log("Ir a administrador de perfil…");
     // TODO: Implementar navegación al perfil
   };
 
@@ -46,8 +50,7 @@ function Header({ onToggleSidebar }: HeaderProps) {
           <List size={24} />
         </Button>
 
-        {/* Brand a la izquierda */}  
-        
+        {/* Brand a la izquierda */}
         <Navbar.Brand href="#dashboard" className="d-flex align-items-center">
           <Eyeglasses size={30} className="me-2" />
           <span>Opticar</span>
@@ -62,7 +65,7 @@ function Header({ onToggleSidebar }: HeaderProps) {
               title={
                 <span>
                   <PersonCircle size={24} className="me-2" />
-                  Usuario
+                  {user?.username ?? "Usuario"}
                 </span>
               }
               id="user-dropdown"

@@ -23,6 +23,8 @@ from django.conf.urls.static import static
 urlpatterns = [
     # Admin
     path("admin/", admin.site.urls),
+    # Autenticación JWT
+    path("api/", include("authentication.urls")),
     # API REST
     path("api/", include("productos.urls")),
     path("api/", include("compras.urls")),
