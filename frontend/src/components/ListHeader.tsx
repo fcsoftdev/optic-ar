@@ -16,6 +16,11 @@ interface ListHeaderProps {
   addLabel?: string;
   /** Callback ejecutado al hacer click en el botón de agregar. */
   onAdd?: () => void;
+  /**
+   * Controla si el botón de agregar es visible. Por defecto `true`.
+   * Pasar `false` para ocultar el botón cuando el usuario no tiene permiso de creación.
+   */
+  canAdd?: boolean;
   /** Contenido adicional renderizado a la derecha, junto al botón de agregar (ej: botones extra). */
   children?: React.ReactNode;
 }
@@ -51,9 +56,10 @@ const ListHeader: React.FC<ListHeaderProps> = ({
   icon,
   addLabel,
   onAdd,
+  canAdd = true,
   children,
 }) => {
-  const hasActions = addLabel || children;
+  const hasActions = (addLabel && canAdd) || children;
 
   return (
     <Row className="mb-3 align-items-center">
@@ -71,7 +77,9 @@ const ListHeader: React.FC<ListHeaderProps> = ({
       {hasActions && (
         <Col xs="auto" className="d-flex gap-2 align-items-center">
           {children}
-          {addLabel && onAdd && <AddButton label={addLabel} onClick={onAdd} />}
+          {addLabel && onAdd && canAdd && (
+            <AddButton label={addLabel} onClick={onAdd} />
+          )}
         </Col>
       )}
     </Row>

@@ -26,6 +26,7 @@ import {
 } from "../hooks/useVentas";
 import type { ObraSocial } from "../services/ventas.service";
 import ListHeader from "./ListHeader";
+import { usePermiso } from "../hooks/usePermiso";
 import ObraSocialFormModal from "./ObraSocialFormModal";
 import PaginationBar from "./PaginationBar";
 
@@ -38,6 +39,10 @@ import PaginationBar from "./PaginationBar";
  * del resto de los ABM del sistema.
  */
 const InsuranceProvider: React.FC = () => {
+  const { tienePermiso } = usePermiso();
+  const puedeEditar = tienePermiso("ventas.change_obrasocial");
+  const puedeEliminar = tienePermiso("ventas.delete_obrasocial");
+  const hayAcciones = puedeEditar || puedeEliminar;
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -133,6 +138,7 @@ const InsuranceProvider: React.FC = () => {
           count={obrasSocialesData?.count ?? 0}
           icon={<CardHeading size={26} viewBox="0 0 16 16" />}
           addLabel="Obra Social"
+          canAdd={tienePermiso("ventas.add_obrasocial")}
           onAdd={() => {
             setEditingObraSocial(null);
             setShowModal(true);
@@ -188,7 +194,7 @@ const InsuranceProvider: React.FC = () => {
                 <th>Nombre</th>
                 <th>Dirección</th>
                 <th>Teléfono</th>
-                <th style={{ width: "120px" }}>Acciones</th>
+                {hayAcciones && <th style={{ width: "120px" }}>Acciones</th>}
               </tr>
             </thead>
             <tbody>
@@ -199,26 +205,32 @@ const InsuranceProvider: React.FC = () => {
                   </td>
                   <td>{os.direccion || "-"}</td>
                   <td>{os.telefono || "-"}</td>
-                  <td>
-                    <div className="d-flex gap-1">
-                      <Button
-                        variant="outline-primary"
-                        size="sm"
-                        onClick={() => handleEdit(os)}
-                        title="Editar"
-                      >
-                        <Pencil size={14} />
-                      </Button>
-                      <Button
-                        variant="outline-danger"
-                        size="sm"
-                        onClick={() => handleDelete(os.id, os.nombre)}
-                        title="Eliminar"
-                      >
-                        <Trash size={14} />
-                      </Button>
-                    </div>
-                  </td>
+                  {hayAcciones && (
+                    <td>
+                      <div className="d-flex gap-1">
+                        {puedeEditar && (
+                          <Button
+                            variant="outline-primary"
+                            size="sm"
+                            onClick={() => handleEdit(os)}
+                            title="Editar"
+                          >
+                            <Pencil size={14} />
+                          </Button>
+                        )}
+                        {puedeEliminar && (
+                          <Button
+                            variant="outline-danger"
+                            size="sm"
+                            onClick={() => handleDelete(os.id, os.nombre)}
+                            title="Eliminar"
+                          >
+                            <Trash size={14} />
+                          </Button>
+                        )}
+                      </div>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>

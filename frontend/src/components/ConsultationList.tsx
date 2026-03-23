@@ -28,6 +28,7 @@ import {
 } from "../hooks/useVentas";
 import type { ConsultaList } from "../services/ventas.service";
 import ListHeader from "./ListHeader";
+import { usePermiso } from "../hooks/usePermiso";
 import ConsultationFormModal from "./ConsultationFormModal";
 import PaginationBar from "./PaginationBar";
 
@@ -40,6 +41,10 @@ import PaginationBar from "./PaginationBar";
  * para que la tabla sea el único área scrollable.
  */
 const ConsultationList: React.FC = () => {
+  const { tienePermiso } = usePermiso();
+  const puedeEditar = tienePermiso("ventas.change_consulta");
+  const puedeEliminar = tienePermiso("ventas.delete_consulta");
+  const hayAcciones = puedeEditar || puedeEliminar;
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [fechaDesde, setFechaDesde] = useState("");
@@ -157,6 +162,7 @@ const ConsultationList: React.FC = () => {
           count={consultasData?.count ?? 0}
           icon={<FileMedical size={26} viewBox="0 0 16 16" />}
           addLabel="Consulta"
+          canAdd={tienePermiso("ventas.add_consulta")}
           onAdd={() => {
             setEditingConsulta(null);
             setShowModal(true);
@@ -252,7 +258,7 @@ const ConsultationList: React.FC = () => {
                 <th>Motivo</th>
                 <th>Diagnóstico</th>
                 <th className="text-center">Grad.</th>
-                <th style={{ width: "100px" }}>Acciones</th>
+                {hayAcciones && <th style={{ width: "100px" }}>Acciones</th>}
               </tr>
             </thead>
             <tbody>
@@ -309,26 +315,32 @@ const ConsultationList: React.FC = () => {
                       <span className="text-muted">—</span>
                     )}
                   </td>
-                  <td>
-                    <div className="d-flex gap-1">
-                      <Button
-                        variant="outline-primary"
-                        size="sm"
-                        onClick={() => handleEdit(c)}
-                        title="Editar"
-                      >
-                        <Pencil size={14} />
-                      </Button>
-                      <Button
-                        variant="outline-danger"
-                        size="sm"
-                        onClick={() => handleDelete(c.id, c.cliente_nombre)}
-                        title="Eliminar"
-                      >
-                        <Trash size={14} />
-                      </Button>
-                    </div>
-                  </td>
+                  {hayAcciones && (
+                    <td>
+                      <div className="d-flex gap-1">
+                        {puedeEditar && (
+                          <Button
+                            variant="outline-primary"
+                            size="sm"
+                            onClick={() => handleEdit(c)}
+                            title="Editar"
+                          >
+                            <Pencil size={14} />
+                          </Button>
+                        )}
+                        {puedeEliminar && (
+                          <Button
+                            variant="outline-danger"
+                            size="sm"
+                            onClick={() => handleDelete(c.id, c.cliente_nombre)}
+                            title="Eliminar"
+                          >
+                            <Trash size={14} />
+                          </Button>
+                        )}
+                      </div>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>

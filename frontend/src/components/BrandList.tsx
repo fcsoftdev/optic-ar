@@ -15,6 +15,7 @@ import { Button, Col, Form, Row, Table, Spinner, Alert } from "react-bootstrap";
 import { PencilSquare, Tags, Trash } from "react-bootstrap-icons";
 import { useMarcas, useDeleteMarca } from "../hooks/useProductos";
 import ListHeader from "./ListHeader";
+import { usePermiso } from "../hooks/usePermiso";
 import MarcaFormModal from "./MarcaFormModal";
 import PaginationBar from "./PaginationBar";
 import type { Marca } from "../services/productos.service";
@@ -30,6 +31,10 @@ import type { Marca } from "../services/productos.service";
  * - Eliminar marcas (individual o múltiple)
  */
 function BrandList() {
+  const { tienePermiso } = usePermiso();
+  const puedeEditar = tienePermiso("productos.change_marca");
+  const puedeEliminar = tienePermiso("productos.delete_marca");
+  const hayAcciones = puedeEditar || puedeEliminar;
   const [selectedMarcas, setSelectedMarcas] = useState<number[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
@@ -166,6 +171,7 @@ function BrandList() {
         icon={<Tags size={26} viewBox="0 0 16 16" />}
         addLabel="Marca"
         onAdd={handleAddMarca}
+        canAdd={tienePermiso("productos.add_marca")}
       />
 
       {/* Barra de búsqueda y acciones */}
@@ -179,7 +185,7 @@ function BrandList() {
           />
         </Col>
         <Col md={6} className="text-end">
-          {selectedMarcas.length > 0 && (
+          {puedeEliminar && selectedMarcas.length > 0 && (
             <Button variant="danger" onClick={handleDeleteSelected}>
               <Trash size={16} className="me-1" />
               Eliminar seleccionadas ({selectedMarcas.length})
@@ -225,13 +231,16 @@ function BrandList() {
               </th>
               <th style={{ width: "80px" }}>#</th>
               <th>Nombre</th>
-              <th style={{ width: "150px" }}>Acciones</th>
+              {hayAcciones && <th style={{ width: "150px" }}>Acciones</th>}
             </tr>
           </thead>
           <tbody>
             {marcas.length === 0 ? (
               <tr>
-                <td colSpan={4} className="text-center text-muted">
+                <td
+                  colSpan={hayAcciones ? 4 : 3}
+                  className="text-center text-muted"
+                >
                   {debouncedSearchTerm
                     ? "No se encontraron marcas con ese criterio de búsqueda"
                     : "No hay marcas registradas. Agregue una nueva marca."}
@@ -251,25 +260,31 @@ function BrandList() {
                   <td>
                     <strong>{marca.nombre}</strong>
                   </td>
-                  <td>
-                    <Button
-                      variant="outline-primary"
-                      size="sm"
-                      className="me-2"
-                      onClick={() => handleEditMarca(marca)}
-                      title="Editar marca"
-                    >
-                      <PencilSquare size={14} />
-                    </Button>
-                    <Button
-                      variant="outline-danger"
-                      size="sm"
-                      onClick={() => handleDeleteMarca(marca.id)}
-                      title="Eliminar marca"
-                    >
-                      <Trash size={14} />
-                    </Button>
-                  </td>
+                  {hayAcciones && (
+                    <td>
+                      {puedeEditar && (
+                        <Button
+                          variant="outline-primary"
+                          size="sm"
+                          className="me-2"
+                          onClick={() => handleEditMarca(marca)}
+                          title="Editar marca"
+                        >
+                          <PencilSquare size={14} />
+                        </Button>
+                      )}
+                      {puedeEliminar && (
+                        <Button
+                          variant="outline-danger"
+                          size="sm"
+                          onClick={() => handleDeleteMarca(marca.id)}
+                          title="Eliminar marca"
+                        >
+                          <Trash size={14} />
+                        </Button>
+                      )}
+                    </td>
+                  )}
                 </tr>
               ))
             )}

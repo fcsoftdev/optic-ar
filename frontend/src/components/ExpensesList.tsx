@@ -19,6 +19,7 @@ import { useDeleteGasto, useGastos } from "../hooks/useCompras";
 import type { Gasto } from "../services/compras.service";
 import GastoFormModal from "./GastoFormModal";
 import ListHeader from "./ListHeader";
+import { usePermiso } from "../hooks/usePermiso";
 import PaginationBar from "./PaginationBar";
 
 /** Formatea un valor a pesos argentinos con 2 decimales. */
@@ -35,6 +36,10 @@ const fmtARS = (value: string | number) =>
  * Implementa búsqueda con debounce (500ms) y paginación inteligente.
  */
 function ExpensesList() {
+  const { tienePermiso } = usePermiso();
+  const puedeEditar = tienePermiso("compras.change_gasto");
+  const puedeEliminar = tienePermiso("compras.delete_gasto");
+  const hayAcciones = puedeEditar || puedeEliminar;
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -113,6 +118,7 @@ function ExpensesList() {
         icon={<Cash size={26} viewBox="0 0 16 16" />}
         addLabel="Gasto"
         onAdd={handleNuevoGasto}
+        canAdd={tienePermiso("compras.add_gasto")}
       />
 
       {/* Barra de búsqueda */}
@@ -167,7 +173,7 @@ function ExpensesList() {
               <th>Fecha</th>
               <th>Descripción</th>
               <th className="text-end">Total</th>
-              <th className="text-center">Acciones</th>
+              {hayAcciones && <th className="text-center">Acciones</th>}
             </tr>
           </thead>
           <tbody>
@@ -177,25 +183,31 @@ function ExpensesList() {
                   <td>{gasto.fecha}</td>
                   <td>{gasto.descripcion}</td>
                   <td className="text-end">{fmtARS(gasto.total)}</td>
-                  <td className="text-center">
-                    <Button
-                      size="sm"
-                      variant="outline-warning"
-                      className="me-1"
-                      title="Editar"
-                      onClick={() => handleEdit(gasto)}
-                    >
-                      <Pencil />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline-danger"
-                      title="Eliminar"
-                      onClick={() => handleDeleteRequest(gasto.id)}
-                    >
-                      <Trash />
-                    </Button>
-                  </td>
+                  {hayAcciones && (
+                    <td className="text-center">
+                      {puedeEditar && (
+                        <Button
+                          size="sm"
+                          variant="outline-warning"
+                          className="me-1"
+                          title="Editar"
+                          onClick={() => handleEdit(gasto)}
+                        >
+                          <Pencil />
+                        </Button>
+                      )}
+                      {puedeEliminar && (
+                        <Button
+                          size="sm"
+                          variant="outline-danger"
+                          title="Eliminar"
+                          onClick={() => handleDeleteRequest(gasto.id)}
+                        >
+                          <Trash />
+                        </Button>
+                      )}
+                    </td>
+                  )}
                 </tr>
 
                 {/* Fila de confirmación de eliminación */}

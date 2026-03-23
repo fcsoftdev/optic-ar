@@ -24,6 +24,7 @@ import {
 import { useDeleteVenta, useVentas } from "../hooks/useVentas";
 import type { VentaList } from "../services/ventas.service";
 import ListHeader from "./ListHeader";
+import { usePermiso } from "../hooks/usePermiso";
 import PaginationBar from "./PaginationBar";
 import VentaFormModal from "./VentaFormModal";
 
@@ -36,6 +37,10 @@ import VentaFormModal from "./VentaFormModal";
  * de los productos involucrados mediante la señal Django.
  */
 const SalesList: React.FC = () => {
+  const { tienePermiso } = usePermiso();
+  const puedeEditar = tienePermiso("ventas.change_venta");
+  const puedeEliminar = tienePermiso("ventas.delete_venta");
+  const hayAcciones = puedeEditar || puedeEliminar;
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -117,6 +122,7 @@ const SalesList: React.FC = () => {
           icon={<CartCheck size={26} viewBox="0 0 16 16" />}
           addLabel="Venta"
           onAdd={handleNuevaVenta}
+          canAdd={tienePermiso("ventas.add_venta")}
         />
 
         <Row className="mt-3 g-2">
@@ -182,7 +188,7 @@ const SalesList: React.FC = () => {
                 <th className="text-end">Total</th>
                 <th className="text-end">Entregó</th>
                 <th className="text-end">Saldo</th>
-                <th style={{ width: "90px" }}>Acciones</th>
+                {hayAcciones && <th style={{ width: "90px" }}>Acciones</th>}
               </tr>
             </thead>
             <tbody>
@@ -214,51 +220,57 @@ const SalesList: React.FC = () => {
                     >
                       ${saldo.toFixed(2)}
                     </td>
-                    <td>
-                      {deleteConfirmId === v.id ? (
-                        <div className="d-flex gap-1">
-                          <Button
-                            variant="danger"
-                            size="sm"
-                            onClick={handleConfirmarEliminar}
-                            disabled={deleteVenta.isPending}
-                            title="Confirmar eliminación"
-                          >
-                            {deleteVenta.isPending ? (
-                              <Spinner animation="border" size="sm" />
-                            ) : (
-                              "Sí"
+                    {hayAcciones && (
+                      <td>
+                        {deleteConfirmId === v.id ? (
+                          <div className="d-flex gap-1">
+                            <Button
+                              variant="danger"
+                              size="sm"
+                              onClick={handleConfirmarEliminar}
+                              disabled={deleteVenta.isPending}
+                              title="Confirmar eliminación"
+                            >
+                              {deleteVenta.isPending ? (
+                                <Spinner animation="border" size="sm" />
+                              ) : (
+                                "Sí"
+                              )}
+                            </Button>
+                            <Button
+                              variant="outline-secondary"
+                              size="sm"
+                              onClick={() => setDeleteConfirmId(null)}
+                            >
+                              No
+                            </Button>
+                          </div>
+                        ) : (
+                          <div className="d-flex gap-1">
+                            {puedeEditar && (
+                              <Button
+                                variant="outline-primary"
+                                size="sm"
+                                onClick={() => handleEditar(v)}
+                                title="Editar venta"
+                              >
+                                <Pencil size={13} />
+                              </Button>
                             )}
-                          </Button>
-                          <Button
-                            variant="outline-secondary"
-                            size="sm"
-                            onClick={() => setDeleteConfirmId(null)}
-                          >
-                            No
-                          </Button>
-                        </div>
-                      ) : (
-                        <div className="d-flex gap-1">
-                          <Button
-                            variant="outline-primary"
-                            size="sm"
-                            onClick={() => handleEditar(v)}
-                            title="Editar venta"
-                          >
-                            <Pencil size={13} />
-                          </Button>
-                          <Button
-                            variant="outline-danger"
-                            size="sm"
-                            onClick={() => setDeleteConfirmId(v.id)}
-                            title="Eliminar venta (devuelve stock)"
-                          >
-                            <Trash size={13} />
-                          </Button>
-                        </div>
-                      )}
-                    </td>
+                            {puedeEliminar && (
+                              <Button
+                                variant="outline-danger"
+                                size="sm"
+                                onClick={() => setDeleteConfirmId(v.id)}
+                                title="Eliminar venta (devuelve stock)"
+                              >
+                                <Trash size={13} />
+                              </Button>
+                            )}
+                          </div>
+                        )}
+                      </td>
+                    )}
                   </tr>
                 );
               })}

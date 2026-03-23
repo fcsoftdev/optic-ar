@@ -28,6 +28,7 @@ import {
 } from "../hooks/useCompras";
 import type { CompraList, Proveedor } from "../services/compras.service";
 import ListHeader from "./ListHeader";
+import { usePermiso } from "../hooks/usePermiso";
 import PaginationBar from "./PaginationBar";
 import ProveedorComprasModal from "./ProveedorComprasModal";
 import ProveedorFormModal from "./ProveedorFormModal";
@@ -41,6 +42,9 @@ import ProveedorFormModal from "./ProveedorFormModal";
  * responde con error 409 / PROTECT).
  */
 function SuppliersList() {
+  const { tienePermiso } = usePermiso();
+  const puedeEditar = tienePermiso("compras.change_proveedor");
+  const puedeEliminar = tienePermiso("compras.delete_proveedor");
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -155,6 +159,7 @@ function SuppliersList() {
           icon={<People size={26} viewBox="0 0 16 16" />}
           addLabel="Proveedor"
           onAdd={handleNuevoProveedor}
+          canAdd={tienePermiso("compras.add_proveedor")}
         />
 
         <Row className="g-2">
@@ -289,24 +294,28 @@ function SuppliersList() {
                           >
                             <CartCheck size={13} />
                           </Button>
-                          <Button
-                            variant="outline-primary"
-                            size="sm"
-                            onClick={() => handleEditar(p)}
-                            title="Editar proveedor"
-                          >
-                            <Pencil size={13} />
-                          </Button>
-                          <Button
-                            variant="outline-danger"
-                            size="sm"
-                            onClick={() => {
-                              setDeleteConfirmId(p.id);
-                            }}
-                            title="Eliminar proveedor"
-                          >
-                            <Trash size={13} />
-                          </Button>
+                          {puedeEditar && (
+                            <Button
+                              variant="outline-primary"
+                              size="sm"
+                              onClick={() => handleEditar(p)}
+                              title="Editar proveedor"
+                            >
+                              <Pencil size={13} />
+                            </Button>
+                          )}
+                          {puedeEliminar && (
+                            <Button
+                              variant="outline-danger"
+                              size="sm"
+                              onClick={() => {
+                                setDeleteConfirmId(p.id);
+                              }}
+                              title="Eliminar proveedor"
+                            >
+                              <Trash size={13} />
+                            </Button>
+                          )}
                         </div>
                       )}
                     </td>

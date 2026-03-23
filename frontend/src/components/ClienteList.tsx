@@ -28,6 +28,7 @@ import type {
   ConsultaList,
 } from "../services/ventas.service";
 import ListHeader from "./ListHeader";
+import { usePermiso } from "../hooks/usePermiso";
 import ClienteConsultasModal from "./ClienteConsultasModal";
 import ClienteFormModal from "./ClienteFormModal";
 import ConsultationFormModal from "./ConsultationFormModal";
@@ -43,6 +44,9 @@ import SearchableSelect from "./SearchableSelect";
  * sea la única área scrollable, manteniendo el header y la paginación fijos.
  */
 const ClienteList: React.FC = () => {
+  const { tienePermiso } = usePermiso();
+  const puedeEditar = tienePermiso("ventas.change_cliente");
+  const puedeEliminar = tienePermiso("ventas.delete_cliente");
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [selectedObraSocial, setSelectedObraSocial] = useState<number | null>(
@@ -214,6 +218,7 @@ const ClienteList: React.FC = () => {
           count={clientesData?.count ?? 0}
           icon={<People size={26} viewBox="0 0 16 16" />}
           addLabel="Cliente"
+          canAdd={tienePermiso("ventas.add_cliente")}
           onAdd={() => {
             setEditingCliente(null);
             setShowModal(true);
@@ -317,27 +322,31 @@ const ClienteList: React.FC = () => {
                       >
                         <ClipboardPulse size={14} />
                       </Button>
-                      <Button
-                        variant="outline-primary"
-                        size="sm"
-                        onClick={() => handleEdit(cliente as any)}
-                        title="Editar"
-                      >
-                        <Pencil size={14} />
-                      </Button>
-                      <Button
-                        variant="outline-danger"
-                        size="sm"
-                        onClick={() =>
-                          handleDelete(
-                            cliente.id,
-                            `${cliente.apellido}, ${cliente.nombre}`,
-                          )
-                        }
-                        title="Eliminar"
-                      >
-                        <Trash size={14} />
-                      </Button>
+                      {puedeEditar && (
+                        <Button
+                          variant="outline-primary"
+                          size="sm"
+                          onClick={() => handleEdit(cliente as any)}
+                          title="Editar"
+                        >
+                          <Pencil size={14} />
+                        </Button>
+                      )}
+                      {puedeEliminar && (
+                        <Button
+                          variant="outline-danger"
+                          size="sm"
+                          onClick={() =>
+                            handleDelete(
+                              cliente.id,
+                              `${cliente.apellido}, ${cliente.nombre}`,
+                            )
+                          }
+                          title="Eliminar"
+                        >
+                          <Trash size={14} />
+                        </Button>
+                      )}
                     </div>
                   </td>
                 </tr>

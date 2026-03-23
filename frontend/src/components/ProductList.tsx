@@ -2,6 +2,7 @@ import React, { useState, useEffect, type JSX } from "react";
 import { Button, Col, Form, Row, Table, Spinner, Alert } from "react-bootstrap";
 import { BoxSeam, PencilSquare, Trash } from "react-bootstrap-icons";
 import ListHeader from "./ListHeader";
+import { usePermiso } from "../hooks/usePermiso";
 import PaginationBar from "./PaginationBar";
 import {
   useProductos,
@@ -23,6 +24,10 @@ const obtenerClaseStock = (stock: number): string => {
 };
 
 const ProductList: React.FC = (): JSX.Element => {
+  const { tienePermiso } = usePermiso();
+  const puedeEditar = tienePermiso("productos.change_producto");
+  const puedeEliminar = tienePermiso("productos.delete_producto");
+  const hayAcciones = puedeEditar || puedeEliminar;
   const [selectedProducts, setSelectedProducts] = useState<number[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
@@ -192,8 +197,9 @@ const ProductList: React.FC = (): JSX.Element => {
           icon={<BoxSeam size={26} viewBox="0 0 16 16" />}
           addLabel="Producto"
           onAdd={handleAddProduct}
+          canAdd={tienePermiso("productos.add_producto")}
         >
-          {selectedProducts.length > 0 && (
+          {puedeEliminar && selectedProducts.length > 0 && (
             <Button variant="danger" size="sm" onClick={handleDeleteSelected}>
               <Trash size={16} className="me-1" />
               Eliminar seleccionados ({selectedProducts.length})
@@ -325,7 +331,7 @@ const ProductList: React.FC = (): JSX.Element => {
               <th>Subcategoría</th>
               <th>Precio</th>
               <th>Stock</th>
-              <th style={{ width: "120px" }}>Acciones</th>
+              {hayAcciones && <th style={{ width: "120px" }}>Acciones</th>}
             </tr>
           </thead>
           <tbody>
@@ -353,25 +359,31 @@ const ProductList: React.FC = (): JSX.Element => {
                     : "-"}
                 </td>
                 <td>{producto.stock}</td>
-                <td>
-                  <Button
-                    variant="outline-primary"
-                    size="sm"
-                    className="me-1"
-                    onClick={() => handleEditProduct(producto.id)}
-                    title="Editar"
-                  >
-                    <PencilSquare size={16} />
-                  </Button>
-                  <Button
-                    variant="outline-danger"
-                    size="sm"
-                    onClick={() => handleDeleteProduct(producto.id)}
-                    title="Eliminar"
-                  >
-                    <Trash size={16} />
-                  </Button>
-                </td>
+                {hayAcciones && (
+                  <td>
+                    {puedeEditar && (
+                      <Button
+                        variant="outline-primary"
+                        size="sm"
+                        className="me-1"
+                        onClick={() => handleEditProduct(producto.id)}
+                        title="Editar"
+                      >
+                        <PencilSquare size={16} />
+                      </Button>
+                    )}
+                    {puedeEliminar && (
+                      <Button
+                        variant="outline-danger"
+                        size="sm"
+                        onClick={() => handleDeleteProduct(producto.id)}
+                        title="Eliminar"
+                      >
+                        <Trash size={16} />
+                      </Button>
+                    )}
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>
