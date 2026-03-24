@@ -12,7 +12,7 @@ import {
   useSubCategorias,
 } from "../hooks/useProductos";
 import ProductoFormModal from "./ProductoFormModal";
-import type { Producto } from "../services/productos.service";
+import productosService, { type Producto } from "../services/productos.service";
 
 const obtenerClaseStock = (stock: number): string => {
   if (stock <= 1) {
@@ -125,21 +125,12 @@ const ProductList: React.FC = (): JSX.Element => {
   };
 
   const handleEditProduct = async (productId: number) => {
-    const producto = products.find((p) => p.id === productId);
-    if (producto) {
-      // Necesitamos obtener el producto completo desde la API
-      try {
-        const response = await fetch(
-          `${
-            import.meta.env.VITE_API_URL || "http://127.0.0.1:8000"
-          }/api/productos/${productId}/`,
-        );
-        const fullProducto = await response.json();
-        setEditingProducto(fullProducto);
-        setShowModal(true);
-      } catch (error) {
-        console.error("Error al cargar producto:", error);
-      }
+    try {
+      const fullProducto = await productosService.getProducto(productId);
+      setEditingProducto(fullProducto);
+      setShowModal(true);
+    } catch (error) {
+      console.error("Error al cargar producto:", error);
     }
   };
 
