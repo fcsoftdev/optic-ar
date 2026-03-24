@@ -22,6 +22,7 @@ export interface DetalleCompraRead {
   producto_nombre: string;
   cantidad: number;
   precio_unitario: string;
+  porcentaje_ganancia: string;
   precio_venta: string;
   subtotal: string;
 }
@@ -52,7 +53,7 @@ export interface DetalleCompraWrite {
   producto: number;
   cantidad: number;
   precio_unitario: number;
-  precio_venta: number;
+  porcentaje_ganancia: number;
 }
 
 /** Datos para crear o actualizar una compra */

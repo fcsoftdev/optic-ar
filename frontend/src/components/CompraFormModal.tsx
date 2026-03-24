@@ -37,6 +37,7 @@ const DETALLE_VACIO = {
   producto: 0,
   cantidad: 1,
   precio_unitario: 0,
+  porcentaje_ganancia: 0,
   precio_venta: 0,
 };
 
@@ -95,7 +96,16 @@ const NumericInput: React.FC<{
       size={size}
       value={raw}
       placeholder={placeholder}
-      onChange={(e) => setRaw(e.target.value)}
+      onChange={(e) => {
+        const newRaw = e.target.value;
+        setRaw(newRaw);
+        // Propagar el valor parseado mientras se escribe
+        const normalized = newRaw.replace(/\./g, "").replace(",", ".");
+        const val = parseFloat(normalized);
+        if (Number.isFinite(val)) {
+          onChange(val);
+        }
+      }}
       onFocus={() => {
         setFocused(true);
         setRaw(
@@ -250,7 +260,7 @@ const CompraFormModal: React.FC<CompraFormModalProps> = ({
     reset,
     formState: { errors },
   } = useForm<CompraFormValues>({
-    resolver: zodResolver(compraSchema),
+    resolver: zodResolver(compraSchema) as any,
     defaultValues: {
       fecha: today,
       proveedor: undefined,
@@ -296,6 +306,7 @@ const CompraFormModal: React.FC<CompraFormModalProps> = ({
                 producto: d.producto ?? 0,
                 cantidad: d.cantidad,
                 precio_unitario: Number(d.precio_unitario),
+                porcentaje_ganancia: Number(d.porcentaje_ganancia),
                 precio_venta: Number(d.precio_venta),
               }))
             : [DETALLE_VACIO],
@@ -330,21 +341,13 @@ const CompraFormModal: React.FC<CompraFormModalProps> = ({
 
   /**
    * Al seleccionar un producto en un ítem, autocompleta precio_unitario
-   * desde el precio_costo del producto y precio_venta desde el precio_venta.
+   * desde el precio_costo del producto.
    *
    * @param index - Índice del ítem en el array de detalles.
    * @param productoId - ID del producto seleccionado.
    */
   const handleProductoChange = (index: number, productoId: number | null) => {
     setValue(`detalles.${index}.producto`, productoId ?? 0);
-    const cached = productoId
-      ? productoCacheRef.current[productoId]
-      : undefined;
-    if (cached) {
-      if (cached.precio_venta > 0) {
-        setValue(`detalles.${index}.precio_venta`, cached.precio_venta);
-      }
-    }
   };
 
   /**
@@ -367,7 +370,7 @@ const CompraFormModal: React.FC<CompraFormModalProps> = ({
         producto: d.producto,
         cantidad: d.cantidad,
         precio_unitario: d.precio_unitario,
-        precio_venta: d.precio_venta,
+        porcentaje_ganancia: d.porcentaje_ganancia,
       })),
     };
 
@@ -448,7 +451,13 @@ const CompraFormModal: React.FC<CompraFormModalProps> = ({
                             )}
                           />
                           {errors.proveedor && (
-                            <div className="text-danger" style={{ fontSize: "0.875em", marginTop: "0.25rem" }}>
+                            <div
+                              className="text-danger"
+                              style={{
+                                fontSize: "0.875em",
+                                marginTop: "0.25rem",
+                              }}
+                            >
                               {errors.proveedor.message}
                             </div>
                           )}
@@ -515,6 +524,7 @@ const CompraFormModal: React.FC<CompraFormModalProps> = ({
                         <th style={{ minWidth: "220px" }}>Producto</th>
                         <th style={{ width: "80px" }}>Cant.</th>
                         <th style={{ width: "130px" }}>P. Costo ($)</th>
+                        <th style={{ width: "110px" }}>% Ganancia</th>
                         <th style={{ width: "130px" }}>P. Venta ($)</th>
                         <th style={{ width: "110px" }} className="text-end">
                           Subtotal
@@ -598,11 +608,52 @@ const CompraFormModal: React.FC<CompraFormModalProps> = ({
                                 render={({ field: f }) => (
                                   <NumericInput
                                     value={f.value}
-                                    onChange={f.onChange}
+                                    onChange={(newCosto) => {
+                                      f.onChange(newCosto);
+                                      const pct =
+                                        watchedDetalles?.[index]
+                                          ?.porcentaje_ganancia ?? 0;
+                                      setValue(
+                                        `detalles.${index}.precio_venta`,
+                                        Math.round(
+                                          newCosto * (1 + pct / 100) * 100,
+                                        ) / 100,
+                                      );
+                                    }}
                                     size="sm"
                                     isInvalid={
                                       !!(errors.detalles?.[index] as any)
                                         ?.precio_unitario
+                                    }
+                                  />
+                                )}
+                              />
+                            </td>
+
+                            <td>
+                              <Controller
+                                name={`detalles.${index}.porcentaje_ganancia`}
+                                control={control}
+                                render={({ field: f }) => (
+                                  <NumericInput
+                                    value={f.value}
+                                    onChange={(newPct) => {
+                                      f.onChange(newPct);
+                                      const costo =
+                                        watchedDetalles?.[index]
+                                          ?.precio_unitario ?? 0;
+                                      setValue(
+                                        `detalles.${index}.precio_venta`,
+                                        Math.round(
+                                          costo * (1 + newPct / 100) * 100,
+                                        ) / 100,
+                                      );
+                                    }}
+                                    size="sm"
+                                    placeholder="0,00"
+                                    isInvalid={
+                                      !!(errors.detalles?.[index] as any)
+                                        ?.porcentaje_ganancia
                                     }
                                   />
                                 )}
@@ -616,7 +667,22 @@ const CompraFormModal: React.FC<CompraFormModalProps> = ({
                                 render={({ field: f }) => (
                                   <NumericInput
                                     value={f.value}
-                                    onChange={f.onChange}
+                                    onChange={(newVenta) => {
+                                      f.onChange(newVenta);
+                                      const costo =
+                                        watchedDetalles?.[index]
+                                          ?.precio_unitario ?? 0;
+                                      if (costo > 0) {
+                                        setValue(
+                                          `detalles.${index}.porcentaje_ganancia`,
+                                          Math.round(
+                                            ((newVenta - costo) / costo) *
+                                              100 *
+                                              100,
+                                          ) / 100,
+                                        );
+                                      }
+                                    }}
                                     size="sm"
                                     isInvalid={
                                       !!(errors.detalles?.[index] as any)

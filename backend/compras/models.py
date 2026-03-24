@@ -52,12 +52,20 @@ class DetalleCompra(models.Model):
     precio_unitario = models.DecimalField(
         "Precio unitario", max_digits=10, decimal_places=2, default=0
     )
+    porcentaje_ganancia = models.DecimalField(
+        "Porcentaje de ganancia",
+        max_digits=5,
+        decimal_places=2,
+        default=Decimal("0.00"),
+        help_text="Porcentaje de ganancia sobre el precio unitario (ej: 30.00 para 30%)",
+    )
     precio_venta = models.DecimalField(
         "Precio de venta",
         max_digits=10,
         decimal_places=2,
         default=0,
-        help_text="Precio de venta sugerido para este producto",
+        editable=False,
+        help_text="Calculado automáticamente: precio_unitario × (1 + porcentaje_ganancia / 100)",
     )
     subtotal = models.DecimalField(max_digits=10, decimal_places=2, editable=False)
 
@@ -73,7 +81,12 @@ class DetalleCompra(models.Model):
         # 1. Calcular el subtotal
         self.subtotal = self.cantidad * self.precio_unitario
 
-        # 2. Si hay un producto asociado, actualizamos su stock y precio
+        # 2. Calcular precio de venta a partir del porcentaje de ganancia
+        self.precio_venta = (
+            self.precio_unitario * (1 + self.porcentaje_ganancia / Decimal("100"))
+        ).quantize(Decimal("0.01"))
+
+        # 3. Si hay un producto asociado, actualizamos su stock y precio
         if self.producto:
             try:
                 detalle_viejo = DetalleCompra.objects.get(pk=self.pk)
@@ -88,7 +101,7 @@ class DetalleCompra(models.Model):
             self.producto.precio_venta = self.precio_venta
             self.producto.save()
 
-        # 3. Guardar el detalle de compra
+        # 4. Guardar el detalle de compra
         super().save(*args, **kwargs)
 
 

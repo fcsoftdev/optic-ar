@@ -40,10 +40,11 @@ class DetalleCompraReadSerializer(serializers.ModelSerializer):
             "producto_nombre",
             "cantidad",
             "precio_unitario",
+            "porcentaje_ganancia",
             "precio_venta",
             "subtotal",
         ]
-        read_only_fields = ["id", "subtotal"]
+        read_only_fields = ["id", "precio_venta", "subtotal"]
 
 
 class DetalleCompraWriteSerializer(serializers.Serializer):
@@ -61,8 +62,8 @@ class DetalleCompraWriteSerializer(serializers.Serializer):
     precio_unitario = serializers.DecimalField(
         max_digits=10, decimal_places=2, min_value=Decimal("0.01")
     )
-    precio_venta = serializers.DecimalField(
-        max_digits=10, decimal_places=2, min_value=Decimal("0.01")
+    porcentaje_ganancia = serializers.DecimalField(
+        max_digits=5, decimal_places=2, min_value=Decimal("0")
     )
 
 

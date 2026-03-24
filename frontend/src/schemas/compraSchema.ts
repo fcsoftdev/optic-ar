@@ -17,10 +17,14 @@ const detalleCompraSchema = z.object({
     .number({ error: "Ingrese el precio de costo" })
     .multipleOf(0.01)
     .positive("El precio de costo debe ser mayor a 0"),
+  porcentaje_ganancia: z
+    .number({ error: "Ingrese el porcentaje de ganancia" })
+    .min(0, "El porcentaje no puede ser negativo")
+    .multipleOf(0.01),
   precio_venta: z
     .number({ error: "Ingrese el precio de venta" })
-    .multipleOf(0.01)
-    .positive("El precio de venta debe ser mayor a 0"),
+    .min(0, "El precio de venta no puede ser negativo")
+    .multipleOf(0.01),
 });
 
 /**
