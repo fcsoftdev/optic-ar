@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      // Redirige /api/ y /static/ al backend Django.
+      // Redirige /api/, /ventas/ y /static/ al backend Django.
       // Esto hace que el navegador trate todas las peticiones como mismo
       // origen (localhost:5173), resolviendo el problema de SameSite con cookies.
       "/api": {
@@ -17,6 +17,10 @@ export default defineConfig({
         // Sin esto, la cookie refresh_token queda atada a 127.0.0.1 y
         // el navegador no la envía en peticiones desde localhost:5173.
         cookieDomainRewrite: { "127.0.0.1": "localhost", "*": "" },
+      },
+      "/ventas": {
+        target: "http://127.0.0.1:8000",
+        changeOrigin: true,
       },
       "/static": {
         target: "http://127.0.0.1:8000",
