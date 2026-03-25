@@ -21,6 +21,7 @@ import ListHeader from "./ListHeader";
 import { usePermiso } from "../hooks/usePermiso";
 import PaginationBar from "./PaginationBar";
 import CompraFormModal from "./CompraFormModal";
+import { useNavStore } from "../stores/useNavStore";
 
 /**
  * Formatea un número con separador de miles (.) y decimales (,) en formato argentino.
@@ -53,6 +54,24 @@ const PurchaseList: React.FC = () => {
   const [showModal, setShowModal] = useState(false);
   const [editingCompra, setEditingCompra] = useState<CompraList | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
+
+  // Abrir compra solicitada desde historial de producto
+  const { pendingCompraId, clearPendingCompraId } = useNavStore();
+  useEffect(() => {
+    if (pendingCompraId !== null) {
+      const stub: CompraList = {
+        id: pendingCompraId,
+        fecha: "",
+        proveedor: null,
+        proveedor_nombre: "",
+        cantidad_items: 0,
+        total: "0",
+      };
+      setEditingCompra(stub);
+      setShowModal(true);
+      clearPendingCompraId();
+    }
+  }, [pendingCompraId]);
 
   // Debounce para búsqueda
   useEffect(() => {

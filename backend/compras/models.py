@@ -78,31 +78,86 @@ class DetalleCompra(models.Model):
         return f"{self.cantidad}-{producto_nombre}-{self.precio_unitario}"
 
     def save(self, *args, **kwargs):
+        from .services import calcular_precio_costo_promedio
+
         # 1. Calcular el subtotal
         self.subtotal = self.cantidad * self.precio_unitario
-
-        # 2. Calcular precio de venta a partir del porcentaje de ganancia
-        self.precio_venta = (
-            self.precio_unitario * (1 + self.porcentaje_ganancia / Decimal("100"))
-        ).quantize(Decimal("0.01"))
 
         # 3. Si hay un producto asociado, actualizamos su stock y precio
         if self.producto:
             try:
                 detalle_viejo = DetalleCompra.objects.get(pk=self.pk)
-                diferencia_stock = self.cantidad - detalle_viejo.cantidad
+                # Stock base: excluir la cantidad vieja de este mismo detalle
+                stock_base = Decimal(self.producto.stock) - Decimal(detalle_viejo.cantidad)
             except DetalleCompra.DoesNotExist:
-                # Si el objeto es nuevo, la diferencia es la cantidad total
-                diferencia_stock = self.cantidad
+                # Nuevo detalle: el stock actual es la base completa
+                stock_base = Decimal(self.producto.stock)
 
-            # Actualizamos el stock y precios del producto
-            self.producto.stock += diferencia_stock
-            self.producto.precio_costo = self.precio_unitario
+            cantidad_nueva = Decimal(self.cantidad)
+
+            # Calcular nuevo costo promedio ponderado
+            nuevo_costo = calcular_precio_costo_promedio(
+                stock_actual=stock_base,
+                costo_actual=self.producto.precio_costo or Decimal("0.00"),
+                cantidad_nueva=cantidad_nueva,
+                costo_nuevo=self.precio_unitario,
+            )
+
+            # 2. Precio de venta sobre el costo promedio resultante
+            self.precio_venta = (
+                nuevo_costo * (1 + self.porcentaje_ganancia / Decimal("100"))
+            ).quantize(Decimal("0.01"))
+
+            # Actualizar stock y precios del producto
+            self.producto.stock = int(stock_base + cantidad_nueva)
+            self.producto.precio_costo = nuevo_costo
+            self.producto.porcentaje_ganancia = self.porcentaje_ganancia
             self.producto.precio_venta = self.precio_venta
             self.producto.save()
 
+            # Registrar historial de costo (mantener solo las últimas 4 entradas)
+            HistorialCostoProducto.objects.create(
+                producto=self.producto,
+                compra=self.compra,
+                precio_costo=nuevo_costo,
+                precio_compra=self.precio_unitario,
+                fecha=self.compra.fecha,
+            )
+            historial_ids = list(
+                HistorialCostoProducto.objects
+                .filter(producto=self.producto)
+                .order_by("-fecha", "-id")
+                .values_list("id", flat=True)
+            )
+            if len(historial_ids) > 4:
+                HistorialCostoProducto.objects.filter(id__in=historial_ids[4:]).delete()
+
         # 4. Guardar el detalle de compra
         super().save(*args, **kwargs)
+
+
+class HistorialCostoProducto(models.Model):
+    """Historial de los últimos costos de compra registrados para un producto."""
+
+    producto = models.ForeignKey(
+        Producto, on_delete=models.CASCADE, related_name="historial_costos"
+    )
+    compra = models.ForeignKey(
+        Compra, on_delete=models.SET_NULL, null=True, blank=True
+    )
+    precio_costo = models.DecimalField("Precio promedio", max_digits=10, decimal_places=2)
+    precio_compra = models.DecimalField(
+        "Precio real de compra", max_digits=10, decimal_places=2, default=0
+    )
+    fecha = models.DateField()
+
+    class Meta:
+        verbose_name = "Historial de Costo"
+        verbose_name_plural = "Historial de Costos"
+        ordering = ["-fecha", "-id"]
+
+    def __str__(self):
+        return f"{self.producto} - {self.precio_costo} ({self.fecha})"
 
 
 class Gasto(models.Model):

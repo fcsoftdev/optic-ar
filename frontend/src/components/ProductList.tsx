@@ -1,9 +1,8 @@
-import React, { useState, useEffect, type JSX } from "react";
+import React, { useState, useEffect, useRef, type JSX } from "react";
 import { Button, Col, Form, Row, Table, Spinner, Alert } from "react-bootstrap";
 import { BoxSeam, PencilSquare, Trash } from "react-bootstrap-icons";
 import ListHeader from "./ListHeader";
 import { usePermiso } from "../hooks/usePermiso";
-import PaginationBar from "./PaginationBar";
 import {
   useProductos,
   useDeleteProducto,
@@ -12,6 +11,7 @@ import {
   useSubCategorias,
 } from "../hooks/useProductos";
 import ProductoFormModal from "./ProductoFormModal";
+import AumentoMasivoModal from "./AumentoMasivoModal";
 import productosService, { type Producto } from "../services/productos.service";
 
 const obtenerClaseStock = (stock: number): string => {
@@ -29,6 +29,7 @@ const ProductList: React.FC = (): JSX.Element => {
   const puedeEliminar = tienePermiso("productos.delete_producto");
   const hayAcciones = puedeEditar || puedeEliminar;
   const [selectedProducts, setSelectedProducts] = useState<number[]>([]);
+  const [showAumentoModal, setShowAumentoModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [selectedMarca, setSelectedMarca] = useState<number | null>(null);
@@ -38,7 +39,7 @@ const ProductList: React.FC = (): JSX.Element => {
   const [selectedSubCategoria, setSelectedSubCategoria] = useState<
     number | null
   >(null);
-  const [currentPage, setCurrentPage] = useState(1);
+  const sentinelRef = useRef<HTMLDivElement>(null);
   const [showModal, setShowModal] = useState(false);
   const [editingProducto, setEditingProducto] = useState<Producto | null>(null);
 
@@ -46,15 +47,20 @@ const ProductList: React.FC = (): JSX.Element => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm);
-      setCurrentPage(1); // Reset a la primera página al buscar
     }, 500); // Espera 500ms después de que el usuario deje de escribir
 
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
-  const { data, isLoading, error } = useProductos({
+  const {
+    data,
+    isLoading,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useProductos({
     search: debouncedSearchTerm,
-    page: currentPage,
     marca: selectedMarca || undefined,
     categoria: selectedCategoria || undefined,
     sub_categoria: selectedSubCategoria || undefined,
@@ -66,28 +72,39 @@ const ProductList: React.FC = (): JSX.Element => {
     selectedCategoria || undefined,
   );
 
-  const products = data?.results || [];
-  const totalPages = data?.count ? Math.ceil(data.count / 10) : 0;
+  const products = data?.pages.flatMap((p) => p.results) ?? [];
   const marcas = Array.isArray(marcasData)
     ? marcasData
     : marcasData?.results || [];
   const categoriasData = categorias || [];
   const subcategoriasData = subcategorias || [];
 
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { threshold: 0.1 },
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
   const handleMarcaChange = (marcaId: number | null) => {
     setSelectedMarca(marcaId);
-    setCurrentPage(1);
   };
 
   const handleCategoriaChange = (categoriaId: number | null) => {
     setSelectedCategoria(categoriaId);
     setSelectedSubCategoria(null); // Reset subcategoría al cambiar categoría
-    setCurrentPage(1);
   };
 
   const handleSubCategoriaChange = (subCategoriaId: number | null) => {
     setSelectedSubCategoria(subCategoriaId);
-    setCurrentPage(1);
   };
 
   const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -147,12 +164,6 @@ const ProductList: React.FC = (): JSX.Element => {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     setDebouncedSearchTerm(searchTerm);
-    setCurrentPage(1); // Reset a la primera página al buscar
-  };
-
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   if (isLoading) {
@@ -184,7 +195,7 @@ const ProductList: React.FC = (): JSX.Element => {
       <div style={{ flex: "0 0 auto" }}>
         <ListHeader
           title="Productos"
-          count={data?.count || 0}
+          count={data?.pages[0]?.count || 0}
           icon={<BoxSeam size={26} viewBox="0 0 16 16" />}
           addLabel="Producto"
           onAdd={handleAddProduct}
@@ -194,6 +205,15 @@ const ProductList: React.FC = (): JSX.Element => {
             <Button variant="danger" size="sm" onClick={handleDeleteSelected}>
               <Trash size={16} className="me-1" />
               Eliminar seleccionados ({selectedProducts.length})
+            </Button>
+          )}
+          {puedeEditar && selectedProducts.length > 0 && (
+            <Button
+              variant="warning"
+              size="sm"
+              onClick={() => setShowAumentoModal(true)}
+            >
+              Aumento Masivo ({selectedProducts.length})
             </Button>
           )}
         </ListHeader>
@@ -269,7 +289,6 @@ const ProductList: React.FC = (): JSX.Element => {
                   setSelectedMarca(null);
                   setSelectedCategoria(null);
                   setSelectedSubCategoria(null);
-                  setCurrentPage(1);
                 }}
               >
                 Limpiar
@@ -379,18 +398,14 @@ const ProductList: React.FC = (): JSX.Element => {
             ))}
           </tbody>
         </Table>
-      </div>
-
-      {/* Paginación */}
-      <div style={{ flex: "0 0 auto", marginTop: "auto" }}>
-        <PaginationBar
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={handlePageChange}
-          totalItems={data?.count ?? 0}
-          pageItems={products.length}
-          itemLabel="producto(s)"
-        />
+        {/* Sentinel para infinite scroll */}
+        <div ref={sentinelRef} style={{ height: 1 }} />
+        {isFetchingNextPage && (
+          <div className="text-center py-3">
+            <Spinner animation="border" size="sm" className="me-2" />
+            Cargando más productos...
+          </div>
+        )}
       </div>
 
       {/* Modal de formulario */}
@@ -398,6 +413,14 @@ const ProductList: React.FC = (): JSX.Element => {
         show={showModal}
         onHide={handleCloseModal}
         producto={editingProducto}
+      />
+
+      {/* Modal de aumento masivo */}
+      <AumentoMasivoModal
+        show={showAumentoModal}
+        onHide={() => setShowAumentoModal(false)}
+        selectedIds={selectedProducts}
+        onSuccess={() => setSelectedProducts([])}
       />
     </div>
   );

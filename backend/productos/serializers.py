@@ -34,6 +34,25 @@ class ProductoSerializer(serializers.ModelSerializer):
     sub_categoria_nombre = serializers.CharField(
         source="sub_categoria.nombre", read_only=True
     )
+    historial_costos = serializers.SerializerMethodField()
+
+    def get_historial_costos(self, obj):
+        """Retorna los últimos 4 registros de costo del producto."""
+        from compras.models import HistorialCostoProducto
+        historial = (
+            HistorialCostoProducto.objects
+            .filter(producto=obj)
+            .order_by("-fecha", "-id")[:4]
+        )
+        return [
+            {
+                "precio_compra": str(h.precio_compra),
+                "precio_costo": str(h.precio_costo),
+                "fecha": str(h.fecha),
+                "compra_id": h.compra_id,
+            }
+            for h in historial
+        ]
 
     class Meta:
         model = Producto
@@ -52,6 +71,7 @@ class ProductoSerializer(serializers.ModelSerializer):
             "precio_costo",
             "porcentaje_ganancia",
             "precio_venta",
+            "historial_costos",
         ]
         read_only_fields = ["id"]
 

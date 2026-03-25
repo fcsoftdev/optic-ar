@@ -29,6 +29,13 @@ export interface SubCategoria {
 }
 
 /** Producto completo con todos los campos */
+export interface HistorialCosto {
+  precio_compra: string;
+  precio_costo: string;
+  fecha: string;
+  compra_id: number | null;
+}
+
 export interface Producto {
   id: number;
   codigo: string;
@@ -44,6 +51,7 @@ export interface Producto {
   precio_costo?: number;
   porcentaje_ganancia?: number;
   precio_venta: number;
+  historial_costos?: HistorialCosto[];
 }
 
 /** Versión simplificada de Producto para listados (menos campos) */
@@ -194,6 +202,16 @@ const productosService = {
     await api.delete(`/api/productos/${id}/`);
   },
 
+  /**
+   * Aplica un porcentaje de aumento al precio_costo de los productos indicados.
+   * @param ids - IDs de los productos a actualizar
+   * @param porcentaje - Porcentaje de aumento (ej: 15.5 para 15.5%)
+   */
+  aumentoMasivo: async (ids: number[], porcentaje: number): Promise<{ actualizados: number }> => {
+    const response = await api.post("/api/productos/aumento_masivo/", { ids, porcentaje });
+    return response.data;
+  },
+
   // ==================== MARCAS ====================
 
   /**
@@ -260,7 +278,7 @@ const productosService = {
    * @returns Array de categorías
    */
   getCategorias: async (): Promise<Categoria[]> => {
-    const response = await api.get("/api/categorias/");
+    const response = await api.get("/api/categorias/", { params: { page_size: 9999 } });
     return response.data.results || response.data;
   },
 

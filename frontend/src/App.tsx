@@ -8,6 +8,7 @@ import MainContent from "./components/MainContent";
 import InfoCard from "./components/InfoCard";
 import LoginPage from "./components/LoginPage";
 import { useAuthStore } from "./stores/useAuthStore";
+import { useNavStore } from "./stores/useNavStore";
 import { silentRefresh } from "./services/auth.service";
 
 /**
@@ -24,6 +25,14 @@ function App() {
   const [activeSection, setActiveSection] = useState("dashboard");
   const { accessToken, setAuth, clearAuth, isInitialized, setInitialized } =
     useAuthStore();
+  const { pendingCompraId } = useNavStore();
+
+  // Navegar a compras cuando se solicita desde historial de producto
+  useEffect(() => {
+    if (pendingCompraId !== null) {
+      setActiveSection("compras");
+    }
+  }, [pendingCompraId]);
 
   // Guard para evitar doble ejecución en React StrictMode (desarrollo).
   // StrictMode monta/desmonta/remonta los componentes dos veces. Con

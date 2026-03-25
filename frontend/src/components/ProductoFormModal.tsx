@@ -30,7 +30,8 @@ import {
   productoSchema,
   type ProductoFormData,
 } from "../schemas/productoSchema";
-import type { Producto } from "../services/productos.service";
+import type { Producto, HistorialCosto } from "../services/productos.service";
+import { useNavStore } from "../stores/useNavStore";
 import EntityManagerModal from "./EntityManagerModal";
 import SearchableSelect from "./SearchableSelect";
 
@@ -49,6 +50,7 @@ const ProductoFormModal: React.FC<ProductoFormModalProps> = ({
   const [showMarcaManager, setShowMarcaManager] = useState(false);
   const [showCategoriaManager, setShowCategoriaManager] = useState(false);
   const [showSubCategoriaManager, setShowSubCategoriaManager] = useState(false);
+  const { setPendingCompraId } = useNavStore();
 
   const {
     control,
@@ -105,7 +107,7 @@ const ProductoFormModal: React.FC<ProductoFormModalProps> = ({
   // Función para calcular el precio de venta
   const calcularPrecioVenta = (
     costo: number | null | undefined,
-    porcentaje: number | null | undefined
+    porcentaje: number | null | undefined,
   ) => {
     if (!costo || costo <= 0) {
       setValue("precio_venta", 0);
@@ -215,7 +217,7 @@ const ProductoFormModal: React.FC<ProductoFormModalProps> = ({
   // Handlers para SubCategoría
   const handleCreateSubCategoria = async (
     nombre: string,
-    categoriaId?: number
+    categoriaId?: number,
   ) => {
     if (!categoriaId) throw new Error("Categoría requerida");
     const newSubCategoria = await createSubCategoria.mutateAsync({
@@ -228,7 +230,7 @@ const ProductoFormModal: React.FC<ProductoFormModalProps> = ({
   const handleUpdateSubCategoria = async (
     id: number,
     nombre: string,
-    categoriaId?: number
+    categoriaId?: number,
   ) => {
     if (!categoriaId) throw new Error("Categoría requerida");
     await updateSubCategoria.mutateAsync({
@@ -469,7 +471,7 @@ const ProductoFormModal: React.FC<ProductoFormModalProps> = ({
                             const newCosto = isNaN(numValue) ? null : numValue;
                             // Obtener porcentaje antes de actualizar el costo
                             const porcentajeActual = getValues(
-                              "porcentaje_ganancia"
+                              "porcentaje_ganancia",
                             );
                             onChange(newCosto);
                             // Calcular inmediatamente con los valores actuales
@@ -569,6 +571,77 @@ const ProductoFormModal: React.FC<ProductoFormModalProps> = ({
                 </Form.Group>
               </Col>
             </Row>
+
+            {/* Historial de costos (solo en edición) */}
+            {isEditing &&
+              producto?.historial_costos &&
+              producto.historial_costos.length > 0 && (
+                <Row className="mb-3">
+                  <Col md={12}>
+                    <Form.Label className="text-muted">
+                      Historial de Precio
+                    </Form.Label>
+                    <div className="d-flex gap-2">
+                      {producto.historial_costos.map(
+                        (h: HistorialCosto, i: number) => (
+                          <div
+                            key={i}
+                            className="border rounded px-3 py-2 bg-light text-center"
+                            style={{
+                              minWidth: 130,
+                              cursor: h.compra_id ? "pointer" : "default",
+                              transition: "box-shadow 0.15s",
+                            }}
+                            role={h.compra_id ? "button" : undefined}
+                            title={h.compra_id ? "Ver compra" : undefined}
+                            onClick={() => {
+                              if (h.compra_id) {
+                                setPendingCompraId(h.compra_id);
+                                handleClose();
+                              }
+                            }}
+                            onMouseEnter={(e) => {
+                              if (h.compra_id)
+                                (
+                                  e.currentTarget as HTMLDivElement
+                                ).style.boxShadow = "0 0 0 2px #0d6efd";
+                            }}
+                            onMouseLeave={(e) => {
+                              (
+                                e.currentTarget as HTMLDivElement
+                              ).style.boxShadow = "";
+                            }}
+                          >
+                            <div className="fw-semibold text-dark">
+                              $
+                              {parseFloat(h.precio_compra).toLocaleString(
+                                "es-AR",
+                                { minimumFractionDigits: 2 },
+                              )}
+                            </div>
+                            <div className="text-muted small">{h.fecha}</div>
+                            {h.compra_id ? (
+                              <div
+                                className="text-primary"
+                                style={{ fontSize: "0.7rem" }}
+                              >
+                                Ver compra →
+                              </div>
+                            ) : (
+                              <div
+                                className="text-warning"
+                                style={{ fontSize: "0.7rem" }}
+                              >
+                                Aumento masivo
+                              </div>
+                            )}
+                          </div>
+                        ),
+                      )}
+                    </div>
+                  </Col>
+                </Row>
+              )}
 
             {(createProducto.isError || updateProducto.isError) && (
               <Alert variant="danger" className="mt-3">

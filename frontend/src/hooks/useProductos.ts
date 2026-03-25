@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import productosService, {
   type ProductoCreateUpdate,
 } from "../services/productos.service";
@@ -59,15 +59,21 @@ import productosService, {
  * return <ProductTable productos={data.results} />;
  */
 export const useProductos = (params?: {
-  page?: number;
   search?: string;
   marca?: number;
   categoria?: number;
   sub_categoria?: number;
 }) => {
-  return useQuery({
-    queryKey: ["productos", params], // Cache key - se invalida cuando cambia params
-    queryFn: () => productosService.getProductos(params), // Función que hace el fetch
+  return useInfiniteQuery({
+    queryKey: ["productos", params],
+    queryFn: ({ pageParam = 1 }) =>
+      productosService.getProductos({ ...params, page: pageParam as number }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => {
+      if (!lastPage.next) return undefined;
+      const url = new URL(lastPage.next);
+      return Number(url.searchParams.get("page"));
+    },
   });
 };
 
@@ -169,10 +175,19 @@ export const useDeleteProducto = () => {
   return useMutation({
     mutationFn: (id: number) => productosService.deleteProducto(id),
     onSuccess: (_, deletedId) => {
-      // Remover el producto individual del cache
       queryClient.removeQueries({ queryKey: ["producto", deletedId] });
+      queryClient.invalidateQueries({ queryKey: ["productos"] });
+    },
+  });
+};
 
-      // Invalidar lista de productos (necesario por paginación y conteo)
+export const useAumentoMasivo = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ ids, porcentaje }: { ids: number[]; porcentaje: number }) =>
+      productosService.aumentoMasivo(ids, porcentaje),
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["productos"] });
     },
   });
@@ -195,9 +210,11 @@ export const useDeleteProducto = () => {
  * const marcas = Array.isArray(data) ? data : data?.results || [];
  */
 export const useMarcas = (params?: { page?: number; search?: string }) => {
+  // Si no se pide una página específica (uso en selector), traer todos los registros
+  const queryParams = params?.page ? params : { ...params, page_size: 9999 };
   return useQuery({
-    queryKey: ["marcas", params],
-    queryFn: () => productosService.getMarcas(params),
+    queryKey: ["marcas", queryParams],
+    queryFn: () => productosService.getMarcas(queryParams),
   });
 };
 
