@@ -160,6 +160,36 @@ function TurnosCalendar() {
   };
 
   /**
+   * Extrae el primer mensaje de error legible de una respuesta Axios.
+   * Soporta el formato DRF: { campo: ["mensaje"] } o { detail: "mensaje" }.
+   *
+   * @param error - Error capturado en el catch.
+   * @param fallback - Mensaje genérico si no se puede extraer uno específico.
+   */
+  const extraerMensajeError = (error: unknown, fallback: string): string => {
+    if (!axios.isAxiosError(error) || !error.response?.data) return fallback;
+    const data = error.response.data as Record<string, unknown>;
+    // DRF devuelve arrays por campo: { hora_inicio: ["Conflicto..."] }
+    for (const val of Object.values(data)) {
+      if (Array.isArray(val) && typeof val[0] === "string") return val[0];
+      if (typeof val === "string") return val;
+    }
+    return fallback;
+  };
+
+  /**
+   * Formatea una fecha local en YYYY-MM-DD sin conversión UTC.
+   *
+   * @param d - Objeto Date de FullCalendar (hora local).
+   */
+  const fechaLocal = (d: Date): string => {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  };
+
+  /**
    * Drag & drop de un evento: actualiza fecha y hora del turno vía PATCH.
    *
    * @param arg - Datos del evento desplazado.
@@ -168,8 +198,9 @@ function TurnosCalendar() {
     const turnoId = parseInt(arg.event.id, 10);
     const start = arg.event.start;
     if (!start) return;
-    const fecha = start.toISOString().slice(0, 10);
-    const hoy = new Date().toISOString().slice(0, 10);
+    // Usar fecha local para evitar desfase UTC en zona horaria de Argentina
+    const fecha = fechaLocal(start);
+    const hoy = fechaLocal(new Date());
     if (fecha < hoy) {
       arg.revert();
       setDragError("No se puede mover un turno a una fecha pasada.");
@@ -192,7 +223,9 @@ function TurnosCalendar() {
       if (axios.isAxiosError(error) && error.response?.status === 403) {
         setDragError("No tenés permisos para modificar turnos.");
       } else {
-        setDragError("Error al mover el turno. Intente nuevamente.");
+        setDragError(
+          extraerMensajeError(error, "Error al mover el turno. Intente nuevamente.")
+        );
       }
     }
   };
@@ -214,7 +247,9 @@ function TurnosCalendar() {
       if (axios.isAxiosError(error) && error.response?.status === 403) {
         setDragError("No tenés permisos para modificar turnos.");
       } else {
-        setDragError("Error al redimensionar el turno. Intente nuevamente.");
+        setDragError(
+          extraerMensajeError(error, "Error al redimensionar el turno. Intente nuevamente.")
+        );
       }
     }
   };
