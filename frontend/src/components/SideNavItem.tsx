@@ -1,5 +1,6 @@
 import { Nav } from "react-bootstrap";
 import { type ReactNode } from "react";
+import { useNavigate } from "react-router-dom";
 
 /**
  * Tipo de item del menú de navegación
@@ -27,7 +28,6 @@ export interface SideNavItemProps {
   item: MenuItem;
   index: number;
   onHide: () => void;
-  setActiveSection: (section: string) => void;
 }
 
 /**
@@ -40,22 +40,18 @@ export interface SideNavItemProps {
  * @param onHide - Función para ocultar el menú móvil
  * @param setActiveSection - Función para cambiar la sección activa
  */
-function SideNavItem({
-  item,
-  index,
-  onHide,
-  setActiveSection,
-}: SideNavItemProps) {
+function SideNavItem({ item, index, onHide }: SideNavItemProps) {
+  const navigate = useNavigate();
+
   /**
    * Maneja el click en un item del menú
    *
    * @param href - Identificador de la sección
    */
   const handleClick = (href: string) => {
-    // Extraer el nombre de la sección del href (sin el #)
-    const section = href.replace("#", "");
-    setActiveSection(section);
-    onHide(); // Cierra el menú en móviles
+    const path = "/" + href.replace("#", "");
+    navigate(path);
+    onHide();
   };
 
   if (item.type === "header") {

@@ -2,7 +2,6 @@ import { Nav, Col, Offcanvas } from "react-bootstrap";
 import {
   BoxSeam,
   CartCheck,
-  CashStack,
   Calendar3,
   Bag,
   Cash,
@@ -20,7 +19,6 @@ import { useAuthStore } from "../stores/useAuthStore";
 interface SideNavProps {
   show: boolean;
   onHide: () => void;
-  setActiveSection: (section: string) => void;
 }
 
 /**
@@ -33,7 +31,7 @@ interface SideNavProps {
  * @param show - Estado de visibilidad en móviles
  * @param onHide - Función para ocultar el menú en móviles
  */
-function SideNav({ show, onHide, setActiveSection }: SideNavProps) {
+function SideNav({ show, onHide }: SideNavProps) {
   const { user } = useAuthStore();
 
   /**
@@ -187,13 +185,7 @@ function SideNav({ show, onHide, setActiveSection }: SideNavProps) {
       <h5 className="mb-3 text-muted px-3 pt-3">Menú Principal</h5>
       <Nav className="flex-column px-3">
         {menuItems.map((item, index) => (
-          <SideNavItem
-            key={index}
-            item={item}
-            index={index}
-            onHide={onHide}
-            setActiveSection={setActiveSection}
-          />
+          <SideNavItem key={index} item={item} index={index} onHide={onHide} />
         ))}
       </Nav>
     </>

@@ -32,6 +32,7 @@ import {
 } from "../schemas/productoSchema";
 import type { Producto, HistorialCosto } from "../services/productos.service";
 import { useNavStore } from "../stores/useNavStore";
+import { useNavigate } from "react-router-dom";
 import EntityManagerModal from "./EntityManagerModal";
 import SearchableSelect from "./SearchableSelect";
 
@@ -51,6 +52,7 @@ const ProductoFormModal: React.FC<ProductoFormModalProps> = ({
   const [showCategoriaManager, setShowCategoriaManager] = useState(false);
   const [showSubCategoriaManager, setShowSubCategoriaManager] = useState(false);
   const { setPendingCompraId } = useNavStore();
+  const navigate = useNavigate();
 
   const {
     control,
@@ -597,6 +599,9 @@ const ProductoFormModal: React.FC<ProductoFormModalProps> = ({
                             onClick={() => {
                               if (h.compra_id) {
                                 setPendingCompraId(h.compra_id);
+                                navigate("/compras", {
+                                  state: { compraId: h.compra_id },
+                                });
                                 handleClose();
                               }
                             }}

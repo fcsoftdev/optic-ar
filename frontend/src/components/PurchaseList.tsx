@@ -22,6 +22,7 @@ import { usePermiso } from "../hooks/usePermiso";
 import PaginationBar from "./PaginationBar";
 import CompraFormModal from "./CompraFormModal";
 import { useNavStore } from "../stores/useNavStore";
+import { useLocation } from "react-router-dom";
 
 /**
  * Formatea un número con separador de miles (.) y decimales (,) en formato argentino.
@@ -57,10 +58,16 @@ const PurchaseList: React.FC = () => {
 
   // Abrir compra solicitada desde historial de producto
   const { pendingCompraId, clearPendingCompraId } = useNavStore();
+  const location = useLocation();
+  const locationCompraId: number | null =
+    (location.state as any)?.compraId ?? null;
+
   useEffect(() => {
-    if (pendingCompraId !== null) {
+    // Prioridad: state de react-router (navegación desde modal)
+    const compraId = locationCompraId ?? pendingCompraId;
+    if (compraId !== null) {
       const stub: CompraList = {
-        id: pendingCompraId,
+        id: compraId,
         fecha: "",
         proveedor: null,
         proveedor_nombre: "",
@@ -69,9 +76,9 @@ const PurchaseList: React.FC = () => {
       };
       setEditingCompra(stub);
       setShowModal(true);
-      clearPendingCompraId();
+      if (pendingCompraId !== null) clearPendingCompraId();
     }
-  }, [pendingCompraId]);
+  }, [locationCompraId, pendingCompraId]);
 
   // Debounce para búsqueda
   useEffect(() => {

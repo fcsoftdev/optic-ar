@@ -11,6 +11,7 @@ from typing import Any, Dict
 
 from django.db.models import Count, DecimalField, Sum
 from django.db.models.functions import Coalesce
+from rest_framework.permissions import BasePermission
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -19,6 +20,17 @@ from compras.models import Compra, Gasto
 from ventas.models import Venta
 
 CERO = Decimal("0.00")
+
+
+class _PermisoVerReporteCaja(BasePermission):
+    """Verifica el permiso personalizado contabilidad.ver_reporte_caja."""
+
+    def has_permission(self, request: Request, view: Any) -> bool:
+        return bool(
+            request.user
+            and request.user.is_authenticated
+            and request.user.has_perm("contabilidad.ver_reporte_caja")
+        )
 
 
 class ReporteCajaAPIView(APIView):
@@ -35,6 +47,8 @@ class ReporteCajaAPIView(APIView):
     Returns:
         JSON con resumen, desglose por forma de pago y listados detallados.
     """
+
+    permission_classes = [_PermisoVerReporteCaja]
 
     def get(self, request: Request) -> Response:
         """Genera y devuelve el reporte de caja filtrado por fechas."""

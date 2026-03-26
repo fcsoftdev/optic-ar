@@ -1,11 +1,9 @@
-import { useState, useEffect, useRef } from "react";
-import { Row, Col } from "react-bootstrap";
-import { PersonBoundingBox, Calendar3, Cart4 } from "react-bootstrap-icons";
+import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Layout from "./components/Layout";
 import Header from "./components/Header";
 import SideNav from "./components/SideNav";
 import MainContent from "./components/MainContent";
-import InfoCard from "./components/InfoCard";
 import LoginPage from "./components/LoginPage";
 import { useAuthStore } from "./stores/useAuthStore";
 import { useNavStore } from "./stores/useNavStore";
@@ -22,17 +20,17 @@ import { silentRefresh } from "./services/auth.service";
  */
 function App() {
   const [showSidebar, setShowSidebar] = useState(false);
-  const [activeSection, setActiveSection] = useState("dashboard");
   const { accessToken, setAuth, clearAuth, isInitialized, setInitialized } =
     useAuthStore();
   const { pendingCompraId } = useNavStore();
+  const navigate = useNavigate();
 
   // Navegar a compras cuando se solicita desde historial de producto
   useEffect(() => {
     if (pendingCompraId !== null) {
-      setActiveSection("compras");
+      navigate("/compras");
     }
-  }, [pendingCompraId]);
+  }, [pendingCompraId, navigate]);
 
   // Guard para evitar doble ejecución en React StrictMode (desarrollo).
   // StrictMode monta/desmonta/remonta los componentes dos veces. Con
@@ -85,12 +83,8 @@ function App() {
   return (
     <Layout>
       <Header onToggleSidebar={handleToggleSidebar} />
-      <SideNav
-        show={showSidebar}
-        onHide={handleCloseSidebar}
-        setActiveSection={setActiveSection}
-      />
-      <MainContent activeSection={activeSection} />
+      <SideNav show={showSidebar} onHide={handleCloseSidebar} />
+      <MainContent />
     </Layout>
   );
 }

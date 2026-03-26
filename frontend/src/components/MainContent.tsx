@@ -1,5 +1,5 @@
-import type { ReactNode } from "react";
 import { Col } from "react-bootstrap";
+import { Routes, Route, Navigate } from "react-router-dom";
 import DashboardHome from "./DashboardHome";
 import ProductList from "./ProductList";
 import BrandList from "./BrandList";
@@ -14,21 +14,17 @@ import TurnosCalendar from "./TurnosCalendar";
 import ReporteCaja from "./ReporteCaja";
 import UserList from "./UserList";
 import GroupList from "./GroupList";
-
-interface MainContentProps {
-  children?: ReactNode;
-  activeSection: string;
-}
+import ProtectedRoute from "./ProtectedRoute";
 
 /**
  * Componente MainContent - Área de contenido principal.
  *
- * Renderiza el contenido principal de la aplicación dentro
- * de una columna de Bootstrap con responsive design.
- *
- * @param children - Contenido a mostrar en el área principal
+ * Renderiza la sección activa usando React Router. Cada ruta con acceso
+ * restringido está envuelta en ProtectedRoute para verificar permisos de
+ * Django antes de renderizar el componente, incluso si el usuario navega
+ * directamente por URL.
  */
-function MainContent({ children, activeSection }: MainContentProps) {
+function MainContent() {
   return (
     <Col
       xs={12}
@@ -38,20 +34,118 @@ function MainContent({ children, activeSection }: MainContentProps) {
       style={{ minHeight: 0 }}
     >
       <div className="p-2">
-        {activeSection === "dashboard" && <DashboardHome />}
-        {activeSection === "productos" && <ProductList />}
-        {activeSection === "marcas" && <BrandList />}
-        {activeSection === "clientes-pacientes" && <ClienteList />}
-        {activeSection === "consultas" && <ConsultationList />}
-        {activeSection === "obras-sociales" && <InsuranceProvider />}
-        {activeSection === "compras" && <PurchaseList />}
-        {activeSection === "gastos" && <ExpensesList />}
-        {activeSection === "proveedores" && <SuppliersList />}
-        {activeSection === "ventas" && <SalesList />}
-        {activeSection === "turnos" && <TurnosCalendar />}
-        {activeSection === "reporte-caja" && <ReporteCaja />}
-        {activeSection === "usuarios" && <UserList />}
-        {activeSection === "grupos" && <GroupList />}
+        <Routes>
+          <Route path="/" element={<DashboardHome />} />
+          <Route path="/dashboard" element={<DashboardHome />} />
+          <Route
+            path="/productos"
+            element={
+              <ProtectedRoute
+                perm="productos.view_producto"
+                element={<ProductList />}
+              />
+            }
+          />
+          <Route
+            path="/marcas"
+            element={
+              <ProtectedRoute
+                perm="productos.view_marca"
+                element={<BrandList />}
+              />
+            }
+          />
+          <Route
+            path="/clientes-pacientes"
+            element={
+              <ProtectedRoute
+                perm="ventas.view_cliente"
+                element={<ClienteList />}
+              />
+            }
+          />
+          <Route
+            path="/consultas"
+            element={
+              <ProtectedRoute
+                perm="ventas.view_consulta"
+                element={<ConsultationList />}
+              />
+            }
+          />
+          <Route
+            path="/obras-sociales"
+            element={
+              <ProtectedRoute
+                perm="ventas.view_obrasocial"
+                element={<InsuranceProvider />}
+              />
+            }
+          />
+          <Route
+            path="/compras"
+            element={
+              <ProtectedRoute
+                perm="compras.view_compra"
+                element={<PurchaseList />}
+              />
+            }
+          />
+          <Route
+            path="/gastos"
+            element={
+              <ProtectedRoute
+                perm="compras.view_gasto"
+                element={<ExpensesList />}
+              />
+            }
+          />
+          <Route
+            path="/proveedores"
+            element={
+              <ProtectedRoute
+                perm="compras.view_proveedor"
+                element={<SuppliersList />}
+              />
+            }
+          />
+          <Route
+            path="/ventas"
+            element={
+              <ProtectedRoute
+                perm="ventas.view_venta"
+                element={<SalesList />}
+              />
+            }
+          />
+          <Route
+            path="/turnos"
+            element={
+              <ProtectedRoute
+                perm="turnos.view_turno"
+                element={<TurnosCalendar />}
+              />
+            }
+          />
+          <Route
+            path="/reporte-caja"
+            element={
+              <ProtectedRoute
+                perm="contabilidad.ver_reporte_caja"
+                element={<ReporteCaja />}
+              />
+            }
+          />
+          <Route
+            path="/usuarios"
+            element={<ProtectedRoute requiresStaff element={<UserList />} />}
+          />
+          <Route
+            path="/grupos"
+            element={<ProtectedRoute requiresStaff element={<GroupList />} />}
+          />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
       </div>
     </Col>
   );
