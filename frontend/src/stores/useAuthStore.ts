@@ -12,6 +12,8 @@ import { create } from "zustand";
 export interface AuthUser {
   id: number;
   username: string;
+  first_name: string;
+  last_name: string;
   email: string;
   /** True si el usuario tiene acceso al admin de Django / ABM de usuarios. */
   is_staff: boolean;

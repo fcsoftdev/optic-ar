@@ -67,6 +67,29 @@ class GroupSerializer(serializers.ModelSerializer):
         return obj.user_set.count()
 
 
+class PerfilSerializer(serializers.ModelSerializer):
+    """
+    Serializer para que el usuario actualice su propio perfil.
+
+    Solo expone los campos editables por el propio usuario:
+    first_name, last_name y email.
+    """
+
+    class Meta:
+        model = User
+        fields = ["id", "username", "email", "first_name", "last_name"]
+        read_only_fields = ["id", "username"]
+
+    def validate_email(self, value: str) -> str:
+        """Valida que el email no esté en uso por otro usuario."""
+        qs = User.objects.filter(email=value)
+        if self.instance:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise serializers.ValidationError("Ese email ya está en uso.")
+        return value
+
+
 class UserListSerializer(serializers.ModelSerializer):
     """Serializer simplificado para listado de usuarios."""
 

@@ -12,7 +12,7 @@ from typing import Any
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from rest_framework import status
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -22,6 +22,8 @@ from rest_framework_simplejwt.serializers import (
     TokenRefreshSerializer,
 )
 from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
+
+from .serializers import PerfilSerializer
 
 User = get_user_model()
 
@@ -44,6 +46,8 @@ def _serializar_usuario(user: Any) -> dict:
     return {
         "id": user.id,
         "username": user.username,
+        "first_name": user.first_name,
+        "last_name": user.last_name,
         "email": user.email,
         "is_staff": user.is_staff,
         "is_superuser": user.is_superuser,
@@ -204,3 +208,48 @@ class LogoutView(APIView):
             samesite="Strict",
         )
         return response
+
+
+class PerfilView(APIView):
+    """
+    Vista de perfil del usuario autenticado.
+
+    Permite al usuario consultar y actualizar sus propios datos básicos
+    (first_name, last_name, email). No expone datos de otros usuarios.
+
+    GET  /api/perfil/  → datos actuales del usuario
+    PATCH /api/perfil/ → actualiza first_name, last_name o email
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request: Request) -> Response:
+        """Devuelve los datos del perfil del usuario autenticado."""
+        serializer = PerfilSerializer(request.user)
+        return Response(serializer.data)
+
+    def patch(self, request: Request) -> Response:
+        """
+        Actualiza parcialmente el perfil del usuario autenticado.
+
+        Args:
+            request: Petición con los campos a modificar (partial=True).
+
+        Returns:
+            Datos actualizados del usuario junto con el payload de usuario
+            completo (para que el frontend actualice el store).
+        """
+        serializer = PerfilSerializer(request.user, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        # Refresca el usuario desde la base de datos para leer datos actualizados
+        request.user.refresh_from_db()
+
+        return Response(
+            {
+                "perfil": serializer.data,
+                "user": _serializar_usuario(request.user),
+            },
+            status=status.HTTP_200_OK,
+        )
