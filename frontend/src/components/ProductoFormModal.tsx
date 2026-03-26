@@ -60,7 +60,6 @@ const ProductoFormModal: React.FC<ProductoFormModalProps> = ({
     reset,
     watch,
     setValue,
-    getValues,
     formState: { errors, isSubmitting },
   } = useForm<ProductoFormData>({
     resolver: zodResolver(productoSchema) as any,
@@ -79,6 +78,10 @@ const ProductoFormModal: React.FC<ProductoFormModalProps> = ({
   });
 
   const selectedCategoria = watch("categoria");
+  // Valores observados reactivamente para los cálculos de precio
+  const watchedCosto = watch("precio_costo");
+  const watchedPct = watch("porcentaje_ganancia");
+  const watchedPrecioVenta = watch("precio_venta");
 
   const { data: marcasData = [], isLoading: loadingMarcas } = useMarcas();
   const { data: categorias = [], isLoading: loadingCategorias } =
@@ -106,20 +109,7 @@ const ProductoFormModal: React.FC<ProductoFormModalProps> = ({
   const updateSubCategoria = useUpdateSubCategoria();
   const deleteSubCategoria = useDeleteSubCategoria();
 
-  // Función para calcular el precio de venta
-  const calcularPrecioVenta = (
-    costo: number | null | undefined,
-    porcentaje: number | null | undefined,
-  ) => {
-    if (!costo || costo <= 0) {
-      setValue("precio_venta", 0);
-      return;
-    }
-    const porcentajeAplicar = porcentaje ?? 0;
-    const ganancia = costo * (porcentajeAplicar / 100);
-    const precioVenta = costo + ganancia;
-    setValue("precio_venta", Math.round(precioVenta * 100) / 100);
-  };
+  // --- Eliminado calcularPrecioVenta: los cálculos son ahora inline en cada onChange ---
 
   useEffect(() => {
     if (producto) {
@@ -471,13 +461,17 @@ const ProductoFormModal: React.FC<ProductoFormModalProps> = ({
                             const numValue = (e.target as HTMLInputElement)
                               .valueAsNumber;
                             const newCosto = isNaN(numValue) ? null : numValue;
-                            // Obtener porcentaje antes de actualizar el costo
-                            const porcentajeActual = getValues(
-                              "porcentaje_ganancia",
-                            );
                             onChange(newCosto);
-                            // Calcular inmediatamente con los valores actuales
-                            calcularPrecioVenta(newCosto, porcentajeActual);
+                            // Al cambiar el costo, recalcula el % de ganancia dejando precio_venta fijo
+                            const pv = Number(watchedPrecioVenta) ?? 0;
+                            if (newCosto && newCosto > 0 && pv > 0) {
+                              setValue(
+                                "porcentaje_ganancia",
+                                Math.round(
+                                  ((pv - newCosto) / newCosto) * 100 * 100,
+                                ) / 100,
+                              );
+                            }
                           }}
                           isInvalid={!!errors.precio_costo}
                           placeholder="0.00"
@@ -514,11 +508,19 @@ const ProductoFormModal: React.FC<ProductoFormModalProps> = ({
                             const newPorcentaje = isNaN(numValue)
                               ? null
                               : numValue;
-                            // Obtener costo antes de actualizar el porcentaje
-                            const costoActual = getValues("precio_costo");
                             onChange(newPorcentaje);
-                            // Calcular inmediatamente con los valores actuales
-                            calcularPrecioVenta(costoActual, newPorcentaje);
+                            // Recalcula precio_venta con el costo actual
+                            const costo = watchedCosto ?? 0;
+                            if (costo > 0) {
+                              setValue(
+                                "precio_venta",
+                                Math.round(
+                                  costo *
+                                    (1 + (newPorcentaje ?? 0) / 100) *
+                                    100,
+                                ) / 100,
+                              );
+                            }
                           }}
                           isInvalid={!!errors.porcentaje_ganancia}
                           placeholder="0.00"
@@ -545,7 +547,7 @@ const ProductoFormModal: React.FC<ProductoFormModalProps> = ({
                   <Controller
                     name="precio_venta"
                     control={control}
-                    render={({ field: { value, onChange, ...field } }) => (
+                    render={({ field: { value, ...field } }) => (
                       <InputGroup>
                         <InputGroup.Text>$</InputGroup.Text>
                         <Form.Control
@@ -567,8 +569,7 @@ const ProductoFormModal: React.FC<ProductoFormModalProps> = ({
                     )}
                   />
                   <Form.Text className="text-muted">
-                    Se calcula automáticamente: Precio Costo + Porcentaje
-                    Ganancia
+                    Se calcula automáticamente: Precio Costo × (1 + % Ganancia)
                   </Form.Text>
                 </Form.Group>
               </Col>
