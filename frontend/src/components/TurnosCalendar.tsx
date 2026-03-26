@@ -224,7 +224,10 @@ function TurnosCalendar() {
         setDragError("No tenés permisos para modificar turnos.");
       } else {
         setDragError(
-          extraerMensajeError(error, "Error al mover el turno. Intente nuevamente.")
+          extraerMensajeError(
+            error,
+            "Error al mover el turno. Intente nuevamente.",
+          ),
         );
       }
     }
@@ -248,7 +251,10 @@ function TurnosCalendar() {
         setDragError("No tenés permisos para modificar turnos.");
       } else {
         setDragError(
-          extraerMensajeError(error, "Error al redimensionar el turno. Intente nuevamente.")
+          extraerMensajeError(
+            error,
+            "Error al redimensionar el turno. Intente nuevamente.",
+          ),
         );
       }
     }
