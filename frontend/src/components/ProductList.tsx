@@ -40,6 +40,7 @@ const ProductList: React.FC = (): JSX.Element => {
     number | null
   >(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [showModal, setShowModal] = useState(false);
   const [editingProducto, setEditingProducto] = useState<Producto | null>(null);
 
@@ -81,6 +82,7 @@ const ProductList: React.FC = (): JSX.Element => {
 
   useEffect(() => {
     const sentinel = sentinelRef.current;
+    const container = scrollContainerRef.current;
     if (!sentinel) return;
     const observer = new IntersectionObserver(
       (entries) => {
@@ -88,7 +90,7 @@ const ProductList: React.FC = (): JSX.Element => {
           fetchNextPage();
         }
       },
-      { threshold: 0.1 },
+      { root: container, threshold: 0.1 },
     );
     observer.observe(sentinel);
     return () => observer.disconnect();
@@ -299,6 +301,7 @@ const ProductList: React.FC = (): JSX.Element => {
       </div>
 
       <div
+        ref={scrollContainerRef}
         style={{
           overflow: "auto",
           flex: "1 1 auto",
