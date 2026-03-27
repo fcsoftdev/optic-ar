@@ -198,7 +198,7 @@ const VentaFormModal: React.FC<VentaFormModalProps> = ({
       ordering: "nombre",
     });
     return data.results.map((p) => {
-      const label = `${p.nombre}${p.codigo ? ` (${p.codigo})` : ""}`;
+      const label = `${p.nombre}${p.codigo ? ` (${p.codigo})` : ""}${p.marca_nombre ? ` [${p.marca_nombre}]` : ""}`;
       productoCacheRef.current[p.id] = {
         precio: Number(p.precio_venta),
         label,
@@ -217,7 +217,7 @@ const VentaFormModal: React.FC<VentaFormModalProps> = ({
       ordering: "nombre",
     });
     return data.results.map((p) => {
-      const label = `${p.nombre}${p.codigo ? ` (${p.codigo})` : ""}`;
+      const label = `${p.nombre}${p.codigo ? ` (${p.codigo})` : ""}${p.marca_nombre ? ` [${p.marca_nombre}]` : ""}`;
       productoCacheRef.current[p.id] = {
         precio: Number(p.precio_venta),
         label,

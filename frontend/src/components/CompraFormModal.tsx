@@ -213,7 +213,7 @@ const CompraFormModal: React.FC<CompraFormModalProps> = ({
       ordering: "nombre",
     });
     return data.results.map((p) => {
-      const label = `${p.nombre}${p.codigo ? ` (${p.codigo})` : ""}`;
+      const label = `${p.nombre}${p.codigo ? ` (${p.codigo})` : ""}${p.marca_nombre ? ` [${p.marca_nombre}]` : ""}`;
       productoCacheRef.current[p.id] = {
         precio_venta: Number(p.precio_venta),
         label,
@@ -234,7 +234,7 @@ const CompraFormModal: React.FC<CompraFormModalProps> = ({
       ordering: "nombre",
     });
     return data.results.map((p) => {
-      const label = `${p.nombre}${p.codigo ? ` (${p.codigo})` : ""}`;
+      const label = `${p.nombre}${p.codigo ? ` (${p.codigo})` : ""}${p.marca_nombre ? ` [${p.marca_nombre}]` : ""}`;
       productoCacheRef.current[p.id] = {
         precio_venta: Number(p.precio_venta),
         label,
