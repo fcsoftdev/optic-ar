@@ -35,6 +35,11 @@ import ConsultationFormModal from "./ConsultationFormModal";
 import PaginationBar from "./PaginationBar";
 import SearchableSelect from "./SearchableSelect";
 
+type SortDir = "asc" | "desc";
+
+const sortIcon = (key: string, sortKey: string, sortDir: SortDir) =>
+  sortKey !== key ? " ⇅" : sortDir === "asc" ? " ↑" : " ↓";
+
 /**
  * Componente principal para la gestión del listado de Clientes/Pacientes.
  *
@@ -100,6 +105,27 @@ const ClienteList: React.FC = () => {
   const totalPages = clientesData?.count
     ? Math.ceil(clientesData.count / 10)
     : 1;
+
+  const [sortKey, setSortKey] = useState("apellido");
+  const [sortDir, setSortDir] = useState<SortDir>("asc");
+
+  const handleSort = (key: string) => {
+    if (sortKey === key) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortKey(key);
+      setSortDir("asc");
+    }
+  };
+
+  const sortedClientes = [...clientes].sort((a, b) => {
+    const av = (a as any)[sortKey];
+    const bv = (b as any)[sortKey];
+    if (av == null) return 1;
+    if (bv == null) return -1;
+    const cmp = String(av).localeCompare(String(bv), "es", { numeric: true });
+    return sortDir === "asc" ? cmp : -cmp;
+  });
 
   /**
    * Abre el modal de edición precargado con los datos del cliente seleccionado.
@@ -288,17 +314,38 @@ const ClienteList: React.FC = () => {
               style={{ position: "sticky", top: 0, zIndex: 1 }}
             >
               <tr>
-                <th>DNI</th>
-                <th>Apellido</th>
-                <th>Nombre</th>
+                <th
+                  style={{ cursor: "pointer", userSelect: "none" }}
+                  onClick={() => handleSort("dni")}
+                >
+                  DNI{sortIcon("dni", sortKey, sortDir)}
+                </th>
+                <th
+                  style={{ cursor: "pointer", userSelect: "none" }}
+                  onClick={() => handleSort("apellido")}
+                >
+                  Apellido{sortIcon("apellido", sortKey, sortDir)}
+                </th>
+                <th
+                  style={{ cursor: "pointer", userSelect: "none" }}
+                  onClick={() => handleSort("nombre")}
+                >
+                  Nombre{sortIcon("nombre", sortKey, sortDir)}
+                </th>
                 <th>Teléfono</th>
                 <th>Obra Social</th>
-                <th>Fecha Nacimiento</th>
+                <th
+                  style={{ cursor: "pointer", userSelect: "none" }}
+                  onClick={() => handleSort("fecha_nacimiento")}
+                >
+                  Fecha Nacimiento
+                  {sortIcon("fecha_nacimiento", sortKey, sortDir)}
+                </th>
                 <th style={{ width: "140px" }}>Acciones</th>
               </tr>
             </thead>
             <tbody>
-              {clientes.map((cliente) => (
+              {sortedClientes.map((cliente) => (
                 <tr key={cliente.id}>
                   <td>{cliente.dni}</td>
                   <td>{cliente.apellido}</td>

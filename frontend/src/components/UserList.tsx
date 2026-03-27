@@ -42,6 +42,11 @@ function nombreCompleto(u: Usuario): string {
   return nombre || u.username;
 }
 
+type SortDir = "asc" | "desc";
+
+const sortIcon = (key: string, sortKey: string, sortDir: SortDir) =>
+  sortKey !== key ? " ⇅" : sortDir === "asc" ? " ↑" : " ↓";
+
 // ── Modal de Formulario ───────────────────────────────────────────────────────
 
 interface ModalProps {
@@ -298,6 +303,29 @@ export default function UserList() {
 
   const usuarios = data?.results ?? [];
 
+  const [sortKey, setSortKey] = useState("username");
+  const [sortDir, setSortDir] = useState<SortDir>("asc");
+
+  const handleSort = (key: string) => {
+    if (sortKey === key) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortKey(key);
+      setSortDir("asc");
+    }
+  };
+
+  const sortedUsuarios = [...usuarios].sort((a, b) => {
+    const av =
+      sortKey === "nombre_completo" ? nombreCompleto(a) : (a as any)[sortKey];
+    const bv =
+      sortKey === "nombre_completo" ? nombreCompleto(b) : (b as any)[sortKey];
+    if (av == null) return 1;
+    if (bv == null) return -1;
+    const cmp = String(av).localeCompare(String(bv), "es", { numeric: true });
+    return sortDir === "asc" ? cmp : -cmp;
+  });
+
   const handleNuevo = () => {
     setUsuarioEditar(null);
     setShowModal(true);
@@ -362,11 +390,29 @@ export default function UserList() {
         {/* Tabla */}
         {!isLoading && !error && (
           <Table hover responsive bordered size="sm">
-            <thead className="table-dark">
+            <thead
+              className="table-dark"
+              style={{ position: "sticky", top: 0, zIndex: 1 }}
+            >
               <tr>
-                <th>Usuario</th>
-                <th>Nombre completo</th>
-                <th>Email</th>
+                <th
+                  style={{ cursor: "pointer", userSelect: "none" }}
+                  onClick={() => handleSort("username")}
+                >
+                  Usuario{sortIcon("username", sortKey, sortDir)}
+                </th>
+                <th
+                  style={{ cursor: "pointer", userSelect: "none" }}
+                  onClick={() => handleSort("nombre_completo")}
+                >
+                  Nombre completo{sortIcon("nombre_completo", sortKey, sortDir)}
+                </th>
+                <th
+                  style={{ cursor: "pointer", userSelect: "none" }}
+                  onClick={() => handleSort("email")}
+                >
+                  Email{sortIcon("email", sortKey, sortDir)}
+                </th>
                 <th>Grupos</th>
                 <th>Estado</th>
                 <th>Rol</th>
@@ -381,7 +427,7 @@ export default function UserList() {
                   </td>
                 </tr>
               ) : (
-                usuarios.map((u) => (
+                sortedUsuarios.map((u) => (
                   <React.Fragment key={u.id}>
                     <tr>
                       <td className="fw-semibold">{u.username}</td>

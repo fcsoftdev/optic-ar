@@ -33,6 +33,11 @@ import PaginationBar from "./PaginationBar";
 import ProveedorComprasModal from "./ProveedorComprasModal";
 import ProveedorFormModal from "./ProveedorFormModal";
 
+type SortDir = "asc" | "desc";
+
+const sortIcon = (key: string, sortKey: string, sortDir: SortDir) =>
+  sortKey !== key ? " ⇅" : sortDir === "asc" ? " ↑" : " ↓";
+
 /**
  * Componente ABM para la gestión del listado de Proveedores.
  *
@@ -90,6 +95,27 @@ function SuppliersList() {
   const totalPages = proveedoresData?.count
     ? Math.ceil(proveedoresData.count / 10)
     : 1;
+
+  const [sortKey, setSortKey] = useState("nombre");
+  const [sortDir, setSortDir] = useState<SortDir>("asc");
+
+  const handleSort = (key: string) => {
+    if (sortKey === key) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortKey(key);
+      setSortDir("asc");
+    }
+  };
+
+  const sortedProveedores = [...proveedores].sort((a, b) => {
+    const av = (a as any)[sortKey];
+    const bv = (b as any)[sortKey];
+    if (av == null) return 1;
+    if (bv == null) return -1;
+    const cmp = String(av).localeCompare(String(bv), "es", { numeric: true });
+    return sortDir === "asc" ? cmp : -cmp;
+  });
 
   /**
    * Abre el modal para crear un nuevo proveedor.
@@ -230,15 +256,25 @@ function SuppliersList() {
               style={{ position: "sticky", top: 0, zIndex: 1 }}
             >
               <tr>
-                <th>Nombre</th>
-                <th>Alias</th>
+                <th
+                  style={{ cursor: "pointer", userSelect: "none" }}
+                  onClick={() => handleSort("nombre")}
+                >
+                  Nombre{sortIcon("nombre", sortKey, sortDir)}
+                </th>
+                <th
+                  style={{ cursor: "pointer", userSelect: "none" }}
+                  onClick={() => handleSort("alias")}
+                >
+                  Alias{sortIcon("alias", sortKey, sortDir)}
+                </th>
                 <th>Teléfono</th>
                 <th>Dirección</th>
                 <th style={{ width: "110px" }}>Acciones</th>
               </tr>
             </thead>
             <tbody>
-              {proveedores.map((p) => (
+              {sortedProveedores.map((p) => (
                 <>
                   <tr key={p.id}>
                     <td>{p.nombre}</td>

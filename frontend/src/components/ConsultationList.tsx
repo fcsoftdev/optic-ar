@@ -32,6 +32,11 @@ import { usePermiso } from "../hooks/usePermiso";
 import ConsultationFormModal from "./ConsultationFormModal";
 import PaginationBar from "./PaginationBar";
 
+type SortDir = "asc" | "desc";
+
+const sortIcon = (key: string, sortKey: string, sortDir: SortDir) =>
+  sortKey !== key ? " ⇅" : sortDir === "asc" ? " ↑" : " ↓";
+
 /**
  * Componente ABM para la gestión del listado de Consultas médicas.
  *
@@ -83,6 +88,27 @@ const ConsultationList: React.FC = () => {
   const totalPages = consultasData?.count
     ? Math.ceil(consultasData.count / 10)
     : 1;
+
+  const [sortKey, setSortKey] = useState("fecha");
+  const [sortDir, setSortDir] = useState<SortDir>("desc");
+
+  const handleSort = (key: string) => {
+    if (sortKey === key) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortKey(key);
+      setSortDir("asc");
+    }
+  };
+
+  const sortedConsultas = [...consultas].sort((a, b) => {
+    const av = (a as any)[sortKey];
+    const bv = (b as any)[sortKey];
+    if (av == null) return 1;
+    if (bv == null) return -1;
+    const cmp = String(av).localeCompare(String(bv), "es", { numeric: true });
+    return sortDir === "asc" ? cmp : -cmp;
+  });
 
   /** Opciones formateadas para el selector de pacientes en el modal. */
   const clienteOptions = (clientesData?.results || []).map((c) => ({
@@ -253,8 +279,18 @@ const ConsultationList: React.FC = () => {
               style={{ position: "sticky", top: 0, zIndex: 1 }}
             >
               <tr>
-                <th>Paciente</th>
-                <th>Fecha</th>
+                <th
+                  style={{ cursor: "pointer", userSelect: "none" }}
+                  onClick={() => handleSort("cliente_nombre")}
+                >
+                  Paciente{sortIcon("cliente_nombre", sortKey, sortDir)}
+                </th>
+                <th
+                  style={{ cursor: "pointer", userSelect: "none" }}
+                  onClick={() => handleSort("fecha")}
+                >
+                  Fecha{sortIcon("fecha", sortKey, sortDir)}
+                </th>
                 <th>Motivo</th>
                 <th>Diagnóstico</th>
                 <th className="text-center">Grad.</th>
@@ -262,7 +298,7 @@ const ConsultationList: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {consultas.map((c) => (
+              {sortedConsultas.map((c) => (
                 <tr key={c.id}>
                   <td>
                     <strong>{c.cliente_nombre}</strong>

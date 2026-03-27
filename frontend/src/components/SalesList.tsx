@@ -27,7 +27,6 @@ import ListHeader from "./ListHeader";
 import { usePermiso } from "../hooks/usePermiso";
 import PaginationBar from "./PaginationBar";
 import VentaFormModal from "./VentaFormModal";
-
 /**
  * Componente principal para la gestión del listado de Ventas.
  *

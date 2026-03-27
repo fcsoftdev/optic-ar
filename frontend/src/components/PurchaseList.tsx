@@ -23,6 +23,10 @@ import PaginationBar from "./PaginationBar";
 import CompraFormModal from "./CompraFormModal";
 import { useNavStore } from "../stores/useNavStore";
 import { useLocation } from "react-router-dom";
+type SortDir = "asc" | "desc";
+
+const sortIcon = (key: string, sortKey: string, sortDir: SortDir) =>
+  sortKey !== key ? " ⇅" : sortDir === "asc" ? " ↑" : " ↓";
 
 /**
  * Formatea un número con separador de miles (.) y decimales (,) en formato argentino.
@@ -102,6 +106,27 @@ const PurchaseList: React.FC = () => {
 
   const compras = comprasData?.results ?? [];
   const totalPages = comprasData?.count ? Math.ceil(comprasData.count / 10) : 1;
+
+  const [sortKey, setSortKey] = useState("fecha");
+  const [sortDir, setSortDir] = useState<SortDir>("desc");
+
+  const handleSort = (key: string) => {
+    if (sortKey === key) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortKey(key);
+      setSortDir("asc");
+    }
+  };
+
+  const sortedCompras = [...compras].sort((a, b) => {
+    const av = (a as any)[sortKey];
+    const bv = (b as any)[sortKey];
+    if (av == null) return 1;
+    if (bv == null) return -1;
+    const cmp = String(av).localeCompare(String(bv), "es", { numeric: true });
+    return sortDir === "asc" ? cmp : -cmp;
+  });
 
   const handleNuevaCompra = () => {
     setEditingCompra(null);
@@ -204,87 +229,111 @@ const PurchaseList: React.FC = () => {
               style={{ position: "sticky", top: 0, zIndex: 1 }}
             >
               <tr>
-                <th>Fecha</th>
-                <th>Proveedor</th>
-                <th className="text-center">Ítems</th>
-                <th className="text-end">Total</th>
+                <th
+                  style={{ cursor: "pointer", userSelect: "none" }}
+                  onClick={() => handleSort("fecha")}
+                >
+                  Fecha{sortIcon("fecha", sortKey, sortDir)}
+                </th>
+                <th
+                  style={{ cursor: "pointer", userSelect: "none" }}
+                  onClick={() => handleSort("proveedor_nombre")}
+                >
+                  Proveedor{sortIcon("proveedor_nombre", sortKey, sortDir)}
+                </th>
+                <th
+                  className="text-center"
+                  style={{ cursor: "pointer", userSelect: "none" }}
+                  onClick={() => handleSort("cantidad_items")}
+                >
+                  Ítems{sortIcon("cantidad_items", sortKey, sortDir)}
+                </th>
+                <th
+                  className="text-end"
+                  style={{ cursor: "pointer", userSelect: "none" }}
+                  onClick={() => handleSort("total")}
+                >
+                  Total{sortIcon("total", sortKey, sortDir)}
+                </th>
                 {hayAcciones && <th style={{ width: "90px" }}>Acciones</th>}
               </tr>
             </thead>
             <tbody>
-              {compras.map((c) => (
-                <tr key={c.id}>
-                  <td className="text-nowrap">
-                    {new Date(c.fecha + "T00:00:00").toLocaleDateString(
-                      "es-AR",
-                    )}
-                  </td>
-                  <td>
-                    {c.proveedor_nombre || (
-                      <span className="text-muted fst-italic">
-                        Sin proveedor
-                      </span>
-                    )}
-                  </td>
-                  <td className="text-center">
-                    <Badge bg="info" text="dark">
-                      {c.cantidad_items}
-                    </Badge>
-                  </td>
-                  <td className="text-end fw-semibold">${fmtARS(c.total)}</td>
-                  {hayAcciones && (
-                    <td>
-                      {deleteConfirmId === c.id ? (
-                        <div className="d-flex gap-1">
-                          <Button
-                            variant="danger"
-                            size="sm"
-                            onClick={handleConfirmarEliminar}
-                            disabled={deleteCompra.isPending}
-                            title="Confirmar — se revertirá el stock"
-                          >
-                            {deleteCompra.isPending ? (
-                              <Spinner animation="border" size="sm" />
-                            ) : (
-                              "Sí"
-                            )}
-                          </Button>
-                          <Button
-                            variant="outline-secondary"
-                            size="sm"
-                            onClick={() => setDeleteConfirmId(null)}
-                          >
-                            No
-                          </Button>
-                        </div>
-                      ) : (
-                        <div className="d-flex gap-1">
-                          {puedeEditar && (
-                            <Button
-                              variant="outline-primary"
-                              size="sm"
-                              onClick={() => handleEditar(c)}
-                              title="Editar compra"
-                            >
-                              <Pencil size={13} />
-                            </Button>
-                          )}
-                          {puedeEliminar && (
-                            <Button
-                              variant="outline-danger"
-                              size="sm"
-                              onClick={() => setDeleteConfirmId(c.id)}
-                              title="Eliminar compra (revierte el stock)"
-                            >
-                              <Trash size={13} />
-                            </Button>
-                          )}
-                        </div>
+              {sortedCompras.map((c) => {
+                return (
+                  <tr key={c.id}>
+                    <td className="text-nowrap">
+                      {new Date(c.fecha + "T00:00:00").toLocaleDateString(
+                        "es-AR",
                       )}
                     </td>
-                  )}
-                </tr>
-              ))}
+                    <td>
+                      {c.proveedor_nombre || (
+                        <span className="text-muted fst-italic">
+                          Sin proveedor
+                        </span>
+                      )}
+                    </td>
+                    <td className="text-center">
+                      <Badge bg="info" text="dark">
+                        {c.cantidad_items}
+                      </Badge>
+                    </td>
+                    <td className="text-end fw-semibold">${fmtARS(c.total)}</td>
+                    {hayAcciones && (
+                      <td>
+                        {deleteConfirmId === c.id ? (
+                          <div className="d-flex gap-1">
+                            <Button
+                              variant="danger"
+                              size="sm"
+                              onClick={handleConfirmarEliminar}
+                              disabled={deleteCompra.isPending}
+                              title="Confirmar — se revertirá el stock"
+                            >
+                              {deleteCompra.isPending ? (
+                                <Spinner animation="border" size="sm" />
+                              ) : (
+                                "Sí"
+                              )}
+                            </Button>
+                            <Button
+                              variant="outline-secondary"
+                              size="sm"
+                              onClick={() => setDeleteConfirmId(null)}
+                            >
+                              No
+                            </Button>
+                          </div>
+                        ) : (
+                          <div className="d-flex gap-1">
+                            {puedeEditar && (
+                              <Button
+                                variant="outline-primary"
+                                size="sm"
+                                onClick={() => handleEditar(c)}
+                                title="Editar compra"
+                              >
+                                <Pencil size={13} />
+                              </Button>
+                            )}
+                            {puedeEliminar && (
+                              <Button
+                                variant="outline-danger"
+                                size="sm"
+                                onClick={() => setDeleteConfirmId(c.id)}
+                                title="Eliminar compra (revierte el stock)"
+                              >
+                                <Trash size={13} />
+                              </Button>
+                            )}
+                          </div>
+                        )}
+                      </td>
+                    )}
+                  </tr>
+                );
+              })}
             </tbody>
           </Table>
         )}

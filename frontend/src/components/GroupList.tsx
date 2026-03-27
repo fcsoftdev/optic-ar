@@ -344,7 +344,10 @@ function DeleteModal({
 }
 
 // ── Componente Principal ──────────────────────────────────────────────────────
+type SortDir = "asc" | "desc";
 
+const sortIcon = (key: string, sortKey: string, sortDir: SortDir) =>
+  sortKey !== key ? " ⇅" : sortDir === "asc" ? " ↑" : " ↓";
 export default function GroupList() {
   const [showModal, setShowModal] = useState(false);
   const [grupoEditar, setGrupoEditar] = useState<Grupo | null>(null);
@@ -354,6 +357,27 @@ export default function GroupList() {
   const { mutate: eliminar, isPending: eliminando } = useDeleteGrupo();
 
   const grupos = data?.results ?? [];
+
+  const [sortKey, setSortKey] = useState("name");
+  const [sortDir, setSortDir] = useState<SortDir>("asc");
+
+  const handleSort = (key: string) => {
+    if (sortKey === key) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortKey(key);
+      setSortDir("asc");
+    }
+  };
+
+  const sortedGrupos = [...grupos].sort((a, b) => {
+    const av = (a as any)[sortKey];
+    const bv = (b as any)[sortKey];
+    if (av == null) return 1;
+    if (bv == null) return -1;
+    const cmp = String(av).localeCompare(String(bv), "es", { numeric: true });
+    return sortDir === "asc" ? cmp : -cmp;
+  });
 
   const handleNuevo = () => {
     setGrupoEditar(null);
@@ -415,8 +439,18 @@ export default function GroupList() {
               style={{ position: "sticky", top: 0, zIndex: 1 }}
             >
               <tr>
-                <th>Nombre del grupo</th>
-                <th>Usuarios</th>
+                <th
+                  style={{ cursor: "pointer", userSelect: "none" }}
+                  onClick={() => handleSort("name")}
+                >
+                  Nombre del grupo{sortIcon("name", sortKey, sortDir)}
+                </th>
+                <th
+                  style={{ cursor: "pointer", userSelect: "none" }}
+                  onClick={() => handleSort("user_count")}
+                >
+                  Usuarios{sortIcon("user_count", sortKey, sortDir)}
+                </th>
                 <th>Permisos asignados</th>
                 <th className="text-center">Acciones</th>
               </tr>
@@ -429,7 +463,7 @@ export default function GroupList() {
                   </td>
                 </tr>
               ) : (
-                grupos.map((g) => (
+                sortedGrupos.map((g) => (
                   <React.Fragment key={g.id}>
                     <tr>
                       <td className="fw-semibold">{g.name}</td>

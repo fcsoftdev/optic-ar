@@ -29,6 +29,11 @@ const fmtARS = (value: string | number) =>
     maximumFractionDigits: 2,
   })}`;
 
+type SortDir = "asc" | "desc";
+
+const sortIcon = (key: string, sortKey: string, sortDir: SortDir) =>
+  sortKey !== key ? " ⇅" : sortDir === "asc" ? " ↑" : " ↓";
+
 /**
  * Componente ABM para la gestión del listado de Gastos.
  *
@@ -70,6 +75,27 @@ function ExpensesList() {
 
   const gastos = gastosData?.results ?? [];
   const totalPages = gastosData?.count ? Math.ceil(gastosData.count / 10) : 1;
+
+  const [sortKey, setSortKey] = useState("fecha");
+  const [sortDir, setSortDir] = useState<SortDir>("desc");
+
+  const handleSort = (key: string) => {
+    if (sortKey === key) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortKey(key);
+      setSortDir("asc");
+    }
+  };
+
+  const sortedGastos = [...gastos].sort((a, b) => {
+    const av = (a as any)[sortKey];
+    const bv = (b as any)[sortKey];
+    if (av == null) return 1;
+    if (bv == null) return -1;
+    const cmp = String(av).localeCompare(String(bv), "es", { numeric: true });
+    return sortDir === "asc" ? cmp : -cmp;
+  });
 
   /** Abre el modal para crear un nuevo gasto. */
   const handleNuevoGasto = () => {
@@ -180,14 +206,30 @@ function ExpensesList() {
               style={{ position: "sticky", top: 0, zIndex: 1 }}
             >
               <tr>
-                <th>Fecha</th>
-                <th>Descripción</th>
-                <th className="text-end">Total</th>
+                <th
+                  style={{ cursor: "pointer", userSelect: "none" }}
+                  onClick={() => handleSort("fecha")}
+                >
+                  Fecha{sortIcon("fecha", sortKey, sortDir)}
+                </th>
+                <th
+                  style={{ cursor: "pointer", userSelect: "none" }}
+                  onClick={() => handleSort("descripcion")}
+                >
+                  Descripción{sortIcon("descripcion", sortKey, sortDir)}
+                </th>
+                <th
+                  className="text-end"
+                  style={{ cursor: "pointer", userSelect: "none" }}
+                  onClick={() => handleSort("total")}
+                >
+                  Total{sortIcon("total", sortKey, sortDir)}
+                </th>
                 {hayAcciones && <th className="text-center">Acciones</th>}
               </tr>
             </thead>
             <tbody>
-              {gastos.map((gasto) => (
+              {sortedGastos.map((gasto) => (
                 <React.Fragment key={gasto.id}>
                   <tr>
                     <td>

@@ -1,4 +1,9 @@
-import { useInfiniteQuery, useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  useInfiniteQuery,
+  useQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import productosService, {
   type ProductoCreateUpdate,
 } from "../services/productos.service";
@@ -63,6 +68,7 @@ export const useProductos = (params?: {
   marca?: number;
   categoria?: number;
   sub_categoria?: number;
+  ordering?: string;
 }) => {
   return useInfiniteQuery({
     queryKey: ["productos", params],
@@ -146,7 +152,7 @@ export const useUpdateProducto = () => {
       // Actualizar el producto individual en cache
       queryClient.setQueryData(
         ["producto", updatedProducto.id],
-        updatedProducto
+        updatedProducto,
       );
 
       // Invalidar la lista de productos para refrescar (necesario por paginación)
@@ -342,7 +348,7 @@ export const useCreateSubCategoria = () => {
         (old: any) => {
           if (!old) return [newSubCategoria];
           return [...old, newSubCategoria];
-        }
+        },
       );
 
       // También actualizar cache sin filtro (si existe)
@@ -377,7 +383,7 @@ export const useUpdateMarca = () => {
           return {
             ...old,
             results: old.results.map((marca: any) =>
-              marca.id === updatedMarca.id ? updatedMarca : marca
+              marca.id === updatedMarca.id ? updatedMarca : marca,
             ),
           };
         }
@@ -385,7 +391,7 @@ export const useUpdateMarca = () => {
         // Si es un array simple
         if (Array.isArray(old)) {
           return old.map((marca: any) =>
-            marca.id === updatedMarca.id ? updatedMarca : marca
+            marca.id === updatedMarca.id ? updatedMarca : marca,
           );
         }
 
@@ -442,7 +448,7 @@ export const useUpdateCategoria = () => {
     mutationFn: async ({ id, nombre }: { id: number; nombre: string }) => {
       const updatedCategoria = await productosService.updateCategoria(
         id,
-        nombre
+        nombre,
       );
 
       // Actualizar cache de categorías reemplazando la modificada
@@ -502,7 +508,7 @@ export const useUpdateSubCategoria = () => {
     }) => {
       const updatedSubCategoria = await productosService.updateSubCategoria(
         id,
-        { nombre, categoria }
+        { nombre, categoria },
       );
 
       // Actualizar todas las caches de subcategorías que puedan contener este item
@@ -511,9 +517,9 @@ export const useUpdateSubCategoria = () => {
         (old: any) => {
           if (!old) return old;
           return old.map((subcat: any) =>
-            subcat.id === id ? updatedSubCategoria : subcat
+            subcat.id === id ? updatedSubCategoria : subcat,
           );
-        }
+        },
       );
 
       return updatedSubCategoria;
@@ -539,7 +545,7 @@ export const useDeleteSubCategoria = () => {
         (old: any) => {
           if (!old) return old;
           return old.filter((subcat: any) => subcat.id !== id);
-        }
+        },
       );
     },
   });

@@ -23,6 +23,11 @@ const obtenerClaseStock = (stock: number): string => {
   return "";
 };
 
+type SortDir = "asc" | "desc";
+
+const sortIcon = (key: string, sortKey: string, sortDir: SortDir) =>
+  sortKey !== key ? " ⇅" : sortDir === "asc" ? " ↑" : " ↓";
+
 const ProductList: React.FC = (): JSX.Element => {
   const { tienePermiso } = usePermiso();
   const puedeEditar = tienePermiso("productos.change_producto");
@@ -43,6 +48,10 @@ const ProductList: React.FC = (): JSX.Element => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [showModal, setShowModal] = useState(false);
   const [editingProducto, setEditingProducto] = useState<Producto | null>(null);
+
+  const [sortKey, setSortKey] = useState("nombre");
+  const [sortDir, setSortDir] = useState<SortDir>("asc");
+  const ordering = sortDir === "asc" ? sortKey : `-${sortKey}`;
 
   // Debounce para el término de búsqueda
   useEffect(() => {
@@ -65,6 +74,7 @@ const ProductList: React.FC = (): JSX.Element => {
     marca: selectedMarca || undefined,
     categoria: selectedCategoria || undefined,
     sub_categoria: selectedSubCategoria || undefined,
+    ordering,
   });
   const deleteProducto = useDeleteProducto();
   const { data: marcasData } = useMarcas();
@@ -107,6 +117,15 @@ const ProductList: React.FC = (): JSX.Element => {
 
   const handleSubCategoriaChange = (subCategoriaId: number | null) => {
     setSelectedSubCategoria(subCategoriaId);
+  };
+
+  const handleSort = (key: string) => {
+    if (sortKey === key) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortKey(key);
+      setSortDir("asc");
+    }
   };
 
   const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -336,67 +355,104 @@ const ProductList: React.FC = (): JSX.Element => {
                   onChange={handleSelectAll}
                 />
               </th>
-              <th>Código</th>
-              <th>Nombre</th>
-              <th>Marca</th>
-              <th>Categoría</th>
-              <th>Subcategoría</th>
-              <th>Precio</th>
-              <th>Stock</th>
+              <th
+                style={{ cursor: "pointer", userSelect: "none" }}
+                onClick={() => handleSort("codigo")}
+              >
+                Código{sortIcon("codigo", sortKey, sortDir)}
+              </th>
+              <th
+                style={{ cursor: "pointer", userSelect: "none" }}
+                onClick={() => handleSort("nombre")}
+              >
+                Nombre{sortIcon("nombre", sortKey, sortDir)}
+              </th>
+              <th
+                style={{ cursor: "pointer", userSelect: "none" }}
+                onClick={() => handleSort("marca_nombre")}
+              >
+                Marca{sortIcon("marca_nombre", sortKey, sortDir)}
+              </th>
+              <th
+                style={{ cursor: "pointer", userSelect: "none" }}
+                onClick={() => handleSort("categoria_nombre")}
+              >
+                Categoría{sortIcon("categoria_nombre", sortKey, sortDir)}
+              </th>
+              <th
+                style={{ cursor: "pointer", userSelect: "none" }}
+                onClick={() => handleSort("sub_categoria_nombre")}
+              >
+                Subcategoría{sortIcon("sub_categoria_nombre", sortKey, sortDir)}
+              </th>
+              <th
+                style={{ cursor: "pointer", userSelect: "none" }}
+                onClick={() => handleSort("precio_venta")}
+              >
+                Precio{sortIcon("precio_venta", sortKey, sortDir)}
+              </th>
+              <th
+                style={{ cursor: "pointer", userSelect: "none" }}
+                onClick={() => handleSort("stock")}
+              >
+                Stock{sortIcon("stock", sortKey, sortDir)}
+              </th>
               {hayAcciones && <th style={{ width: "120px" }}>Acciones</th>}
             </tr>
           </thead>
           <tbody>
-            {products.map((producto) => (
-              <tr
-                key={producto.id}
-                className={obtenerClaseStock(producto.stock)}
-              >
-                <td>
-                  <Form.Check
-                    type="checkbox"
-                    checked={selectedProducts.includes(producto.id)}
-                    onChange={() => handleSelectProduct(producto.id)}
-                  />
-                </td>
-                <td>{producto.codigo}</td>
-                <td>{producto.nombre}</td>
-                <td>{producto.marca_nombre}</td>
-                <td>{producto.categoria_nombre}</td>
-                <td>{producto.sub_categoria_nombre || "-"}</td>
-                <td>
-                  {producto.precio_venta
-                    ? `$${producto.precio_venta.toLocaleString()}`
-                    : "-"}
-                </td>
-                <td>{producto.stock}</td>
-                {hayAcciones && (
+            {products.map((producto) => {
+              return (
+                <tr
+                  key={producto.id}
+                  className={obtenerClaseStock(producto.stock)}
+                >
                   <td>
-                    {puedeEditar && (
-                      <Button
-                        variant="outline-primary"
-                        size="sm"
-                        className="me-1"
-                        onClick={() => handleEditProduct(producto.id)}
-                        title="Editar"
-                      >
-                        <PencilSquare size={16} />
-                      </Button>
-                    )}
-                    {puedeEliminar && (
-                      <Button
-                        variant="outline-danger"
-                        size="sm"
-                        onClick={() => handleDeleteProduct(producto.id)}
-                        title="Eliminar"
-                      >
-                        <Trash size={16} />
-                      </Button>
-                    )}
+                    <Form.Check
+                      type="checkbox"
+                      checked={selectedProducts.includes(producto.id)}
+                      onChange={() => handleSelectProduct(producto.id)}
+                    />
                   </td>
-                )}
-              </tr>
-            ))}
+                  <td>{producto.codigo}</td>
+                  <td>{producto.nombre}</td>
+                  <td>{producto.marca_nombre}</td>
+                  <td>{producto.categoria_nombre}</td>
+                  <td>{producto.sub_categoria_nombre || "-"}</td>
+                  <td>
+                    {producto.precio_venta
+                      ? `$${producto.precio_venta.toLocaleString()}`
+                      : "-"}
+                  </td>
+                  <td>{producto.stock}</td>
+                  {hayAcciones && (
+                    <td>
+                      {puedeEditar && (
+                        <Button
+                          variant="outline-primary"
+                          size="sm"
+                          className="me-1"
+                          onClick={() => handleEditProduct(producto.id)}
+                          title="Editar"
+                        >
+                          <PencilSquare size={16} />
+                        </Button>
+                      )}
+                      {puedeEliminar && (
+                        <Button
+                          variant="outline-danger"
+                          size="sm"
+                          onClick={() => handleDeleteProduct(producto.id)}
+                          title="Eliminar"
+                        >
+                          <Trash size={16} />
+                        </Button>
+                      )}
+                    </td>
+                  )}
+                </tr>
+              );
+            })}
           </tbody>
         </Table>
         {/* Sentinel para infinite scroll */}

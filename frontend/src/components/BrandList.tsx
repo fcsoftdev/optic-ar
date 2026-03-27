@@ -20,6 +20,11 @@ import MarcaFormModal from "./MarcaFormModal";
 import PaginationBar from "./PaginationBar";
 import type { Marca } from "../services/productos.service";
 
+type SortDir = "asc" | "desc";
+
+const sortIcon = (key: string, sortKey: string, sortDir: SortDir) =>
+  sortKey !== key ? " ⇅" : sortDir === "asc" ? " ↑" : " ↓";
+
 /**
  * Componente BrandList - Lista de marcas con ABM completo.
  *
@@ -63,6 +68,27 @@ function BrandList() {
   const marcas = Array.isArray(data) ? data : data?.results || [];
   const totalPages =
     !Array.isArray(data) && data?.count ? Math.ceil(data.count / 10) : 0;
+
+  const [sortKey, setSortKey] = useState("nombre");
+  const [sortDir, setSortDir] = useState<SortDir>("asc");
+
+  const handleSort = (key: string) => {
+    if (sortKey === key) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortKey(key);
+      setSortDir("asc");
+    }
+  };
+
+  const sortedMarcas = [...marcas].sort((a, b) => {
+    const av = (a as any)[sortKey];
+    const bv = (b as any)[sortKey];
+    if (av == null) return 1;
+    if (bv == null) return -1;
+    const cmp = String(av).localeCompare(String(bv), "es", { numeric: true });
+    return sortDir === "asc" ? cmp : -cmp;
+  });
 
   /**
    * Seleccionar/deseleccionar todas las marcas de la página actual
@@ -218,8 +244,22 @@ function BrandList() {
                     onChange={handleSelectAll}
                   />
                 </th>
-                <th style={{ width: "80px" }}>#</th>
-                <th>Nombre</th>
+                <th
+                  style={{
+                    width: "80px",
+                    cursor: "pointer",
+                    userSelect: "none",
+                  }}
+                  onClick={() => handleSort("id")}
+                >
+                  #{sortIcon("id", sortKey, sortDir)}
+                </th>
+                <th
+                  style={{ cursor: "pointer", userSelect: "none" }}
+                  onClick={() => handleSort("nombre")}
+                >
+                  Nombre{sortIcon("nombre", sortKey, sortDir)}
+                </th>
                 {hayAcciones && <th style={{ width: "150px" }}>Acciones</th>}
               </tr>
             </thead>
@@ -236,7 +276,7 @@ function BrandList() {
                   </td>
                 </tr>
               ) : (
-                marcas.map((marca) => (
+                sortedMarcas.map((marca) => (
                   <tr key={marca.id}>
                     <td>
                       <Form.Check
