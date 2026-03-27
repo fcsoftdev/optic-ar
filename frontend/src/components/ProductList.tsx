@@ -336,7 +336,6 @@ const ProductList: React.FC = (): JSX.Element => {
                   onChange={handleSelectAll}
                 />
               </th>
-              <th>#</th>
               <th>Código</th>
               <th>Nombre</th>
               <th>Marca</th>
@@ -360,7 +359,6 @@ const ProductList: React.FC = (): JSX.Element => {
                     onChange={() => handleSelectProduct(producto.id)}
                   />
                 </td>
-                <td>{producto.id}</td>
                 <td>{producto.codigo}</td>
                 <td>{producto.nombre}</td>
                 <td>{producto.marca_nombre}</td>
