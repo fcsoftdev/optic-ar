@@ -190,7 +190,11 @@ function ExpensesList() {
               {gastos.map((gasto) => (
                 <React.Fragment key={gasto.id}>
                   <tr>
-                    <td>{gasto.fecha}</td>
+                    <td>
+                      {new Date(gasto.fecha + "T00:00:00").toLocaleDateString(
+                        "es-AR",
+                      )}
+                    </td>
                     <td>{gasto.descripcion}</td>
                     <td className="text-end">{fmtARS(gasto.total)}</td>
                     {hayAcciones && (

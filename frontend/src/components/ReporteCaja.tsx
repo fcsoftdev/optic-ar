@@ -311,7 +311,11 @@ function ReporteCaja() {
                   <tbody>
                     {data.ventas.map((v) => (
                       <tr key={v.id}>
-                        <td className="ps-3">{v.fecha}</td>
+                        <td className="ps-3">
+                          {new Date(v.fecha + "T00:00:00").toLocaleDateString(
+                            "es-AR",
+                          )}
+                        </td>
                         <td>{v.cliente_nombre}</td>
                         <td>
                           <Badge bg="light" text="dark">
@@ -361,7 +365,11 @@ function ReporteCaja() {
                   <tbody>
                     {data.compras.map((c) => (
                       <tr key={c.id}>
-                        <td className="ps-3">{c.fecha}</td>
+                        <td className="ps-3">
+                          {new Date(c.fecha + "T00:00:00").toLocaleDateString(
+                            "es-AR",
+                          )}
+                        </td>
                         <td>{c.proveedor_nombre}</td>
                         <td className="text-end pe-3 text-danger fw-semibold">
                           {formatearPesos(c.total)}
@@ -399,7 +407,11 @@ function ReporteCaja() {
                   <tbody>
                     {data.gastos.map((g) => (
                       <tr key={g.id}>
-                        <td className="ps-3">{g.fecha}</td>
+                        <td className="ps-3">
+                          {new Date(g.fecha + "T00:00:00").toLocaleDateString(
+                            "es-AR",
+                          )}
+                        </td>
                         <td>{g.descripcion}</td>
                         <td className="text-end pe-3 text-warning fw-semibold">
                           {formatearPesos(g.total)}
