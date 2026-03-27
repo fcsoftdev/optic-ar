@@ -359,7 +359,7 @@ function SuppliersList() {
 
       {/* ── Paginación ───────────────────────────────────────────────── */}
       {totalPages > 1 && (
-        <div className="mt-2">
+        <div className="pt-2 pb-3">
           <PaginationBar
             currentPage={currentPage}
             totalPages={totalPages}

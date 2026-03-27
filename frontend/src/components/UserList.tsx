@@ -318,130 +318,135 @@ export default function UserList() {
 
   return (
     <div
-      style={{
-        height: "calc(100vh - 100px)",
-        overflowY: "auto",
-        paddingRight: "1rem",
-      }}
+      className="d-flex flex-column"
+      style={{ height: "calc(100vh - 80px)" }}
     >
-      <ListHeader
-        title="Usuarios"
-        count={data?.count ?? 0}
-        icon={<PeopleFill size={28} viewBox="0 1 16 16" />}
-      >
-        <Button variant="primary" size="sm" onClick={handleNuevo}>
-          <PersonPlusFill className="me-1" />
-          Nuevo Usuario
-        </Button>
-      </ListHeader>
+      {/* ── Encabezado / Buscador ────────────────────────────────────── */}
+      <div className="mb-3">
+        <ListHeader
+          title="Usuarios"
+          count={data?.count ?? 0}
+          icon={<PeopleFill size={28} viewBox="0 1 16 16" />}
+        >
+          <Button variant="primary" size="sm" onClick={handleNuevo}>
+            <PersonPlusFill className="me-1" />
+            Nuevo Usuario
+          </Button>
+        </ListHeader>
 
-      {/* Buscador */}
-      <Form.Control
-        type="search"
-        placeholder="Buscar por usuario, email o nombre…"
-        className="mb-3"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-      />
+        {/* Buscador */}
+        <Form.Control
+          type="search"
+          placeholder="Buscar por usuario, email o nombre…"
+          className="mt-3"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+      </div>
 
-      {/* Estados */}
-      {isLoading && (
-        <div className="text-center py-5">
-          <Spinner animation="border" variant="primary" />
-        </div>
-      )}
-      {error && (
-        <Alert variant="danger">
-          Error al cargar usuarios. Solo los administradores pueden acceder a
-          esta sección.
-        </Alert>
-      )}
+      {/* ── Contenido scrollable ─────────────────────────────────────── */}
+      <div className="flex-grow-1 overflow-auto">
+        {/* Estados */}
+        {isLoading && (
+          <div className="text-center py-5">
+            <Spinner animation="border" variant="primary" />
+          </div>
+        )}
+        {error && (
+          <Alert variant="danger">
+            Error al cargar usuarios. Solo los administradores pueden acceder a
+            esta sección.
+          </Alert>
+        )}
 
-      {/* Tabla */}
-      {!isLoading && !error && (
-        <Table hover responsive bordered size="sm">
-          <thead className="table-dark">
-            <tr>
-              <th>Usuario</th>
-              <th>Nombre completo</th>
-              <th>Email</th>
-              <th>Grupos</th>
-              <th>Estado</th>
-              <th>Rol</th>
-              <th className="text-center">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {usuarios.length === 0 ? (
+        {/* Tabla */}
+        {!isLoading && !error && (
+          <Table hover responsive bordered size="sm">
+            <thead className="table-dark">
               <tr>
-                <td colSpan={7} className="text-center text-muted py-4">
-                  No se encontraron usuarios.
-                </td>
+                <th>Usuario</th>
+                <th>Nombre completo</th>
+                <th>Email</th>
+                <th>Grupos</th>
+                <th>Estado</th>
+                <th>Rol</th>
+                <th className="text-center">Acciones</th>
               </tr>
-            ) : (
-              usuarios.map((u) => (
-                <React.Fragment key={u.id}>
-                  <tr>
-                    <td className="fw-semibold">{u.username}</td>
-                    <td>{nombreCompleto(u)}</td>
-                    <td>{u.email || <span className="text-muted">—</span>}</td>
-                    <td>
-                      {u.groups.length > 0 ? (
-                        u.groups.map((g) => (
-                          <Badge bg="info" className="me-1 text-dark" key={g}>
-                            {g}
+            </thead>
+            <tbody>
+              {usuarios.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="text-center text-muted py-4">
+                    No se encontraron usuarios.
+                  </td>
+                </tr>
+              ) : (
+                usuarios.map((u) => (
+                  <React.Fragment key={u.id}>
+                    <tr>
+                      <td className="fw-semibold">{u.username}</td>
+                      <td>{nombreCompleto(u)}</td>
+                      <td>
+                        {u.email || <span className="text-muted">—</span>}
+                      </td>
+                      <td>
+                        {u.groups.length > 0 ? (
+                          u.groups.map((g) => (
+                            <Badge bg="info" className="me-1 text-dark" key={g}>
+                              {g}
+                            </Badge>
+                          ))
+                        ) : (
+                          <span className="text-muted small">Sin grupos</span>
+                        )}
+                      </td>
+                      <td>
+                        {u.is_active ? (
+                          <Badge bg="success">Activo</Badge>
+                        ) : (
+                          <Badge bg="secondary">Inactivo</Badge>
+                        )}
+                      </td>
+                      <td>
+                        {u.is_superuser ? (
+                          <Badge bg="danger">Superusuario</Badge>
+                        ) : u.is_staff ? (
+                          <Badge bg="warning" text="dark">
+                            Admin
                           </Badge>
-                        ))
-                      ) : (
-                        <span className="text-muted small">Sin grupos</span>
-                      )}
-                    </td>
-                    <td>
-                      {u.is_active ? (
-                        <Badge bg="success">Activo</Badge>
-                      ) : (
-                        <Badge bg="secondary">Inactivo</Badge>
-                      )}
-                    </td>
-                    <td>
-                      {u.is_superuser ? (
-                        <Badge bg="danger">Superusuario</Badge>
-                      ) : u.is_staff ? (
-                        <Badge bg="warning" text="dark">
-                          Admin
-                        </Badge>
-                      ) : (
-                        <Badge bg="light" text="dark">
-                          Estándar
-                        </Badge>
-                      )}
-                    </td>
-                    <td className="text-center">
-                      <Button
-                        variant="outline-primary"
-                        size="sm"
-                        className="me-1"
-                        onClick={() => handleEditar(u)}
-                        title="Editar"
-                      >
-                        <PencilSquare />
-                      </Button>
-                      <Button
-                        variant="outline-danger"
-                        size="sm"
-                        onClick={() => setUsuarioEliminar(u)}
-                        title="Eliminar"
-                      >
-                        <Trash />
-                      </Button>
-                    </td>
-                  </tr>
-                </React.Fragment>
-              ))
-            )}
-          </tbody>
-        </Table>
-      )}
+                        ) : (
+                          <Badge bg="light" text="dark">
+                            Estándar
+                          </Badge>
+                        )}
+                      </td>
+                      <td className="text-center">
+                        <Button
+                          variant="outline-primary"
+                          size="sm"
+                          className="me-1"
+                          onClick={() => handleEditar(u)}
+                          title="Editar"
+                        >
+                          <PencilSquare />
+                        </Button>
+                        <Button
+                          variant="outline-danger"
+                          size="sm"
+                          onClick={() => setUsuarioEliminar(u)}
+                          title="Eliminar"
+                        >
+                          <Trash />
+                        </Button>
+                      </td>
+                    </tr>
+                  </React.Fragment>
+                ))
+              )}
+            </tbody>
+          </Table>
+        )}
+      </div>
 
       {/* Modales */}
       <UsuarioModal

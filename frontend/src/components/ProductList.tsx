@@ -189,7 +189,7 @@ const ProductList: React.FC = (): JSX.Element => {
       style={{
         display: "flex",
         flexDirection: "column",
-        height: "calc(100vh - 100px)",
+        height: "calc(100vh - 80px)",
       }}
     >
       <div style={{ flex: "0 0 auto" }}>

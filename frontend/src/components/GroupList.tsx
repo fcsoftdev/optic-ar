@@ -375,108 +375,114 @@ export default function GroupList() {
 
   return (
     <div
-      style={{
-        height: "calc(100vh - 100px)",
-        overflowY: "auto",
-        paddingRight: "1rem",
-      }}
+      className="d-flex flex-column"
+      style={{ height: "calc(100vh - 80px)" }}
     >
-      <ListHeader
-        title="Grupos / Roles"
-        count={data?.count ?? 0}
-        icon={<ShieldLockFill size={28} viewBox="0 1 16 16" />}
-      >
-        <Button variant="primary" size="sm" onClick={handleNuevo}>
-          <PlusLg className="me-1" />
-          Nuevo Grupo
-        </Button>
-      </ListHeader>
+      {/* ── Encabezado ───────────────────────────────────────────────── */}
+      <div className="mb-3">
+        <ListHeader
+          title="Grupos / Roles"
+          count={data?.count ?? 0}
+          icon={<ShieldLockFill size={28} viewBox="0 1 16 16" />}
+        >
+          <Button variant="primary" size="sm" onClick={handleNuevo}>
+            <PlusLg className="me-1" />
+            Nuevo Grupo
+          </Button>
+        </ListHeader>
+      </div>
 
-      {/* Estados */}
-      {isLoading && (
-        <div className="text-center py-5">
-          <Spinner animation="border" variant="primary" />
-        </div>
-      )}
-      {error && (
-        <Alert variant="danger">
-          Error al cargar grupos. Solo los administradores pueden acceder a esta
-          sección.
-        </Alert>
-      )}
+      {/* ── Contenido scrollable ─────────────────────────────────────── */}
+      <div className="flex-grow-1 overflow-auto">
+        {/* Estados */}
+        {isLoading && (
+          <div className="text-center py-5">
+            <Spinner animation="border" variant="primary" />
+          </div>
+        )}
+        {error && (
+          <Alert variant="danger">
+            Error al cargar grupos. Solo los administradores pueden acceder a
+            esta sección.
+          </Alert>
+        )}
 
-      {/* Tabla */}
-      {!isLoading && !error && (
-        <Table hover responsive bordered size="sm">
-          <thead className="table-dark">
-            <tr>
-              <th>Nombre del grupo</th>
-              <th>Usuarios</th>
-              <th>Permisos asignados</th>
-              <th className="text-center">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {grupos.length === 0 ? (
+        {/* Tabla */}
+        {!isLoading && !error && (
+          <Table hover responsive bordered size="sm">
+            <thead
+              className="table-dark"
+              style={{ position: "sticky", top: 0, zIndex: 1 }}
+            >
               <tr>
-                <td colSpan={4} className="text-center text-muted py-4">
-                  No hay grupos creados.
-                </td>
+                <th>Nombre del grupo</th>
+                <th>Usuarios</th>
+                <th>Permisos asignados</th>
+                <th className="text-center">Acciones</th>
               </tr>
-            ) : (
-              grupos.map((g) => (
-                <React.Fragment key={g.id}>
-                  <tr>
-                    <td className="fw-semibold">{g.name}</td>
-                    <td>
-                      <Badge bg="secondary" pill>
-                        {g.user_count}
-                      </Badge>
-                    </td>
-                    <td>
-                      {g.permissions.length === 0 ? (
-                        <span className="text-muted small">Sin permisos</span>
-                      ) : (
-                        <span className="text-muted small">
-                          {g.permissions.length} permiso
-                          {g.permissions.length !== 1 ? "s" : ""}
-                          {" · "}
-                          {[
-                            ...new Set(
-                              g.permissions.map(
-                                (p) => APP_LABELS[p.app_label] ?? p.app_label,
+            </thead>
+            <tbody>
+              {grupos.length === 0 ? (
+                <tr>
+                  <td colSpan={4} className="text-center text-muted py-4">
+                    No hay grupos creados.
+                  </td>
+                </tr>
+              ) : (
+                grupos.map((g) => (
+                  <React.Fragment key={g.id}>
+                    <tr>
+                      <td className="fw-semibold">{g.name}</td>
+                      <td>
+                        <Badge bg="secondary" pill>
+                          {g.user_count}
+                        </Badge>
+                      </td>
+                      <td>
+                        {g.permissions.length === 0 ? (
+                          <span className="text-muted small">Sin permisos</span>
+                        ) : (
+                          <span className="text-muted small">
+                            {g.permissions.length} permiso
+                            {g.permissions.length !== 1 ? "s" : ""}
+                            {" · "}
+                            {[
+                              ...new Set(
+                                g.permissions.map(
+                                  (p) => APP_LABELS[p.app_label] ?? p.app_label,
+                                ),
                               ),
-                            ),
-                          ].join(", ")}
-                        </span>
-                      )}
-                    </td>
-                    <td className="text-center">
-                      <Button
-                        variant="outline-primary"
-                        size="sm"
-                        className="me-1"
-                        onClick={() => handleEditar(g)}
-                        title="Editar"
-                      >
-                        <PencilSquare />
-                      </Button>
-                      <Button
-                        variant="outline-danger"
-                        size="sm"
-                        onClick={() => setGrupoEliminar(g)}
-                        title="Eliminar"
-                      >
-                        <Trash />
-                      </Button>
-                    </td>
-                  </tr>
-                </React.Fragment>
-              ))
-            )}
-          </tbody>
-        </Table>
-      )}
+                            ].join(", ")}
+                          </span>
+                        )}
+                      </td>
+                      <td className="text-center">
+                        <Button
+                          variant="outline-primary"
+                          size="sm"
+                          className="me-1"
+                          onClick={() => handleEditar(g)}
+                          title="Editar"
+                        >
+                          <PencilSquare />
+                        </Button>
+                        <Button
+                          variant="outline-danger"
+                          size="sm"
+                          onClick={() => setGrupoEliminar(g)}
+                          title="Eliminar"
+                        >
+                          <Trash />
+                        </Button>
+                      </td>
+                    </tr>
+                  </React.Fragment>
+                ))
+              )}
+            </tbody>
+          </Table>
+        )}
+      </div>
 
       {/* Modales */}
       <GrupoModal

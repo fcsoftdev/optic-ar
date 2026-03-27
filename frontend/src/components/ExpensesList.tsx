@@ -111,153 +111,166 @@ function ExpensesList() {
   };
 
   return (
-    <>
-      <ListHeader
-        title="Listado de Gastos"
-        count={gastosData?.count ?? 0}
-        icon={<Cash size={26} viewBox="0 0 16 16" />}
-        addLabel="Gasto"
-        onAdd={handleNuevoGasto}
-        canAdd={tienePermiso("compras.add_gasto")}
-      />
-
-      {/* Barra de búsqueda */}
-      <Row className="mb-3">
-        <Col>
-          <InputGroup>
-            <InputGroup.Text>
-              <Search />
-            </InputGroup.Text>
-            <Form.Control
-              type="text"
-              placeholder="Buscar por descripción..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            {searchTerm && (
-              <Button
-                variant="outline-secondary"
-                onClick={() => setSearchTerm("")}
-              >
-                <XCircle />
-              </Button>
-            )}
-          </InputGroup>
-        </Col>
-      </Row>
-
-      {/* Error global */}
-      {deleteError && (
-        <Alert
-          variant="danger"
-          dismissible
-          onClose={() => setDeleteError(null)}
-        >
-          {deleteError}
-        </Alert>
-      )}
-
-      {/* Tabla */}
-      {isLoading ? (
-        <div className="text-center py-5">
-          <Spinner animation="border" variant="primary" />
-        </div>
-      ) : error ? (
-        <Alert variant="danger">Error al cargar los gastos.</Alert>
-      ) : gastos.length === 0 ? (
-        <Alert variant="info">No se encontraron gastos.</Alert>
-      ) : (
-        <Table striped bordered hover responsive>
-          <thead className="table-dark">
-            <tr>
-              <th>Fecha</th>
-              <th>Descripción</th>
-              <th className="text-end">Total</th>
-              {hayAcciones && <th className="text-center">Acciones</th>}
-            </tr>
-          </thead>
-          <tbody>
-            {gastos.map((gasto) => (
-              <React.Fragment key={gasto.id}>
-                <tr>
-                  <td>{gasto.fecha}</td>
-                  <td>{gasto.descripcion}</td>
-                  <td className="text-end">{fmtARS(gasto.total)}</td>
-                  {hayAcciones && (
-                    <td className="text-center">
-                      {puedeEditar && (
-                        <Button
-                          size="sm"
-                          variant="outline-warning"
-                          className="me-1"
-                          title="Editar"
-                          onClick={() => handleEdit(gasto)}
-                        >
-                          <Pencil />
-                        </Button>
-                      )}
-                      {puedeEliminar && (
-                        <Button
-                          size="sm"
-                          variant="outline-danger"
-                          title="Eliminar"
-                          onClick={() => handleDeleteRequest(gasto.id)}
-                        >
-                          <Trash />
-                        </Button>
-                      )}
-                    </td>
-                  )}
-                </tr>
-
-                {/* Fila de confirmación de eliminación */}
-                {deleteConfirmId === gasto.id && (
-                  <tr key={`confirm-${gasto.id}`} className="table-warning">
-                    <td colSpan={4}>
-                      <div className="d-flex align-items-center gap-2 flex-wrap">
-                        <span>
-                          ¿Eliminar el gasto{" "}
-                          <strong>{gasto.descripcion}</strong>?
-                        </span>
-                        <Button
-                          size="sm"
-                          variant="danger"
-                          onClick={handleDeleteConfirm}
-                          disabled={deleteGasto.isPending}
-                        >
-                          {deleteGasto.isPending ? (
-                            <Spinner size="sm" animation="border" />
-                          ) : (
-                            "Sí, eliminar"
-                          )}
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="secondary"
-                          onClick={() => setDeleteConfirmId(null)}
-                        >
-                          Cancelar
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                )}
-              </React.Fragment>
-            ))}{" "}
-          </tbody>
-        </Table>
-      )}
-
-      {/* Paginación */}
-      {totalPages > 1 && (
-        <PaginationBar
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={setCurrentPage}
-          totalItems={gastosData?.count ?? 0}
-          pageItems={gastos.length}
-          itemLabel="gasto(s)"
+    <div
+      className="d-flex flex-column"
+      style={{ height: "calc(100vh - 80px)" }}
+    >
+      {/* ── Encabezado / Filtros ────────────────────────────────────── */}
+      <div className="mb-3">
+        <ListHeader
+          title="Listado de Gastos"
+          count={gastosData?.count ?? 0}
+          icon={<Cash size={26} viewBox="0 0 16 16" />}
+          addLabel="Gasto"
+          onAdd={handleNuevoGasto}
+          canAdd={tienePermiso("compras.add_gasto")}
         />
+
+        {/* Barra de búsqueda */}
+        <Row className="mt-3">
+          <Col>
+            <InputGroup>
+              <InputGroup.Text>
+                <Search />
+              </InputGroup.Text>
+              <Form.Control
+                type="text"
+                placeholder="Buscar por descripción..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              {searchTerm && (
+                <Button
+                  variant="outline-secondary"
+                  onClick={() => setSearchTerm("")}
+                >
+                  <XCircle />
+                </Button>
+              )}
+            </InputGroup>
+          </Col>
+        </Row>
+
+        {/* Error global */}
+        {deleteError && (
+          <Alert
+            variant="danger"
+            dismissible
+            onClose={() => setDeleteError(null)}
+          >
+            {deleteError}
+          </Alert>
+        )}
+      </div>
+
+      {/* ── Tabla ────────────────────────────────────────────────────── */}
+      <div className="flex-grow-1 overflow-auto">
+        {isLoading ? (
+          <div className="text-center py-5">
+            <Spinner animation="border" variant="primary" />
+          </div>
+        ) : error ? (
+          <Alert variant="danger">Error al cargar los gastos.</Alert>
+        ) : gastos.length === 0 ? (
+          <Alert variant="info">No se encontraron gastos.</Alert>
+        ) : (
+          <Table striped bordered hover responsive>
+            <thead
+              className="table-dark"
+              style={{ position: "sticky", top: 0, zIndex: 1 }}
+            >
+              <tr>
+                <th>Fecha</th>
+                <th>Descripción</th>
+                <th className="text-end">Total</th>
+                {hayAcciones && <th className="text-center">Acciones</th>}
+              </tr>
+            </thead>
+            <tbody>
+              {gastos.map((gasto) => (
+                <React.Fragment key={gasto.id}>
+                  <tr>
+                    <td>{gasto.fecha}</td>
+                    <td>{gasto.descripcion}</td>
+                    <td className="text-end">{fmtARS(gasto.total)}</td>
+                    {hayAcciones && (
+                      <td className="text-center">
+                        {puedeEditar && (
+                          <Button
+                            size="sm"
+                            variant="outline-warning"
+                            className="me-1"
+                            title="Editar"
+                            onClick={() => handleEdit(gasto)}
+                          >
+                            <Pencil />
+                          </Button>
+                        )}
+                        {puedeEliminar && (
+                          <Button
+                            size="sm"
+                            variant="outline-danger"
+                            title="Eliminar"
+                            onClick={() => handleDeleteRequest(gasto.id)}
+                          >
+                            <Trash />
+                          </Button>
+                        )}
+                      </td>
+                    )}
+                  </tr>
+
+                  {/* Fila de confirmación de eliminación */}
+                  {deleteConfirmId === gasto.id && (
+                    <tr key={`confirm-${gasto.id}`} className="table-warning">
+                      <td colSpan={4}>
+                        <div className="d-flex align-items-center gap-2 flex-wrap">
+                          <span>
+                            ¿Eliminar el gasto{" "}
+                            <strong>{gasto.descripcion}</strong>?
+                          </span>
+                          <Button
+                            size="sm"
+                            variant="danger"
+                            onClick={handleDeleteConfirm}
+                            disabled={deleteGasto.isPending}
+                          >
+                            {deleteGasto.isPending ? (
+                              <Spinner size="sm" animation="border" />
+                            ) : (
+                              "Sí, eliminar"
+                            )}
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            onClick={() => setDeleteConfirmId(null)}
+                          >
+                            Cancelar
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </React.Fragment>
+              ))}{" "}
+            </tbody>
+          </Table>
+        )}
+      </div>
+
+      {/* ── Paginación ───────────────────────────────────────────────── */}
+      {totalPages > 1 && (
+        <div className="pt-2 pb-3">
+          <PaginationBar
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+            totalItems={gastosData?.count ?? 0}
+            pageItems={gastos.length}
+            itemLabel="gasto(s)"
+          />
+        </div>
       )}
 
       {/* Modal de formulario */}
@@ -269,7 +282,7 @@ function ExpensesList() {
         }}
         gasto={editingGasto}
       />
-    </>
+    </div>
   );
 }
 

@@ -152,7 +152,7 @@ const ConsultationList: React.FC = () => {
       style={{
         display: "flex",
         flexDirection: "column",
-        height: "calc(100vh - 100px)",
+        height: "calc(100vh - 80px)",
       }}
     >
       {/* Header y filtros — fijos arriba */}
@@ -349,16 +349,18 @@ const ConsultationList: React.FC = () => {
       </div>
 
       {/* Paginación — fija abajo */}
-      <div style={{ flex: "0 0 auto" }}>
-        <PaginationBar
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={setCurrentPage}
-          totalItems={consultasData?.count ?? 0}
-          pageItems={consultas.length}
-          itemLabel="consulta(s)"
-        />
-      </div>
+      {totalPages > 1 && (
+        <div className="pt-2 pb-3">
+          <PaginationBar
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+            totalItems={consultasData?.count ?? 0}
+            pageItems={consultas.length}
+            itemLabel="consulta(s)"
+          />
+        </div>
+      )}
 
       {/* Modal de formulario */}
       <ConsultationFormModal

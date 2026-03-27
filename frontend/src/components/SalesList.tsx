@@ -281,7 +281,7 @@ const SalesList: React.FC = () => {
 
       {/* ── Paginación ───────────────────────────────────────────────── */}
       {!isLoading && ventas.length > 0 && (
-        <div className="mt-2">
+        <div className="pt-2 pb-3">
           <PaginationBar
             currentPage={currentPage}
             totalPages={totalPages}

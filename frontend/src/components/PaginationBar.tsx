@@ -88,7 +88,7 @@ const PaginationBar: React.FC<PaginationBarProps> = ({
 
   return (
     <div
-      className="d-flex justify-content-between align-items-center mt-4 pt-3"
+      className="d-flex justify-content-between align-items-center mt-4 pt-3 pb-3"
       style={{ borderTop: "1px solid #dee2e6" }}
     >
       <div className="text-muted">

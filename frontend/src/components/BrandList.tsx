@@ -142,28 +142,11 @@ function BrandList() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Estados de carga y error
-  if (isLoading) {
-    return (
-      <div className="text-center py-5">
-        <Spinner animation="border" role="status">
-          <span className="visually-hidden">Cargando marcas...</span>
-        </Spinner>
-        <p className="mt-3">Cargando marcas...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <Alert variant="danger">
-        Error al cargar las marcas. Por favor, intente nuevamente.
-      </Alert>
-    );
-  }
-
   return (
-    <>
+    <div
+      className="d-flex flex-column"
+      style={{ height: "calc(100vh - 80px)" }}
+    >
       {/* Header con título y botón de crear */}
       <ListHeader
         title="Marcas"
@@ -194,115 +177,126 @@ function BrandList() {
         </Col>
       </Row>
 
-      {/* Contenedor con scroll para la tabla */}
-      <div
-        style={{
-          overflow: "auto",
-          maxHeight: "calc(100vh - 300px)",
-          border: "1px solid #dee2e6",
-          borderRadius: "4px",
-        }}
-      >
-        <Table
-          striped
-          bordered
-          hover
-          style={{ minWidth: "600px", marginBottom: 0 }}
-        >
-          <thead
-            style={{
-              position: "sticky",
-              top: 0,
-              backgroundColor: "#fff",
-              zIndex: 1,
-              boxShadow: "0 2px 2px -1px rgba(0, 0, 0, 0.1)",
-            }}
-            className="table-dark"
+      {/* Tabla */}
+      <div className="flex-grow-1 overflow-auto">
+        {isLoading ? (
+          <div className="text-center py-5">
+            <Spinner animation="border" role="status">
+              <span className="visually-hidden">Cargando marcas...</span>
+            </Spinner>
+            <p className="mt-3">Cargando marcas...</p>
+          </div>
+        ) : error ? (
+          <Alert variant="danger">
+            Error al cargar las marcas. Por favor, intente nuevamente.
+          </Alert>
+        ) : (
+          <Table
+            striped
+            bordered
+            hover
+            style={{ minWidth: "600px", marginBottom: 0 }}
           >
-            <tr>
-              <th style={{ width: "50px" }}>
-                <Form.Check
-                  type="checkbox"
-                  checked={
-                    marcas.length > 0 && selectedMarcas.length === marcas.length
-                  }
-                  onChange={handleSelectAll}
-                />
-              </th>
-              <th style={{ width: "80px" }}>#</th>
-              <th>Nombre</th>
-              {hayAcciones && <th style={{ width: "150px" }}>Acciones</th>}
-            </tr>
-          </thead>
-          <tbody>
-            {marcas.length === 0 ? (
+            <thead
+              style={{
+                position: "sticky",
+                top: 0,
+                backgroundColor: "#fff",
+                zIndex: 1,
+                boxShadow: "0 2px 2px -1px rgba(0, 0, 0, 0.1)",
+              }}
+              className="table-dark"
+            >
               <tr>
-                <td
-                  colSpan={hayAcciones ? 4 : 3}
-                  className="text-center text-muted"
-                >
-                  {debouncedSearchTerm
-                    ? "No se encontraron marcas con ese criterio de búsqueda"
-                    : "No hay marcas registradas. Agregue una nueva marca."}
-                </td>
+                <th style={{ width: "50px" }}>
+                  <Form.Check
+                    type="checkbox"
+                    checked={
+                      marcas.length > 0 &&
+                      selectedMarcas.length === marcas.length
+                    }
+                    onChange={handleSelectAll}
+                  />
+                </th>
+                <th style={{ width: "80px" }}>#</th>
+                <th>Nombre</th>
+                {hayAcciones && <th style={{ width: "150px" }}>Acciones</th>}
               </tr>
-            ) : (
-              marcas.map((marca) => (
-                <tr key={marca.id}>
-                  <td>
-                    <Form.Check
-                      type="checkbox"
-                      checked={selectedMarcas.includes(marca.id)}
-                      onChange={() => handleSelectMarca(marca.id)}
-                    />
+            </thead>
+            <tbody>
+              {marcas.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={hayAcciones ? 4 : 3}
+                    className="text-center text-muted"
+                  >
+                    {debouncedSearchTerm
+                      ? "No se encontraron marcas con ese criterio de búsqueda"
+                      : "No hay marcas registradas. Agregue una nueva marca."}
                   </td>
-                  <td>{marca.id}</td>
-                  <td>
-                    <strong>{marca.nombre}</strong>
-                  </td>
-                  {hayAcciones && (
-                    <td>
-                      {puedeEditar && (
-                        <Button
-                          variant="outline-primary"
-                          size="sm"
-                          className="me-2"
-                          onClick={() => handleEditMarca(marca)}
-                          title="Editar marca"
-                        >
-                          <PencilSquare size={14} />
-                        </Button>
-                      )}
-                      {puedeEliminar && (
-                        <Button
-                          variant="outline-danger"
-                          size="sm"
-                          onClick={() => handleDeleteMarca(marca.id)}
-                          title="Eliminar marca"
-                        >
-                          <Trash size={14} />
-                        </Button>
-                      )}
-                    </td>
-                  )}
                 </tr>
-              ))
-            )}
-          </tbody>
-        </Table>
+              ) : (
+                marcas.map((marca) => (
+                  <tr key={marca.id}>
+                    <td>
+                      <Form.Check
+                        type="checkbox"
+                        checked={selectedMarcas.includes(marca.id)}
+                        onChange={() => handleSelectMarca(marca.id)}
+                      />
+                    </td>
+                    <td>{marca.id}</td>
+                    <td>
+                      <strong>{marca.nombre}</strong>
+                    </td>
+                    {hayAcciones && (
+                      <td>
+                        {puedeEditar && (
+                          <Button
+                            variant="outline-primary"
+                            size="sm"
+                            className="me-2"
+                            onClick={() => handleEditMarca(marca)}
+                            title="Editar marca"
+                          >
+                            <PencilSquare size={14} />
+                          </Button>
+                        )}
+                        {puedeEliminar && (
+                          <Button
+                            variant="outline-danger"
+                            size="sm"
+                            onClick={() => handleDeleteMarca(marca.id)}
+                            title="Eliminar marca"
+                          >
+                            <Trash size={14} />
+                          </Button>
+                        )}
+                      </td>
+                    )}
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </Table>
+        )}
       </div>
 
       {/* Paginación */}
-      <PaginationBar
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={handlePageChange}
-        totalItems={
-          !Array.isArray(data) && data?.count ? data.count : marcas.length
-        }
-        pageItems={marcas.length}
-        itemLabel="marca(s)"
-      />
+      {totalPages > 1 && (
+        <div className="pt-2 pb-3">
+          <PaginationBar
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+            totalItems={
+              !Array.isArray(data) && data?.count ? data.count : marcas.length
+            }
+            pageItems={marcas.length}
+            itemLabel="marca(s)"
+          />
+        </div>
+      )}
 
       {/* Modal de crear/editar marca */}
       <MarcaFormModal
@@ -310,7 +304,7 @@ function BrandList() {
         onHide={handleCloseModal}
         marca={editingMarca}
       />
-    </>
+    </div>
   );
 }
 
