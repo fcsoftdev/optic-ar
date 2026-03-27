@@ -5,6 +5,7 @@ import { Eyeglasses, List, PersonCircle } from "react-bootstrap-icons";
 import { useAuthStore } from "../stores/useAuthStore";
 import { useAuth } from "../hooks/useAuth";
 import ProfileModal from "./ProfileModal";
+import { useNavigate } from "react-router-dom";
 
 interface HeaderProps {
   onToggleSidebar?: () => void;
@@ -24,6 +25,7 @@ interface HeaderProps {
 function Header({ onToggleSidebar }: HeaderProps) {
   const { user } = useAuthStore();
   const { logout } = useAuth();
+  const navigate = useNavigate();
   const [showProfile, setShowProfile] = useState(false);
 
   /** Nombre a mostrar: "Nombre Apellido" o username como fallback. */
@@ -54,7 +56,11 @@ function Header({ onToggleSidebar }: HeaderProps) {
           </Button>
 
           {/* Brand a la izquierda */}
-          <Navbar.Brand href="#dashboard" className="d-flex align-items-center">
+          <Navbar.Brand
+            onClick={() => navigate("/")}
+            className="d-flex align-items-center"
+            style={{ cursor: "pointer" }}
+          >
             <Eyeglasses size={30} className="me-2" />
             <span>Opticar</span>
           </Navbar.Brand>
