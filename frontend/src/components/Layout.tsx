@@ -25,13 +25,13 @@ function Layout({ children }: LayoutProps) {
   const gridContent = childrenArray.slice(1);
 
   return (
-    <div className="d-flex flex-column vh-100">
+    <div className="d-flex flex-column vh-100 layout-root">
       {/* Header fijo en la parte superior */}
       {header}
 
       {/* Contenedor principal con Grid */}
-      <Container fluid className="flex-grow-1 overflow-hidden p-0">
-        <Row className="h-100 g-0">{gridContent}</Row>
+      <Container fluid className="flex-grow-1 overflow-hidden p-0 layout-content">
+        <Row className="h-100 g-0 layout-row">{gridContent}</Row>
       </Container>
     </div>
   );
