@@ -338,7 +338,7 @@ const ProductList: React.FC = (): JSX.Element => {
             style={{
               position: "sticky",
               top: 0,
-              backgroundColor: "#fff",
+              backgroundColor: "var(--bs-body-bg)",
               zIndex: 1,
               boxShadow: "0 2px 2px -1px rgba(0, 0, 0, 0.1)",
             }}

@@ -519,7 +519,7 @@ const CompraFormModal: React.FC<CompraFormModalProps> = ({
 
                 <div style={{ maxHeight: "340px", overflowY: "auto" }}>
                   <Table bordered hover size="sm" className="mb-0">
-                    <thead className="table-light sticky-top">
+                    <thead className="table-secondary sticky-top">
                       <tr>
                         <th style={{ minWidth: "220px" }}>Producto</th>
                         <th style={{ width: "80px" }}>Cant.</th>

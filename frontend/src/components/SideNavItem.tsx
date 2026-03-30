@@ -62,7 +62,7 @@ function SideNavItem({ item, index, onHide }: SideNavItemProps) {
     <Nav.Link
       key={index}
       href={item.href}
-      className="text-dark py-2 rounded"
+      className="text-body py-2 rounded"
       onClick={(e) => {
         e.preventDefault();
         if (item.href) {

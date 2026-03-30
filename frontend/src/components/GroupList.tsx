@@ -123,7 +123,7 @@ function PermisosSelect({ permisos, value, onChange }: PermisosSelectProps) {
         <div key={app} className="mb-2">
           {/* Cabecera de app */}
           <div
-            className="d-flex align-items-center gap-1 fw-bold text-primary small py-1 px-2 bg-light rounded cursor-pointer user-select-none"
+            className="d-flex align-items-center gap-1 fw-bold text-primary small py-1 px-2 bg-body-secondary rounded cursor-pointer user-select-none"
             onClick={() => toggle(app)}
             style={{ cursor: "pointer" }}
           >

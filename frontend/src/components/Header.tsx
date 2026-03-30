@@ -1,9 +1,17 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useState } from "react";
 import { Button, Container, Nav, Navbar, NavDropdown } from "react-bootstrap";
-import { Eyeglasses, List, PersonCircle } from "react-bootstrap-icons";
+import {
+  CircleHalf,
+  Eyeglasses,
+  List,
+  MoonFill,
+  PersonCircle,
+  SunFill,
+} from "react-bootstrap-icons";
 import { useAuthStore } from "../stores/useAuthStore";
 import { useAuth } from "../hooks/useAuth";
+import { useThemeStore, type Theme } from "../stores/useThemeStore";
 import ProfileModal from "./ProfileModal";
 import { useNavigate } from "react-router-dom";
 
@@ -27,6 +35,25 @@ function Header({ onToggleSidebar }: HeaderProps) {
   const { logout } = useAuth();
   const navigate = useNavigate();
   const [showProfile, setShowProfile] = useState(false);
+  const { theme, setTheme } = useThemeStore();
+
+  /** Cicla entre los tres modos de tema en orden: light → dark → auto. */
+  const themeOrder: Theme[] = ["light", "dark", "auto"];
+  const handleThemeToggle = () => {
+    const idx = themeOrder.indexOf(theme);
+    setTheme(themeOrder[(idx + 1) % themeOrder.length]);
+  };
+
+  const themeIcon: Record<Theme, React.ReactNode> = {
+    light: <SunFill size={16} />,
+    dark: <MoonFill size={16} />,
+    auto: <CircleHalf size={16} />,
+  };
+  const themeLabel: Record<Theme, string> = {
+    light: "Claro",
+    dark: "Oscuro",
+    auto: "Auto",
+  };
 
   /** Nombre a mostrar: "Nombre Apellido" o username como fallback. */
   const nombreCompleto =
@@ -68,8 +95,21 @@ function Header({ onToggleSidebar }: HeaderProps) {
           <Navbar.Toggle aria-controls="navbar-nav" />
 
           <Navbar.Collapse id="navbar-nav">
-            {/* Menú de usuario a la derecha */}
-            <Nav className="ms-auto">
+            {/* Botón de tema */}
+            <Nav className="me-auto" />
+            <Nav className="align-items-center gap-2">
+              <Button
+                variant="outline-light"
+                size="sm"
+                onClick={handleThemeToggle}
+                title={`Tema: ${themeLabel[theme]}`}
+                className="d-flex align-items-center gap-1"
+              >
+                {themeIcon[theme]}
+                <span className="d-none d-md-inline">{themeLabel[theme]}</span>
+              </Button>
+
+              {/* Menú de usuario a la derecha */}
               <NavDropdown
                 title={
                   <span>

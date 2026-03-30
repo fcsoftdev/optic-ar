@@ -127,7 +127,7 @@ const ClienteConsultasModal: React.FC<ClienteConsultasModalProps> = ({
         ) : (
           <>
             <Table striped bordered hover responsive size="sm">
-              <thead className="table-light">
+              <thead className="table-secondary">
                 <tr>
                   <th>Fecha</th>
                   <th>Motivo</th>

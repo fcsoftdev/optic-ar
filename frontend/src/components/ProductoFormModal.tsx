@@ -558,7 +558,10 @@ const ProductoFormModal: React.FC<ProductoFormModalProps> = ({
                           readOnly
                           isInvalid={!!errors.precio_venta}
                           placeholder="0.00"
-                          style={{ backgroundColor: "#e9ecef" }}
+                          style={{
+                            backgroundColor: "var(--bs-secondary-bg)",
+                            color: "var(--bs-body-color)",
+                          }}
                         />
                         {errors.precio_venta && (
                           <Form.Control.Feedback type="invalid">
@@ -589,7 +592,7 @@ const ProductoFormModal: React.FC<ProductoFormModalProps> = ({
                         (h: HistorialCosto, i: number) => (
                           <div
                             key={i}
-                            className="border rounded px-3 py-2 bg-light text-center"
+                            className="border rounded px-3 py-2 bg-body-secondary text-center"
                             style={{
                               minWidth: 130,
                               cursor: h.compra_id ? "pointer" : "default",
@@ -618,7 +621,7 @@ const ProductoFormModal: React.FC<ProductoFormModalProps> = ({
                               ).style.boxShadow = "";
                             }}
                           >
-                            <div className="fw-semibold text-dark">
+                            <div className="fw-semibold text-body">
                               $
                               {parseFloat(h.precio_compra).toLocaleString(
                                 "es-AR",

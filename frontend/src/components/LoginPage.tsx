@@ -42,7 +42,7 @@ export default function LoginPage() {
   return (
     <Container
       fluid
-      className="d-flex justify-content-center align-items-center vh-100 bg-light"
+      className="d-flex justify-content-center align-items-center vh-100 bg-body"
     >
       <Card
         style={{ width: "100%", maxWidth: 420 }}

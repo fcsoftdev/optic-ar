@@ -557,7 +557,7 @@ const VentaFormModal: React.FC<VentaFormModalProps> = ({
 
               <div style={{ maxHeight: "320px", overflowY: "auto" }}>
                 <Table bordered hover size="sm" className="mb-0">
-                  <thead className="table-light sticky-top">
+                  <thead className="table-secondary sticky-top">
                     <tr>
                       <th style={{ minWidth: "220px" }}>Producto</th>
                       <th style={{ width: "90px" }}>Cant.</th>

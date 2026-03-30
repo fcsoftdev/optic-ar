@@ -44,7 +44,7 @@ const EntityManagerModal: React.FC<EntityManagerModalProps> = ({
 }) => {
   const [newItemName, setNewItemName] = useState("");
   const [newItemCategoria, setNewItemCategoria] = useState<number>(
-    selectedCategoria || 0
+    selectedCategoria || 0,
   );
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editingName, setEditingName] = useState("");
@@ -108,7 +108,7 @@ const EntityManagerModal: React.FC<EntityManagerModalProps> = ({
     } catch (err: any) {
       if (err.response?.status === 403 || err.response?.status === 400) {
         setError(
-          "No se puede eliminar porque está siendo utilizado por productos"
+          "No se puede eliminar porque está siendo utilizado por productos",
         );
       } else {
         setError("Error al eliminar el elemento");
@@ -134,7 +134,7 @@ const EntityManagerModal: React.FC<EntityManagerModalProps> = ({
         )}
 
         {/* Formulario para crear nuevo */}
-        <div className="mb-4 p-3 bg-light rounded">
+        <div className="mb-4 p-3 bg-body-secondary rounded">
           <h6 className="mb-3">Agregar Nuevo</h6>
           <InputGroup className="mb-2">
             <Form.Control

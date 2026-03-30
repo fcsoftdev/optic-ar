@@ -4,12 +4,12 @@
 
 /* Estilos para el área de navegación lateral (Desktop) */
 .sidenav {
-  background-color: #f8f9fa;
-  border-right: 1px solid #dee2e6;
+  background-color: var(--bs-secondary-bg);
+  border-right: 1px solid var(--bs-border-color);
 }
 
 .sidenav nav a {
-  color: #495057;
+  color: var(--bs-body-color);
   padding: 0.5rem 1rem;
   display: block;
   border-radius: 0.25rem;
@@ -17,8 +17,8 @@
 }
 
 .sidenav nav a:hover {
-  background-color: #e9ecef;
-  color: #212529;
+  background-color: var(--bs-tertiary-bg);
+  color: var(--bs-body-color);
 }
 
 .sidenav nav a.active {
@@ -29,7 +29,7 @@
 /* Scrollbars personalizados */
 .overflow-auto {
   scrollbar-width: thin;
-  scrollbar-color: #cbd5e0 #f7fafc;
+  scrollbar-color: var(--bs-secondary-color) var(--bs-body-bg);
 }
 
 .overflow-auto::-webkit-scrollbar {
@@ -38,16 +38,16 @@
 }
 
 .overflow-auto::-webkit-scrollbar-track {
-  background: #f7fafc;
+  background: var(--bs-body-bg);
 }
 
 .overflow-auto::-webkit-scrollbar-thumb {
-  background-color: #cbd5e0;
+  background-color: var(--bs-secondary-color);
   border-radius: 4px;
 }
 
 .overflow-auto::-webkit-scrollbar-thumb:hover {
-  background-color: #a0aec0;
+  background-color: var(--bs-body-color);
 }
 
 /**

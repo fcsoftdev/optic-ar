@@ -95,11 +95,12 @@ const AsyncSearchableSelect: React.FC<AsyncSearchableSelectProps> = ({
   const customStyles: StylesConfig<Option, false> = {
     control: (provided, state) => ({
       ...provided,
+      backgroundColor: "var(--bs-body-bg)",
       borderColor: isInvalid
-        ? "#dc3545"
+        ? "var(--bs-danger)"
         : state.isFocused
           ? "#86b7fe"
-          : "#dee2e6",
+          : "var(--bs-border-color)",
       boxShadow: state.isFocused
         ? isInvalid
           ? "0 0 0 0.25rem rgba(220, 53, 69, 0.25)"
@@ -107,24 +108,49 @@ const AsyncSearchableSelect: React.FC<AsyncSearchableSelectProps> = ({
         : "none",
       "&:hover": {
         borderColor: isInvalid
-          ? "#dc3545"
+          ? "var(--bs-danger)"
           : state.isFocused
             ? "#86b7fe"
-            : "#dee2e6",
+            : "var(--bs-border-color)",
       },
       minHeight: "38px",
     }),
-    menu: (provided) => ({ ...provided, zIndex: 9999 }),
+    singleValue: (provided) => ({
+      ...provided,
+      color: "var(--bs-body-color)",
+    }),
+    input: (provided) => ({
+      ...provided,
+      color: "var(--bs-body-color)",
+    }),
+    placeholder: (provided) => ({
+      ...provided,
+      color: "var(--bs-secondary-color)",
+    }),
+    menu: (provided) => ({
+      ...provided,
+      zIndex: 9999,
+      backgroundColor: "var(--bs-body-bg)",
+      border: "1px solid var(--bs-border-color)",
+    }),
+    menuList: (provided) => ({
+      ...provided,
+      backgroundColor: "var(--bs-body-bg)",
+    }),
     menuPortal: (provided) => ({ ...provided, zIndex: 9999 }),
     option: (provided, state) => ({
       ...provided,
       backgroundColor: state.isSelected
         ? "#0d6efd"
         : state.isFocused
-          ? "#e7f1ff"
-          : "white",
-      color: state.isSelected ? "white" : "#212529",
+          ? "var(--bs-tertiary-bg)"
+          : "var(--bs-body-bg)",
+      color: state.isSelected ? "white" : "var(--bs-body-color)",
       "&:active": { backgroundColor: "#0d6efd", color: "white" },
+    }),
+    noOptionsMessage: (provided) => ({
+      ...provided,
+      color: "var(--bs-secondary-color)",
     }),
   };
 

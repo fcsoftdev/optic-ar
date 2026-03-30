@@ -259,7 +259,7 @@ function ReporteCaja() {
                   responsive
                   className="mb-0 align-middle text-center"
                 >
-                  <thead className="table-light">
+                  <thead className="table-secondary">
                     <tr>
                       <th className="text-start ps-3">Forma de Pago</th>
                       <th>Cantidad</th>
@@ -299,7 +299,7 @@ function ReporteCaja() {
             ) : (
               <Card.Body className="p-0">
                 <Table hover responsive className="mb-0 align-middle">
-                  <thead className="table-light">
+                  <thead className="table-secondary">
                     <tr>
                       <th className="ps-3">Fecha</th>
                       <th>Cliente</th>
@@ -355,7 +355,7 @@ function ReporteCaja() {
             ) : (
               <Card.Body className="p-0">
                 <Table hover responsive className="mb-0 align-middle">
-                  <thead className="table-light">
+                  <thead className="table-secondary">
                     <tr>
                       <th className="ps-3">Fecha</th>
                       <th>Proveedor</th>
@@ -397,7 +397,7 @@ function ReporteCaja() {
             ) : (
               <Card.Body className="p-0">
                 <Table hover responsive className="mb-0 align-middle">
-                  <thead className="table-light">
+                  <thead className="table-secondary">
                     <tr>
                       <th className="ps-3">Fecha</th>
                       <th>Descripción</th>

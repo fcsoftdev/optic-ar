@@ -388,7 +388,7 @@ const ConsultationFormModal: React.FC<ConsultationFormModalProps> = ({
             <Collapse in={showGraduacion}>
               <div className="mt-3">
                 <Table bordered size="sm" className="mb-0">
-                  <thead className="table-light">
+                  <thead className="table-secondary">
                     <tr>
                       <th style={{ width: "90px" }}></th>
                       <th>Esférico</th>

@@ -30,7 +30,10 @@ function Layout({ children }: LayoutProps) {
       {header}
 
       {/* Contenedor principal con Grid */}
-      <Container fluid className="flex-grow-1 overflow-hidden p-0 layout-content">
+      <Container
+        fluid
+        className="flex-grow-1 overflow-hidden p-0 layout-content"
+      >
         <Row className="h-100 g-0 layout-row">{gridContent}</Row>
       </Container>
     </div>

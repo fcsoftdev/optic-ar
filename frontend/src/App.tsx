@@ -7,6 +7,7 @@ import MainContent from "./components/MainContent";
 import LoginPage from "./components/LoginPage";
 import { useAuthStore } from "./stores/useAuthStore";
 import { useNavStore } from "./stores/useNavStore";
+import { useThemeStore } from "./stores/useThemeStore";
 import { silentRefresh } from "./services/auth.service";
 
 /**
@@ -23,7 +24,32 @@ function App() {
   const { accessToken, setAuth, clearAuth, isInitialized, setInitialized } =
     useAuthStore();
   const { pendingCompraId } = useNavStore();
+  const { theme } = useThemeStore();
   const navigate = useNavigate();
+
+  /**
+   * Aplica data-bs-theme al elemento <html> cada vez que cambia el tema.
+   * El modo "auto" lee la preferencia del SO y escucha cambios en tiempo real.
+   */
+  useEffect(() => {
+    const root = document.documentElement;
+
+    const applyTheme = (t: "light" | "dark") =>
+      root.setAttribute("data-bs-theme", t);
+
+    if (theme !== "auto") {
+      applyTheme(theme);
+      return;
+    }
+
+    const mq = window.matchMedia("(prefers-color-scheme: dark)");
+    applyTheme(mq.matches ? "dark" : "light");
+
+    const listener = (e: MediaQueryListEvent) =>
+      applyTheme(e.matches ? "dark" : "light");
+    mq.addEventListener("change", listener);
+    return () => mq.removeEventListener("change", listener);
+  }, [theme]);
 
   // Navegar a compras cuando se solicita desde historial de producto
   useEffect(() => {

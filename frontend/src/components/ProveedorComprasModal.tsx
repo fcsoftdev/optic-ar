@@ -101,7 +101,7 @@ const ProveedorComprasModal: React.FC<ProveedorComprasModalProps> = ({
         ) : (
           <>
             <Table striped bordered hover responsive size="sm">
-              <thead className="table-light">
+              <thead className="table-secondary">
                 <tr>
                   <th>#</th>
                   <th>Fecha</th>

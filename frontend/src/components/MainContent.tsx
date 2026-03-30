@@ -30,7 +30,7 @@ function MainContent() {
       xs={12}
       md={9}
       lg={10}
-      className="p-4 overflow-auto bg-white"
+      className="p-4 overflow-auto bg-body"
       style={{ minHeight: 0 }}
     >
       <div className="p-2">

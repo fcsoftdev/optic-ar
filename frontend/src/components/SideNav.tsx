@@ -198,7 +198,7 @@ function SideNav({ show, onHide }: SideNavProps) {
         xs={12}
         md={3}
         lg={2}
-        className="bg-light border-end p-0 d-none d-md-block"
+        className="bg-body-secondary border-end p-0 d-none d-md-block"
         style={{ overflowY: "auto", maxHeight: "100%" }}
       >
         <div className="sidenav">{menuContent}</div>
