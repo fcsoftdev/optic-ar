@@ -1,8 +1,7 @@
 import { Row, Col } from "react-bootstrap";
-import { BoxSeam } from "react-bootstrap-icons";
-import InfoCard from "./InfoCard";
 import TurnosHoy from "./TurnosHoy";
 import VentasCard from "./VentasCard";
+import ComprasCard from "./ComprasCard";
 
 /**
  * @component DashboardHome
@@ -21,11 +20,7 @@ const DashboardHome = () => (
         <VentasCard />
       </Col>
       <Col xs={12} md={6} lg={4}>
-        <InfoCard
-          icon={<BoxSeam size={48} />}
-          title="15"
-          description="Productos"
-        />
+        <ComprasCard />
       </Col>
     </Row>
   </div>
