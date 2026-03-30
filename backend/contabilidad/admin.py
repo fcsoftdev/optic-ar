@@ -4,10 +4,13 @@ Solo incluye el Reporte de Caja (vista personalizada).
 """
 
 from datetime import date
+from typing import Any, Optional
+
 from django.contrib import admin
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import render, redirect
-from django.urls import path, reverse
+from django.shortcuts import render
+from django.urls import path
+from django.utils.safestring import SafeString
 
 from .models import ReporteCaja
 from .services import obtener_movimientos_caja
@@ -50,7 +53,7 @@ def reporte_caja_view(request: HttpRequest) -> HttpResponse:
     return render(request, "admin/contabilidad/reporte_caja.html", context)
 
 
-# --- Registrar URL personalizada para el Reporte de Caja ---
+# --- FIX PARA EVITAR RECURSION ---
 old_get_urls = admin.site.get_urls
 
 

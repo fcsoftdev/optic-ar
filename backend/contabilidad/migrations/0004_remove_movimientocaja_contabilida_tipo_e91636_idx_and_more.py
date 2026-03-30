@@ -32,8 +32,8 @@ def remove_fields_if_exist(apps, schema_editor):
 
     with schema_editor.connection.cursor() as cursor:
         # Lista de campos a eliminar
-        fields_to_remove = ['concepto', 'monto', 'tipo']
-        
+        fields_to_remove = ["concepto", "monto", "tipo"]
+
         for field in fields_to_remove:
             # Verificar si el campo existe
             cursor.execute(
@@ -91,7 +91,10 @@ def add_fields_if_not_exist(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('contabilidad', '0003_remove_movimientocaja_contabilida_tipo_e91636_idx_and_more'),
+        (
+            "contabilidad",
+            "0003_remove_movimientocaja_contabilida_tipo_e91636_idx_and_more",
+        ),
     ]
 
     operations = [

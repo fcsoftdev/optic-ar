@@ -11,6 +11,11 @@ from django.utils import timezone
 from datetime import datetime, timedelta
 
 
+def _default_dias_laborables() -> list:
+    """Retorna los días laborables por defecto (Lunes a Viernes)."""
+    return [1, 2, 3, 4, 5]
+
+
 class ConfiguracionCalendario(models.Model):
     """
     Configuración básica del calendario de turnos.
@@ -33,6 +38,11 @@ class ConfiguracionCalendario(models.Model):
 
     activa = models.BooleanField(
         default=True, help_text="Indica si esta configuración está activa"
+    )
+
+    dias_laborables = models.JSONField(
+        default=_default_dias_laborables,
+        help_text="Días laborables (0=Dom, 1=Lun, 2=Mar, 3=Mié, 4=Jue, 5=Vie, 6=Sáb)",
     )
 
     class Meta:
@@ -109,11 +119,24 @@ class Turno(models.Model):
         """Validaciones personalizadas del modelo."""
         super().clean()
 
-        # Validar que la fecha no sea anterior a hoy (solo para turnos nuevos)
-        if self.fecha and self.fecha < timezone.now().date() and not self.pk:
+        # Validar que la fecha no sea anterior a hoy
+        if self.fecha and self.fecha < timezone.now().date():
             raise ValidationError(
                 {"fecha": "No se puede programar un turno en una fecha pasada."}
             )
+
+        # Validar que el día sea laborable según la configuración activa
+        if self.fecha:
+            config = ConfiguracionCalendario.get_configuracion_activa()
+            if config and config.dias_laborables:
+                # Python weekday(): 0=Lun...6=Dom → convertir a JS: 0=Dom...6=Sáb
+                dia_js = (self.fecha.weekday() + 1) % 7
+                if dia_js not in config.dias_laborables:
+                    raise ValidationError(
+                        {
+                            "fecha": "Este día no es laborable según la configuración del calendario."
+                        }
+                    )
 
         # Calcular hora de fin automáticamente si no está definida
         if self.hora_inicio and not self.hora_fin:

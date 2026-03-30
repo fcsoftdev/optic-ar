@@ -17,10 +17,25 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import include, path
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
-    path("productos/", include("productos.urls")),
+    # Admin
+    path("admin/", admin.site.urls),
+    # Autenticación JWT
+    path("api/", include("authentication.urls")),
+    # API REST
+    path("api/", include("productos.urls")),
+    path("api/", include("compras.urls")),
+    path("api/", include("contabilidad.urls")),
+    path("api/", include("turnos.api_urls")),
+    # Apps legacy
     path("ventas/", include("ventas.urls")),
     path("turnos/", include("turnos.urls")),
-    path("admin/", admin.site.urls),
 ]
+
+# Servir archivos media en desarrollo
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

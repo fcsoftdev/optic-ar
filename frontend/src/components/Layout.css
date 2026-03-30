@@ -1,0 +1,72 @@
+/**
+ * Estilos personalizados para el componente Layout
+ */
+
+/* Estilos para el área de navegación lateral (Desktop) */
+.sidenav {
+  background-color: var(--bs-secondary-bg);
+  border-right: 1px solid var(--bs-border-color);
+}
+
+.sidenav nav a {
+  color: var(--bs-body-color);
+  padding: 0.5rem 1rem;
+  display: block;
+  border-radius: 0.25rem;
+  transition: all 0.2s ease;
+}
+
+.sidenav nav a:hover {
+  background-color: var(--bs-tertiary-bg);
+  color: var(--bs-body-color);
+}
+
+.sidenav nav a.active {
+  background-color: #0d6efd;
+  color: white;
+}
+
+/* Scrollbars personalizados */
+.overflow-auto {
+  scrollbar-width: thin;
+  scrollbar-color: var(--bs-secondary-color) var(--bs-body-bg);
+}
+
+.overflow-auto::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.overflow-auto::-webkit-scrollbar-track {
+  background: var(--bs-body-bg);
+}
+
+.overflow-auto::-webkit-scrollbar-thumb {
+  background-color: var(--bs-secondary-color);
+  border-radius: 4px;
+}
+
+.overflow-auto::-webkit-scrollbar-thumb:hover {
+  background-color: var(--bs-body-color);
+}
+
+/**
+ * En pantallas pequeñas (< md = 768px) el layout pasa a scroll de página normal.
+ * En desktop (≥ md) se mantiene el layout fijo con scroll interno en MainContent.
+ */
+@media (max-width: 767.98px) {
+  .layout-root {
+    height: auto !important;
+    min-height: 100vh;
+  }
+
+  .layout-content {
+    overflow: visible !important;
+    height: auto !important;
+    flex: 1 0 auto !important;
+  }
+
+  .layout-row {
+    height: auto !important;
+  }
+}
