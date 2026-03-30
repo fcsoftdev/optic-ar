@@ -1,6 +1,7 @@
 import { Row, Col } from "react-bootstrap";
-import { PersonBoundingBox, Calendar3, Cart4 } from "react-bootstrap-icons";
+import { PersonBoundingBox, Cart4 } from "react-bootstrap-icons";
 import InfoCard from "./InfoCard";
+import TurnosHoy from "./TurnosHoy";
 
 /**
  * @component DashboardHome
@@ -13,11 +14,7 @@ const DashboardHome = () => (
 
     <Row className="g-3">
       <Col xs={12} md={6} lg={4}>
-        <InfoCard
-          icon={<Calendar3 size={48} />}
-          title="5"
-          description="Turnos de hoy"
-        />
+        <TurnosHoy />
       </Col>
       <Col xs={12} md={6} lg={4}>
         <InfoCard

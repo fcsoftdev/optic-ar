@@ -17,6 +17,7 @@ import type {
 import esLocale from "@fullcalendar/core/locales/es";
 import axios from "axios";
 import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Alert, Button, Spinner } from "react-bootstrap";
 import { Calendar3, GearFill } from "react-bootstrap-icons";
 import {
@@ -57,6 +58,10 @@ const toSlotDuration = (minutos: number): string => {
  * - El rango de fechas visible se actualiza dinámicamente vía `datesSet`.
  */
 function TurnosCalendar() {
+  const [searchParams] = useSearchParams();
+  const initialDate = searchParams.get("date") ?? undefined;
+  const initialView = searchParams.get("view") ?? "timeGridWeek";
+
   const [rangoFechas, setRangoFechas] = useState<{
     start: string;
     end: string;
@@ -318,9 +323,10 @@ function TurnosCalendar() {
       )}
 
       <FullCalendar
-        key={`${slotMin}-${slotMax}-${slotDuration}`}
+        key={`${slotMin}-${slotMax}-${slotDuration}-${initialDate ?? ""}-${initialView}`}
         plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-        initialView="timeGridWeek"
+        initialView={initialView}
+        initialDate={initialDate}
         locale={esLocale}
         headerToolbar={{
           left: "prev,next today",
