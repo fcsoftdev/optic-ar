@@ -1,0 +1,2411 @@
+[
+  {
+    "id": "TC001",
+    "title": "Iniciar sesión con credenciales válidas redirige al dashboard",
+    "description": "Verifica que un usuario puede autenticarse con usuario y contraseña y llega al dashboard.",
+    "category": "Autenticación con JWT",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the username field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the user lands on the dashboard"
+      }
+    ]
+  },
+  {
+    "id": "TC002",
+    "title": "Login con contraseña inválida muestra error",
+    "description": "Verifica que al enviar credenciales inválidas se muestra un estado de error y no se inicia sesión.",
+    "category": "Autenticación con JWT",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the username field"
+      },
+      {
+        "type": "action",
+        "description": "Fill an invalid password into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify a credentials validation error is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC003",
+    "title": "Flujo de logout y regreso a pantalla de login",
+    "description": "Verifica que un usuario autenticado puede cerrar sesión desde el layout principal y vuelve a estar no autenticado.",
+    "category": "Autenticación con JWT",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the username field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Trigger logout from the main navigation/header"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the login screen is displayed"
+      }
+    ]
+  },
+  {
+    "id": "TC004",
+    "title": "Acceso a una ruta protegida sin sesión redirige a login",
+    "description": "Verifica que al intentar entrar al dashboard sin estar autenticado se solicita iniciar sesión.",
+    "category": "Autenticación con JWT",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /dashboard"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the login screen is displayed"
+      }
+    ]
+  },
+  {
+    "id": "TC005",
+    "title": "Recuperación de sesión al recargar mantiene el layout autenticado",
+    "description": "Verifica que, tras iniciar sesión, una recarga de página no rompe la sesión visible para el usuario.",
+    "category": "Autenticación con JWT",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the username field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Reload the page"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the user remains on the authenticated layout"
+      }
+    ]
+  },
+  {
+    "id": "TC006",
+    "title": "Carga inicial sin sesión muestra pantalla de login",
+    "description": "Verifica que al abrir la app sin sesión activa se muestra el formulario de acceso.",
+    "category": "Autenticación con JWT",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the login form is displayed"
+      }
+    ]
+  },
+  {
+    "id": "TC007",
+    "title": "Productos: ver listado paginado y búsqueda por texto",
+    "description": "Verifica que el listado de productos carga, permite buscar por texto y muestra resultados filtrados.",
+    "category": "Gestión de Productos",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click the navigation link to products"
+      },
+      {
+        "type": "action",
+        "description": "Fill a specific search term into the product search field: TestProductoBusqueda"
+      },
+      {
+        "type": "action",
+        "description": "Wait for the product list to update after search"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the product list is displayed and matches the applied search filter"
+      }
+    ]
+  },
+  {
+    "id": "TC008",
+    "title": "Productos: aplicar filtros por marca y categoría y resetear paginación",
+    "description": "Verifica que al filtrar por marca y categoría el listado se actualiza y la paginación vuelve a la primera página.",
+    "category": "Gestión de Productos",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click the navigation link to products"
+      },
+      {
+        "type": "action",
+        "description": "Click the pagination control to go to a later page"
+      },
+      {
+        "type": "action",
+        "description": "Select a valid brand in the brand filter"
+      },
+      {
+        "type": "action",
+        "description": "Select a valid category in the category filter"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the product list is updated according to the selected filters"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the pagination is on the first page"
+      }
+    ]
+  },
+  {
+    "id": "TC009",
+    "title": "Productos: crear producto con datos obligatorios",
+    "description": "Verifica que se puede crear un producto completando campos obligatorios y que aparece en la lista.",
+    "category": "Gestión de Productos",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click the navigation link to products"
+      },
+      {
+        "type": "action",
+        "description": "Click the action to add a new product"
+      },
+      {
+        "type": "action",
+        "description": "Fill TestProductoAlta001 into the product name field"
+      },
+      {
+        "type": "action",
+        "description": "Select a valid brand in the brand field"
+      },
+      {
+        "type": "action",
+        "description": "Select a valid category in the category field"
+      },
+      {
+        "type": "action",
+        "description": "Fill a valid sale price into the sale price field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the product form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify a success confirmation is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the product list contains TestProductoAlta001"
+      }
+    ]
+  },
+  {
+    "id": "TC010",
+    "title": "Productos: validación al crear con precio de venta inválido y stock negativo",
+    "description": "Verifica que el formulario bloquea la creación y muestra errores de validación con datos inválidos.",
+    "category": "Gestión de Productos",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click the navigation link to products"
+      },
+      {
+        "type": "action",
+        "description": "Click the action to add a new product"
+      },
+      {
+        "type": "action",
+        "description": "Fill TestProductoInvalido001 into the product name field"
+      },
+      {
+        "type": "action",
+        "description": "Select a valid brand in the brand field"
+      },
+      {
+        "type": "action",
+        "description": "Select a valid category in the category field"
+      },
+      {
+        "type": "action",
+        "description": "Fill 0 into the sale price field"
+      },
+      {
+        "type": "action",
+        "description": "Fill -1 into the stock field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the product form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify validation errors are visible and the form remains open"
+      }
+    ]
+  },
+  {
+    "id": "TC011",
+    "title": "Productos: editar un producto existente y reflejar cambios en la lista",
+    "description": "Verifica que se puede editar un producto y que el cambio queda reflejado en el listado.",
+    "category": "Gestión de Productos",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click the navigation link to products"
+      },
+      {
+        "type": "action",
+        "description": "Fill a specific search term into the product search field: TestProductoEdit001"
+      },
+      {
+        "type": "action",
+        "description": "Wait for the product list to update after search"
+      },
+      {
+        "type": "action",
+        "description": "Open the edit action for the first product in the filtered list"
+      },
+      {
+        "type": "action",
+        "description": "Fill TestProductoEdit001_Mod into the product name field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the product form to save changes"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify a success confirmation is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the product list contains TestProductoEdit001_Mod"
+      }
+    ]
+  },
+  {
+    "id": "TC012",
+    "title": "Productos: limpiar filtros y búsqueda",
+    "description": "Verifica que el botón de limpiar restablece filtros y vuelve a mostrar el listado sin restricciones.",
+    "category": "Gestión de Productos",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click the navigation link to products"
+      },
+      {
+        "type": "action",
+        "description": "Fill a specific search term into the product search field: TestProducto"
+      },
+      {
+        "type": "action",
+        "description": "Select a valid brand in the brand filter"
+      },
+      {
+        "type": "action",
+        "description": "Click the action to clear filters"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the product filters and search input are reset and the full product list is displayed"
+      }
+    ]
+  },
+  {
+    "id": "TC013",
+    "title": "Marcas: crear nueva marca",
+    "description": "Verifica que se puede crear una marca y que aparece listada.",
+    "category": "Gestión de Marcas",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click the navigation link to brands"
+      },
+      {
+        "type": "action",
+        "description": "Click the action to add a new brand"
+      },
+      {
+        "type": "action",
+        "description": "Fill TestMarca001 into the brand name field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the brand form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify a success confirmation is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the brand list contains TestMarca001"
+      }
+    ]
+  },
+  {
+    "id": "TC014",
+    "title": "Marcas: editar una marca existente",
+    "description": "Verifica que se puede editar el nombre de una marca y ver el cambio en el listado.",
+    "category": "Gestión de Marcas",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click the navigation link to brands"
+      },
+      {
+        "type": "action",
+        "description": "Locate the brand row for TestMarca001"
+      },
+      {
+        "type": "action",
+        "description": "Open the edit action for that brand"
+      },
+      {
+        "type": "action",
+        "description": "Fill TestMarca001_Editada into the brand name field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the brand form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify a success confirmation is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the brand list contains TestMarca001_Editada"
+      }
+    ]
+  },
+  {
+    "id": "TC015",
+    "title": "Marcas: eliminar una marca y confirmar eliminación (si no está en uso)",
+    "description": "Verifica el flujo de eliminación con confirmación y que la marca se remueve del listado cuando la eliminación es exitosa.",
+    "category": "Gestión de Marcas",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click the navigation link to brands"
+      },
+      {
+        "type": "action",
+        "description": "Click the action to add a new brand"
+      },
+      {
+        "type": "action",
+        "description": "Fill TestMarcaEliminar001 into the brand name field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the brand form"
+      },
+      {
+        "type": "action",
+        "description": "Locate the brand row for TestMarcaEliminar001"
+      },
+      {
+        "type": "action",
+        "description": "Open the delete action for that brand"
+      },
+      {
+        "type": "action",
+        "description": "Confirm the deletion"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify a success confirmation is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the brand list no longer contains TestMarcaEliminar001"
+      }
+    ]
+  },
+  {
+    "id": "TC016",
+    "title": "Clientes/Pacientes: ver listado y búsqueda por DNI o nombre",
+    "description": "Verifica que el listado de clientes carga y se puede filtrar por DNI o nombre.",
+    "category": "Gestión de Clientes/Pacientes",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click the navigation link to clients/patients"
+      },
+      {
+        "type": "action",
+        "description": "Fill a specific search term into the client search field: TestCliente"
+      },
+      {
+        "type": "action",
+        "description": "Wait for the client list to update after search"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the client list is displayed and matches the applied search filter"
+      }
+    ]
+  },
+  {
+    "id": "TC017",
+    "title": "Clientes/Pacientes: crear cliente con DNI único",
+    "description": "Verifica que se puede crear un cliente con DNI único y que aparece en la lista.",
+    "category": "Gestión de Clientes/Pacientes",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click the navigation link to clients/patients"
+      },
+      {
+        "type": "action",
+        "description": "Click the action to add a new client/patient"
+      },
+      {
+        "type": "action",
+        "description": "Fill 39000001 into the DNI field"
+      },
+      {
+        "type": "action",
+        "description": "Fill TestClienteAlta001 into the client full name field"
+      },
+      {
+        "type": "action",
+        "description": "Fill a valid phone number into the phone field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the client form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify a success confirmation is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the client list contains TestClienteAlta001"
+      }
+    ]
+  },
+  {
+    "id": "TC018",
+    "title": "Clientes/Pacientes: ver historial de consultas de un cliente y abrir detalle",
+    "description": "Verifica que se puede abrir el modal de historial de consultas desde un cliente y navegar a ver detalles de una consulta desde el modal.",
+    "category": "Gestión de Clientes/Pacientes",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click the navigation link to clients/patients"
+      },
+      {
+        "type": "action",
+        "description": "Fill a specific search term into the client search field: TestClienteAlta001"
+      },
+      {
+        "type": "action",
+        "description": "Wait for the client list to update after search"
+      },
+      {
+        "type": "action",
+        "description": "Open the action to view the selected client's consultation history"
+      },
+      {
+        "type": "action",
+        "description": "Open the first consultation in the history list to view details"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify consultation details are displayed"
+      }
+    ]
+  },
+  {
+    "id": "TC019",
+    "title": "Crear una venta completa desde el listado",
+    "description": "Verifica que se pueda registrar una venta con cliente, productos y pago, y que quede visible en el listado.",
+    "category": "Gestión de Ventas",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /ventas"
+      },
+      {
+        "type": "action",
+        "description": "Iniciar nueva venta"
+      },
+      {
+        "type": "action",
+        "description": "Seleccionar un cliente"
+      },
+      {
+        "type": "action",
+        "description": "Agregar un producto al detalle de venta"
+      },
+      {
+        "type": "action",
+        "description": "Fill una cantidad válida en el campo de cantidad del ítem"
+      },
+      {
+        "type": "action",
+        "description": "Fill un precio válido en el campo de precio del ítem"
+      },
+      {
+        "type": "action",
+        "description": "Seleccionar una forma de pago"
+      },
+      {
+        "type": "action",
+        "description": "Fill un monto entregado válido en el campo de monto entregado"
+      },
+      {
+        "type": "action",
+        "description": "Guardar la venta"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify la nueva venta aparece en el listado con el cliente seleccionado"
+      }
+    ]
+  },
+  {
+    "id": "TC020",
+    "title": "Validación de stock insuficiente al crear una venta",
+    "description": "Verifica que no se permita guardar una venta cuando la cantidad supera el stock disponible y se muestre una advertencia.",
+    "category": "Gestión de Ventas",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /ventas"
+      },
+      {
+        "type": "action",
+        "description": "Iniciar nueva venta"
+      },
+      {
+        "type": "action",
+        "description": "Agregar un producto al detalle de venta"
+      },
+      {
+        "type": "action",
+        "description": "Fill una cantidad mayor que el stock disponible en el campo de cantidad del ítem"
+      },
+      {
+        "type": "action",
+        "description": "Guardar la venta"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify se muestra una advertencia de stock insuficiente"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify la venta no queda registrada en el listado"
+      }
+    ]
+  },
+  {
+    "id": "TC021",
+    "title": "Editar una venta existente y guardar cambios",
+    "description": "Verifica que se pueda editar una venta existente modificando cantidades y que los cambios persistan en el listado/detalle.",
+    "category": "Gestión de Ventas",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /ventas"
+      },
+      {
+        "type": "action",
+        "description": "Iniciar nueva venta"
+      },
+      {
+        "type": "action",
+        "description": "Seleccionar un cliente"
+      },
+      {
+        "type": "action",
+        "description": "Agregar un producto al detalle de venta"
+      },
+      {
+        "type": "action",
+        "description": "Fill una cantidad válida en el campo de cantidad del ítem"
+      },
+      {
+        "type": "action",
+        "description": "Guardar la venta"
+      },
+      {
+        "type": "action",
+        "description": "Seleccionar la venta recién creada en el listado"
+      },
+      {
+        "type": "action",
+        "description": "Editar cantidades en el detalle de la venta"
+      },
+      {
+        "type": "action",
+        "description": "Guardar los cambios de la venta"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify la venta muestra las cantidades actualizadas"
+      }
+    ]
+  },
+  {
+    "id": "TC022",
+    "title": "Eliminar una venta desde el listado con confirmación",
+    "description": "Verifica que se pueda eliminar una venta y que desaparezca del listado tras confirmar.",
+    "category": "Gestión de Ventas",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /ventas"
+      },
+      {
+        "type": "action",
+        "description": "Iniciar nueva venta"
+      },
+      {
+        "type": "action",
+        "description": "Seleccionar un cliente"
+      },
+      {
+        "type": "action",
+        "description": "Agregar un producto al detalle de venta"
+      },
+      {
+        "type": "action",
+        "description": "Fill una cantidad válida en el campo de cantidad del ítem"
+      },
+      {
+        "type": "action",
+        "description": "Guardar la venta"
+      },
+      {
+        "type": "action",
+        "description": "Seleccionar la venta recién creada en el listado"
+      },
+      {
+        "type": "action",
+        "description": "Intentar eliminar la venta"
+      },
+      {
+        "type": "action",
+        "description": "Confirmar la eliminación"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify la venta removida ya no aparece en el listado"
+      }
+    ]
+  },
+  {
+    "id": "TC023",
+    "title": "Cálculo automático de saldo al ingresar monto entregado",
+    "description": "Verifica que el saldo/cambio se calcule automáticamente al ingresar el monto entregado para una venta con total definido.",
+    "category": "Gestión de Ventas",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /ventas"
+      },
+      {
+        "type": "action",
+        "description": "Iniciar nueva venta"
+      },
+      {
+        "type": "action",
+        "description": "Seleccionar un cliente"
+      },
+      {
+        "type": "action",
+        "description": "Agregar un producto al detalle de venta"
+      },
+      {
+        "type": "action",
+        "description": "Fill una cantidad válida en el campo de cantidad del ítem"
+      },
+      {
+        "type": "action",
+        "description": "Fill un precio válido en el campo de precio del ítem"
+      },
+      {
+        "type": "action",
+        "description": "Seleccionar una forma de pago"
+      },
+      {
+        "type": "action",
+        "description": "Fill un monto entregado válido en el campo de monto entregado"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify el saldo/cambio se muestra calculado automáticamente"
+      }
+    ]
+  },
+  {
+    "id": "TC024",
+    "title": "Cancelar creación de venta sin guardar",
+    "description": "Verifica que al cerrar o cancelar el formulario de nueva venta, no se registre ninguna venta.",
+    "category": "Gestión de Ventas",
+    "priority": "Low",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /ventas"
+      },
+      {
+        "type": "action",
+        "description": "Iniciar nueva venta"
+      },
+      {
+        "type": "action",
+        "description": "Seleccionar un cliente"
+      },
+      {
+        "type": "action",
+        "description": "Agregar un producto al detalle de venta"
+      },
+      {
+        "type": "action",
+        "description": "Fill una cantidad válida en el campo de cantidad del ítem"
+      },
+      {
+        "type": "action",
+        "description": "Cancelar el formulario de venta"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify no se agrega una nueva venta al listado"
+      }
+    ]
+  },
+  {
+    "id": "TC025",
+    "title": "Crear una nueva consulta médica con graduación y verla en el listado",
+    "description": "Verifica que se pueda crear una consulta seleccionando un cliente, completando datos y graduación, y que aparezca en la lista.",
+    "category": "Consultas Médicas y Graduaciones",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click the navigation link to consultations"
+      },
+      {
+        "type": "action",
+        "description": "Start creating a new consultation"
+      },
+      {
+        "type": "action",
+        "description": "Select a client/patient for the consultation"
+      },
+      {
+        "type": "action",
+        "description": "Fill Consultation motivo text into the motivo field"
+      },
+      {
+        "type": "action",
+        "description": "Fill Consultation diagnostico text into the diagnóstico field"
+      },
+      {
+        "type": "action",
+        "description": "Fill Consultation tratamiento text into the tratamiento field"
+      },
+      {
+        "type": "action",
+        "description": "Fill a valid spherical value for OD far into the corresponding field"
+      },
+      {
+        "type": "action",
+        "description": "Fill a valid cylindrical value for OD far into the corresponding field"
+      },
+      {
+        "type": "action",
+        "description": "Fill a valid axis value for OD far into the corresponding field"
+      },
+      {
+        "type": "action",
+        "description": "Fill a valid spherical value for OI far into the corresponding field"
+      },
+      {
+        "type": "action",
+        "description": "Fill a valid cylindrical value for OI far into the corresponding field"
+      },
+      {
+        "type": "action",
+        "description": "Fill a valid axis value for OI far into the corresponding field"
+      },
+      {
+        "type": "action",
+        "description": "Save the consultation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the new consultation entry with motivo Consultation motivo is displayed in the consultations list"
+      }
+    ]
+  },
+  {
+    "id": "TC026",
+    "title": "Validación de eje fuera de rango al crear consulta",
+    "description": "Verifica que el formulario impida guardar cuando el eje de graduación está fuera de rango.",
+    "category": "Consultas Médicas y Graduaciones",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click the navigation link to consultations"
+      },
+      {
+        "type": "action",
+        "description": "Start creating a new consultation"
+      },
+      {
+        "type": "action",
+        "description": "Select a client/patient for the consultation"
+      },
+      {
+        "type": "action",
+        "description": "Fill Eje fuera de rango into the motivo field"
+      },
+      {
+        "type": "action",
+        "description": "Fill 200 into the OD far axis field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the consultation form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify an axis range validation error is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the consultation modal remains open indicating the consultation was not saved"
+      }
+    ]
+  },
+  {
+    "id": "TC027",
+    "title": "Editar graduación de una consulta existente y ver reflejado el cambio",
+    "description": "Verifica que se pueda editar una consulta existente, guardar y observar el cambio en el listado.",
+    "category": "Consultas Médicas y Graduaciones",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click the navigation link to consultations"
+      },
+      {
+        "type": "action",
+        "description": "Start creating a new consultation"
+      },
+      {
+        "type": "action",
+        "description": "Select a client/patient for the consultation"
+      },
+      {
+        "type": "action",
+        "description": "Fill Consulta para editar into the motivo field"
+      },
+      {
+        "type": "action",
+        "description": "Fill a valid axis value for OD far into the corresponding field"
+      },
+      {
+        "type": "action",
+        "description": "Save the consultation"
+      },
+      {
+        "type": "action",
+        "description": "Open the consultation details for the consultation with motivo Consulta para editar"
+      },
+      {
+        "type": "action",
+        "description": "Edit the OD far axis field to a different valid value"
+      },
+      {
+        "type": "action",
+        "description": "Save the consultation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the consultation with motivo Consulta para editar shows the updated OD far axis value in its displayed details"
+      }
+    ]
+  },
+  {
+    "id": "TC028",
+    "title": "Eliminar una consulta desde el listado",
+    "description": "Verifica que se pueda eliminar una consulta y que desaparezca del listado.",
+    "category": "Consultas Médicas y Graduaciones",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click the navigation link to consultations"
+      },
+      {
+        "type": "action",
+        "description": "Start creating a new consultation"
+      },
+      {
+        "type": "action",
+        "description": "Select a client/patient for the consultation"
+      },
+      {
+        "type": "action",
+        "description": "Fill Consulta a eliminar into the motivo field"
+      },
+      {
+        "type": "action",
+        "description": "Fill a valid axis value for OD far into the corresponding field"
+      },
+      {
+        "type": "action",
+        "description": "Save the consultation"
+      },
+      {
+        "type": "action",
+        "description": "Initiate delete for the consultation with motivo Consulta a eliminar"
+      },
+      {
+        "type": "action",
+        "description": "Confirm the deletion"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the consultation with motivo Consulta a eliminar is no longer present in the consultations list"
+      }
+    ]
+  },
+  {
+    "id": "TC029",
+    "title": "Cargar la página de consultas y mostrar contenido principal",
+    "description": "Verifica que la página de consultas cargue y muestre el listado.",
+    "category": "Consultas Médicas y Graduaciones",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click the navigation link to consultations"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the consultations list is displayed"
+      }
+    ]
+  },
+  {
+    "id": "TC030",
+    "title": "Reporte de caja: ver movimientos del período por defecto y totales",
+    "description": "Verifica que el reporte de caja muestre movimientos del período por defecto y totales de ingresos, egresos y balance.",
+    "category": "Reporte de Caja",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click the navigation link to cash report"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the cash movements list for the default period is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify totals for ingresos, egresos, and balance final are displayed"
+      }
+    ]
+  },
+  {
+    "id": "TC031",
+    "title": "Reporte de caja: aplicar filtro por rango de fechas y ver actualización",
+    "description": "Verifica que al cambiar el rango de fechas se actualicen los movimientos y los totales mostrados.",
+    "category": "Reporte de Caja",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click the navigation link to cash report"
+      },
+      {
+        "type": "action",
+        "description": "Select a valid start date in the date range filter"
+      },
+      {
+        "type": "action",
+        "description": "Select a valid end date in the date range filter"
+      },
+      {
+        "type": "action",
+        "description": "Apply the date range filter"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the cash movements list reflects the selected date range"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify totals for ingresos, egresos, and balance final are updated"
+      }
+    ]
+  },
+  {
+    "id": "TC032",
+    "title": "Reporte de caja: rango sin movimientos muestra estado vacío y ceros",
+    "description": "Verifica que al seleccionar un rango sin movimientos se muestre listado vacío y totales en cero.",
+    "category": "Reporte de Caja",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click the navigation link to cash report"
+      },
+      {
+        "type": "action",
+        "description": "Select a date range far in the past using the date range filter"
+      },
+      {
+        "type": "action",
+        "description": "Apply the date range filter"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify an empty state is displayed for the cash movements list"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify totals for ingresos, egresos, and balance final are zero"
+      }
+    ]
+  },
+  {
+    "id": "TC033",
+    "title": "Cargar la página de reporte de caja y mostrar contenido principal",
+    "description": "Verifica que la página de reporte de caja cargue mostrando lista y totales.",
+    "category": "Reporte de Caja",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click the navigation link to cash report"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the cash report page primary content is displayed including movements list and totals summary"
+      }
+    ]
+  },
+  {
+    "id": "TC034",
+    "title": "Crear un gasto y verlo en el listado",
+    "description": "Verifica que se pueda crear un gasto con descripción y monto válido y que aparezca en la lista.",
+    "category": "Gestión de Gastos",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click the navigation link to expenses"
+      },
+      {
+        "type": "action",
+        "description": "Start creating a new expense"
+      },
+      {
+        "type": "action",
+        "description": "Fill Gasto prueba UI into the description field"
+      },
+      {
+        "type": "action",
+        "description": "Fill 1234 into the amount field"
+      },
+      {
+        "type": "action",
+        "description": "Save the expense"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify an expense entry with description Gasto prueba UI is displayed in the expenses list"
+      }
+    ]
+  },
+  {
+    "id": "TC035",
+    "title": "Validación de monto negativo al crear gasto",
+    "description": "Verifica que el formulario muestre error y no permita crear un gasto con monto negativo.",
+    "category": "Gestión de Gastos",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click the navigation link to expenses"
+      },
+      {
+        "type": "action",
+        "description": "Start creating a new expense"
+      },
+      {
+        "type": "action",
+        "description": "Fill Gasto monto negativo into the description field"
+      },
+      {
+        "type": "action",
+        "description": "Fill -10 into the amount field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the expense form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify an amount validation error is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the expense modal remains open indicating the expense was not saved"
+      }
+    ]
+  },
+  {
+    "id": "TC036",
+    "title": "Editar un gasto existente y ver reflejado el cambio",
+    "description": "Verifica que se pueda editar un gasto y que el cambio aparezca en el listado.",
+    "category": "Gestión de Gastos",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click the navigation link to expenses"
+      },
+      {
+        "type": "action",
+        "description": "Start creating a new expense"
+      },
+      {
+        "type": "action",
+        "description": "Fill Gasto editable into the description field"
+      },
+      {
+        "type": "action",
+        "description": "Fill 500 into the amount field"
+      },
+      {
+        "type": "action",
+        "description": "Save the expense"
+      },
+      {
+        "type": "action",
+        "description": "Open edit for the expense with description Gasto editable"
+      },
+      {
+        "type": "action",
+        "description": "Fill Gasto editable actualizado into the description field"
+      },
+      {
+        "type": "action",
+        "description": "Save the expense"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify an expense entry with description Gasto editable actualizado is displayed in the expenses list"
+      }
+    ]
+  },
+  {
+    "id": "TC037",
+    "title": "Eliminar un gasto y confirmar que se remueve del listado",
+    "description": "Verifica el flujo de eliminación de un gasto con confirmación y que desaparezca del listado.",
+    "category": "Gestión de Gastos",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click the navigation link to expenses"
+      },
+      {
+        "type": "action",
+        "description": "Start creating a new expense"
+      },
+      {
+        "type": "action",
+        "description": "Fill Gasto a eliminar into the description field"
+      },
+      {
+        "type": "action",
+        "description": "Fill 250 into the amount field"
+      },
+      {
+        "type": "action",
+        "description": "Save the expense"
+      },
+      {
+        "type": "action",
+        "description": "Initiate delete for the expense with description Gasto a eliminar"
+      },
+      {
+        "type": "action",
+        "description": "Confirm the deletion"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the expense with description Gasto a eliminar is no longer present in the expenses list"
+      }
+    ]
+  },
+  {
+    "id": "TC038",
+    "title": "Cargar la página de gastos y mostrar contenido principal",
+    "description": "Verifica que la página de gastos cargue y muestre el listado.",
+    "category": "Gestión de Gastos",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click the navigation link to expenses"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the expenses list is displayed"
+      }
+    ]
+  },
+  {
+    "id": "TC039",
+    "title": "Ver listado de proveedores",
+    "description": "Verifica que la pantalla de proveedores carga y muestra el listado.",
+    "category": "Gestión de Proveedores",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the username field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /proveedores"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the suppliers list is displayed"
+      }
+    ]
+  },
+  {
+    "id": "TC040",
+    "title": "Crear proveedor y verlo en la lista",
+    "description": "Verifica el alta de un proveedor desde el listado y su aparición en la grilla.",
+    "category": "Gestión de Proveedores",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the username field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /proveedores"
+      },
+      {
+        "type": "action",
+        "description": "Start creating a new supplier"
+      },
+      {
+        "type": "action",
+        "description": "Fill Proveedor UI Test 01 into the supplier name field"
+      },
+      {
+        "type": "action",
+        "description": "Fill a valid phone number into the phone field"
+      },
+      {
+        "type": "action",
+        "description": "Fill a valid email into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Save the supplier"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify Proveedor UI Test 01 is visible in the suppliers list"
+      }
+    ]
+  },
+  {
+    "id": "TC041",
+    "title": "Editar proveedor y ver cambios reflejados",
+    "description": "Verifica la edición de un proveedor existente y que el nuevo dato se visualiza en el listado.",
+    "category": "Gestión de Proveedores",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the username field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /proveedores"
+      },
+      {
+        "type": "action",
+        "description": "Start creating a new supplier"
+      },
+      {
+        "type": "action",
+        "description": "Fill Proveedor UI Test Edit 01 into the supplier name field"
+      },
+      {
+        "type": "action",
+        "description": "Fill a valid phone number into the phone field"
+      },
+      {
+        "type": "action",
+        "description": "Save the supplier"
+      },
+      {
+        "type": "action",
+        "description": "Open the supplier details for Proveedor UI Test Edit 01"
+      },
+      {
+        "type": "action",
+        "description": "Start editing the supplier"
+      },
+      {
+        "type": "action",
+        "description": "Fill Proveedor UI Test Edit 01 - Modificado into the supplier name field"
+      },
+      {
+        "type": "action",
+        "description": "Save the supplier"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify Proveedor UI Test Edit 01 - Modificado is visible in the suppliers list"
+      }
+    ]
+  },
+  {
+    "id": "TC042",
+    "title": "Eliminar proveedor sin referencias (flujo básico)",
+    "description": "Verifica que un proveedor creado en el test puede eliminarse y desaparece del listado.",
+    "category": "Gestión de Proveedores",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the username field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /proveedores"
+      },
+      {
+        "type": "action",
+        "description": "Start creating a new supplier"
+      },
+      {
+        "type": "action",
+        "description": "Fill Proveedor UI Test Delete 01 into the supplier name field"
+      },
+      {
+        "type": "action",
+        "description": "Fill a valid phone number into the phone field"
+      },
+      {
+        "type": "action",
+        "description": "Save the supplier"
+      },
+      {
+        "type": "action",
+        "description": "Delete the supplier Proveedor UI Test Delete 01"
+      },
+      {
+        "type": "action",
+        "description": "Confirm the deletion"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify Proveedor UI Test Delete 01 is not visible in the suppliers list"
+      }
+    ]
+  },
+  {
+    "id": "TC043",
+    "title": "Ver historial de compras del proveedor (si existe el acceso)",
+    "description": "Verifica que se puede abrir el historial de compras asociado a un proveedor desde la UI.",
+    "category": "Gestión de Proveedores",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the username field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /proveedores"
+      },
+      {
+        "type": "action",
+        "description": "Start creating a new supplier"
+      },
+      {
+        "type": "action",
+        "description": "Fill Proveedor UI Test Compras 01 into the supplier name field"
+      },
+      {
+        "type": "action",
+        "description": "Fill a valid phone number into the phone field"
+      },
+      {
+        "type": "action",
+        "description": "Save the supplier"
+      },
+      {
+        "type": "action",
+        "description": "Open the purchase history for supplier Proveedor UI Test Compras 01"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the supplier purchase history panel is displayed"
+      }
+    ]
+  },
+  {
+    "id": "TC044",
+    "title": "Abrir un registro de compra desde el historial (si hay items navegables)",
+    "description": "Verifica que desde el historial se puede abrir el detalle de una compra cuando hay un registro disponible en pantalla.",
+    "category": "Gestión de Proveedores",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the username field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /proveedores"
+      },
+      {
+        "type": "action",
+        "description": "Open the purchase history for the first supplier in the list"
+      },
+      {
+        "type": "action",
+        "description": "Open the first available purchase record from the purchase history list"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the purchase details view is displayed"
+      }
+    ]
+  },
+  {
+    "id": "TC045",
+    "title": "Validación al crear proveedor con datos requeridos faltantes",
+    "description": "Verifica que el formulario no se guarda y muestra error de validación al omitir un campo requerido.",
+    "category": "Gestión de Proveedores",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the username field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /proveedores"
+      },
+      {
+        "type": "action",
+        "description": "Start creating a new supplier"
+      },
+      {
+        "type": "action",
+        "description": "Fill a valid phone number into the phone field"
+      },
+      {
+        "type": "action",
+        "description": "Save the supplier"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify a required-field validation error is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC046",
+    "title": "Cancelar creación de proveedor no persiste cambios",
+    "description": "Verifica que al cancelar el alta no aparece el proveedor en el listado.",
+    "category": "Gestión de Proveedores",
+    "priority": "Low",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the username field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /proveedores"
+      },
+      {
+        "type": "action",
+        "description": "Start creating a new supplier"
+      },
+      {
+        "type": "action",
+        "description": "Fill Proveedor UI Test Cancel 01 into the supplier name field"
+      },
+      {
+        "type": "action",
+        "description": "Cancel the supplier form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify Proveedor UI Test Cancel 01 is not visible in the suppliers list"
+      }
+    ]
+  },
+  {
+    "id": "TC047",
+    "title": "Navegación desde SideNav a una sección permitida (desktop)",
+    "description": "Verifica que el usuario autenticado puede ver el menú lateral y navegar a una sección visible.",
+    "category": "Menú lateral con permisos",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click a visible section in the side navigation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the main content updates to the selected section page"
+      }
+    ]
+  },
+  {
+    "id": "TC048",
+    "title": "Filtrado de opciones del SideNav según permisos",
+    "description": "Verifica que el menú lateral muestra solo secciones permitidas y oculta secciones restringidas.",
+    "category": "Menú lateral con permisos",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Scroll the side navigation to view all available sections"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the side navigation shows only permitted sections and no restricted options are visible"
+      }
+    ]
+  },
+  {
+    "id": "TC049",
+    "title": "Abrir SideNav en mobile con botón hamburguesa y navegar",
+    "description": "Verifica que en viewport mobile se puede abrir el menú lateral y navegar a una sección permitida.",
+    "category": "Menú lateral con permisos",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Set the viewport to a mobile size"
+      },
+      {
+        "type": "action",
+        "description": "Click the hamburger menu button to open the side navigation"
+      },
+      {
+        "type": "action",
+        "description": "Click a visible section in the side navigation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the main content updates to the selected section page"
+      }
+    ]
+  },
+  {
+    "id": "TC050",
+    "title": "Acceso directo a ruta restringida redirige al dashboard con acceso denegado",
+    "description": "Verifica que un usuario sin permiso no puede acceder a una ruta restringida y es redirigido al dashboard con un mensaje de denegación.",
+    "category": "Menú lateral con permisos",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /usuarios"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the user lands on the dashboard"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify an access denied message is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC051",
+    "title": "Acceso permitido a ruta de listado desde SideNav mantiene consistencia de navegación",
+    "description": "Verifica que al navegar desde el SideNav a un listado permitido, la página carga su contenido principal.",
+    "category": "Menú lateral con permisos",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click the side navigation option for products"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the products list page displays its primary content"
+      }
+    ]
+  },
+  {
+    "id": "TC052",
+    "title": "El SideNav permanece visible y utilizable tras navegar entre dos secciones permitidas",
+    "description": "Verifica que el menú lateral sigue presente y permite una segunda navegación sin perder estado básico de la UI.",
+    "category": "Menú lateral con permisos",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Click a visible section in the side navigation"
+      },
+      {
+        "type": "action",
+        "description": "Click a different visible section in the side navigation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the main content updates to the second selected section page"
+      }
+    ]
+  },
+  {
+    "id": "TC053",
+    "title": "Cierre del menú lateral en mobile al seleccionar una sección",
+    "description": "Verifica que al seleccionar una sección en mobile, el menú lateral se cierra y se muestra el contenido de la sección.",
+    "category": "Menú lateral con permisos",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_USER}} into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Fill {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Set the viewport to a mobile size"
+      },
+      {
+        "type": "action",
+        "description": "Click the hamburger menu button to open the side navigation"
+      },
+      {
+        "type": "action",
+        "description": "Click a visible section in the side navigation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the side navigation is closed and the selected section content is displayed"
+      }
+    ]
+  }
+]

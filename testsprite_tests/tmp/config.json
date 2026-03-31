@@ -1,0 +1,24 @@
+{
+  "status": "commited",
+  "type": "frontend",
+  "scope": "codebase",
+  "localEndpoint": "http://localhost:5174/",
+  "loginUser": "cristian",
+  "loginPassword": "admin",
+  "executionArgs": {
+    "projectName": "optic-ar",
+    "projectPath": "/home/cristian/sites/fullstack/optic-ar",
+    "testIds": [
+      "TC009",
+      "TC011",
+      "TC015"
+    ],
+    "additionalInstruction": "Login credentials: username=cristian, password=admin. Backend Django API at http://localhost:8000 (also accessible via proxy at http://localhost:5174/api/). Frontend at http://localhost:5174. All routes require authentication. The login form appears at the root URL when unauthenticated. IMPORTANT: The page loads a large JavaScript bundle — wait at least 10 seconds after navigation before checking for elements.",
+    "serverMode": "production",
+    "envs": {
+      "API_KEY": "sk-user-Qjq8XX118AOLyg3uknkrZZ2s-JhW6zI9pPP1uupjJ0qfhA6b3_7yDxPMr0a-MnZD01hHftVHMHFZ-3EGmgTtg3zHwZ40vi4dIV7SCDBHCqXD24nw2ObVI33PCPB6yYaBOXg"
+    }
+  },
+  "serverPort": 41531,
+  "proxy": "http://025a9e92-f4ee-4f91-a8d2-af2a94a3e122:B1SwGFL7PMSROzjIumt9oqvFus6LQ57q@tun.testsprite.com:8080"
+}

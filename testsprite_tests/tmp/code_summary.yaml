@@ -1,0 +1,462 @@
+version: "2"
+type: frontend
+tech_stack:
+  - language: TypeScript
+  - framework: React 19 + Vite 7
+  - ui_library: React Bootstrap 5.3
+  - state_server: TanStack React Query 5
+  - state_global: Zustand 5 (con persist middleware)
+  - validation: Zod 4
+  - forms: React Hook Form 7
+  - calendar: FullCalendar 6 (dayGrid + timeGrid + interaction)
+  - selects: react-select 5
+  - auth: JWT SimpleJWT (access token en memoria, refresh en HttpOnly cookie)
+  - routing: React Router DOM 7
+  - http: Axios
+
+routes:
+  - path: /
+    file: src/components/DashboardHome.tsx
+    auth_required: true
+    description: Dashboard principal con TurnosHoy, VentasCard y ComprasCard
+
+  - path: /dashboard
+    file: src/components/DashboardHome.tsx
+    auth_required: true
+    description: Alias del dashboard principal
+
+  - path: /productos
+    file: src/components/ProductList.tsx
+    auth_required: true
+    description: Listado paginado de productos con búsqueda y filtros avanzados
+
+  - path: /marcas
+    file: src/components/BrandList.tsx
+    auth_required: true
+    description: Gestión de marcas de productos
+
+  - path: /clientes-pacientes
+    file: src/components/ClienteList.tsx
+    auth_required: true
+    description: Listado de clientes/pacientes con búsqueda por DNI o nombre
+
+  - path: /consultas
+    file: src/components/ConsultationList.tsx
+    auth_required: true
+    description: Historial de consultas médicas con graduaciones
+
+  - path: /obras-sociales
+    file: src/components/InsuranceProvider.tsx
+    auth_required: true
+    description: Gestión de obras sociales
+
+  - path: /ventas
+    file: src/components/SalesList.tsx
+    auth_required: true
+    description: Listado de ventas con detalles de productos
+
+  - path: /compras
+    file: src/components/PurchaseList.tsx
+    auth_required: true
+    description: Listado de compras a proveedores
+
+  - path: /gastos
+    file: src/components/ExpensesList.tsx
+    auth_required: true
+    description: Registro de gastos varios
+
+  - path: /proveedores
+    file: src/components/SuppliersList.tsx
+    auth_required: true
+    description: Gestión de proveedores
+
+  - path: /turnos
+    file: src/components/TurnosCalendar.tsx
+    auth_required: true
+    description: Calendario de turnos con FullCalendar (drag & drop, múltiples vistas)
+
+  - path: /reporte-caja
+    file: src/components/ReporteCaja.tsx
+    auth_required: true
+    description: Reporte de movimientos de caja filtrado por fecha
+
+  - path: /usuarios
+    file: src/components/UserList.tsx
+    auth_required: true
+    description: ABM de usuarios del sistema (solo staff)
+
+  - path: /grupos
+    file: src/components/GroupList.tsx
+    auth_required: true
+    description: ABM de grupos y roles (solo staff)
+
+features:
+  - name: Autenticación con JWT
+    description: Login con usuario y contraseña, silentRefresh, logout con blacklist
+    files:
+      - src/components/LoginPage.tsx
+      - src/services/auth.service.ts
+      - src/stores/useAuthStore.ts
+      - src/hooks/useAuth.ts
+    entry_route: /
+    user_interactions:
+      - Ingresar usuario en el campo de texto
+      - Ingresar contraseña en el campo de texto
+      - Hacer clic en el botón "Ingresar"
+      - Ver mensaje de error si las credenciales son inválidas
+      - La aplicación redirige al dashboard al autenticarse correctamente
+    api_calls:
+      - method: POST
+        endpoint: /api/token/
+      - method: POST
+        endpoint: /api/token/refresh/
+    auth_required: false
+
+  - name: Dashboard
+    description: Vista principal con tarjetas de acceso rápido a módulos
+    files:
+      - src/components/DashboardHome.tsx
+      - src/components/TurnosHoy.tsx
+      - src/components/VentasCard.tsx
+      - src/components/ComprasCard.tsx
+    entry_route: /
+    user_interactions:
+      - Ver tarjeta "Turnos de Hoy" con cantidad de turnos del día
+      - Hacer clic en el encabezado de TurnosHoy para ir al calendario del día
+      - Hacer clic en VentasCard para navegar a /ventas
+      - Hacer clic en ComprasCard para navegar a /compras
+    api_calls:
+      - method: GET
+        endpoint: /api/turnos/
+    auth_required: true
+
+  - name: Toggle de Tema (Dark/Light/Auto)
+    description: Cambio de tema visual con persistencia en localStorage
+    files:
+      - src/components/Header.tsx
+      - src/stores/useThemeStore.ts
+    entry_route: /
+    user_interactions:
+      - Hacer clic en el botón de tema en el Header
+      - El tema cicla entre Claro, Oscuro y Auto
+      - El ícono cambia según el modo (sol, luna, círculo)
+    api_calls: []
+    auth_required: true
+
+  - name: Gestión de Productos
+    description: CRUD completo de productos con filtros avanzados y paginación
+    files:
+      - src/components/ProductList.tsx
+      - src/components/ProductoFormModal.tsx
+      - src/components/EntityManagerModal.tsx
+      - src/hooks/useProductos.ts
+      - src/services/productos.service.ts
+    entry_route: /productos
+    user_interactions:
+      - Ver listado paginado de productos (10 por página)
+      - Buscar productos por código, nombre o descripción (debounce 500ms)
+      - Filtrar por marca, categoría y subcategoría
+      - Hacer clic en "Limpiar" para resetear filtros
+      - Hacer clic en "Agregar Producto" para abrir el formulario
+      - Completar el formulario y guardar el nuevo producto
+      - Hacer clic en editar para modificar un producto existente
+      - Hacer clic en eliminar y confirmar para borrar un producto
+      - Gestionar marcas, categorías y subcategorías desde los modales de engranaje
+    api_calls:
+      - method: GET
+        endpoint: /api/productos/
+      - method: POST
+        endpoint: /api/productos/
+      - method: PATCH
+        endpoint: /api/productos/{id}/
+      - method: DELETE
+        endpoint: /api/productos/{id}/
+      - method: GET
+        endpoint: /api/marcas/
+      - method: GET
+        endpoint: /api/categorias/
+      - method: GET
+        endpoint: /api/subcategorias/
+    auth_required: true
+
+  - name: Gestión de Marcas
+    description: CRUD de marcas desde la sección independiente
+    files:
+      - src/components/BrandList.tsx
+      - src/hooks/useProductos.ts
+    entry_route: /marcas
+    user_interactions:
+      - Ver listado de marcas
+      - Agregar nueva marca
+      - Editar marca existente
+      - Eliminar marca (con confirmación)
+    api_calls:
+      - method: GET
+        endpoint: /api/marcas/
+      - method: POST
+        endpoint: /api/marcas/
+      - method: PATCH
+        endpoint: /api/marcas/{id}/
+      - method: DELETE
+        endpoint: /api/marcas/{id}/
+    auth_required: true
+
+  - name: Gestión de Clientes/Pacientes
+    description: CRUD de clientes con búsqueda por DNI y nombre
+    files:
+      - src/components/ClienteList.tsx
+      - src/components/ClienteFormModal.tsx
+      - src/components/ClienteConsultasModal.tsx
+      - src/hooks/useVentas.ts
+    entry_route: /clientes-pacientes
+    user_interactions:
+      - Ver listado de clientes paginado
+      - Buscar por DNI o nombre
+      - Crear nuevo cliente con validación de DNI único
+      - Editar datos del cliente
+      - Ver historial de consultas del cliente
+      - Eliminar cliente
+    api_calls:
+      - method: GET
+        endpoint: /api/clientes/
+      - method: POST
+        endpoint: /api/clientes/
+      - method: PATCH
+        endpoint: /api/clientes/{id}/
+      - method: DELETE
+        endpoint: /api/clientes/{id}/
+    auth_required: true
+
+  - name: Gestión de Ventas
+    description: CRUD de ventas con detalle de productos y control de stock
+    files:
+      - src/components/SalesList.tsx
+      - src/components/VentaFormModal.tsx
+      - src/hooks/useVentas.ts
+    entry_route: /ventas
+    user_interactions:
+      - Ver listado de ventas
+      - Agregar nueva venta seleccionando cliente y productos
+      - Seleccionar forma de pago e ingresar monto entregado
+      - Ver saldo calculado automáticamente
+      - Editar venta existente
+      - Eliminar venta
+    api_calls:
+      - method: GET
+        endpoint: /api/ventas/
+      - method: POST
+        endpoint: /api/ventas/
+      - method: PATCH
+        endpoint: /api/ventas/{id}/
+      - method: DELETE
+        endpoint: /api/ventas/{id}/
+    auth_required: true
+
+  - name: Gestión de Compras
+    description: CRUD de compras a proveedores con actualización de stock y precios
+    files:
+      - src/components/PurchaseList.tsx
+      - src/components/CompraFormModal.tsx
+      - src/hooks/useCompras.ts
+    entry_route: /compras
+    user_interactions:
+      - Ver listado de compras
+      - Agregar nueva compra seleccionando proveedor y productos
+      - Ingresar cantidad, precio_unitario y precio_venta por ítem
+      - Ver total calculado automáticamente
+      - Editar compra existente
+      - Eliminar compra
+    api_calls:
+      - method: GET
+        endpoint: /api/compras/
+      - method: POST
+        endpoint: /api/compras/
+      - method: PATCH
+        endpoint: /api/compras/{id}/
+      - method: DELETE
+        endpoint: /api/compras/{id}/
+    auth_required: true
+
+  - name: Calendario de Turnos
+    description: Gestión de turnos con FullCalendar, drag & drop y múltiples vistas
+    files:
+      - src/components/TurnosCalendar.tsx
+      - src/components/TurnoFormModal.tsx
+      - src/components/ConfigCalendarioModal.tsx
+      - src/hooks/useTurnos.ts
+    entry_route: /turnos
+    user_interactions:
+      - Ver calendario en vista semanal (timeGridWeek por defecto)
+      - Cambiar entre vistas mensual, semanal y diaria
+      - Hacer clic en un espacio vacío para crear un turno
+      - Completar el formulario de turno con cliente, fecha y hora
+      - Hacer clic en un turno para editarlo
+      - Arrastrar un turno a nueva fecha/hora (drag & drop)
+      - Eliminar turno con confirmación
+      - Ver configuración del calendario (solo superusuarios)
+    api_calls:
+      - method: GET
+        endpoint: /api/turnos/
+      - method: POST
+        endpoint: /api/turnos/
+      - method: PATCH
+        endpoint: /api/turnos/{id}/
+      - method: DELETE
+        endpoint: /api/turnos/{id}/
+      - method: GET
+        endpoint: /api/config-calendario/
+    auth_required: true
+
+  - name: Consultas Médicas y Graduaciones
+    description: Registro de consultas oftalmológicas con datos de graduación
+    files:
+      - src/components/ConsultationList.tsx
+      - src/components/ConsultationFormModal.tsx
+      - src/hooks/useVentas.ts
+    entry_route: /consultas
+    user_interactions:
+      - Ver listado de consultas
+      - Crear nueva consulta seleccionando cliente
+      - Ingresar motivo, diagnóstico y tratamiento
+      - Completar graduación (OD/OI, lejos/cerca: esférico, cilíndrico, eje)
+      - Editar consulta existente
+      - Eliminar consulta
+    api_calls:
+      - method: GET
+        endpoint: /api/consultas/
+      - method: POST
+        endpoint: /api/consultas/
+      - method: PATCH
+        endpoint: /api/consultas/{id}/
+      - method: DELETE
+        endpoint: /api/consultas/{id}/
+    auth_required: true
+
+  - name: Reporte de Caja
+    description: Vista consolidada de movimientos de caja con filtros de fecha
+    files:
+      - src/components/ReporteCaja.tsx
+      - src/hooks/useReporteCaja.ts
+    entry_route: /reporte-caja
+    user_interactions:
+      - Ver listado de movimientos de caja
+      - Filtrar por rango de fechas
+      - Ver totales de ingresos, egresos y balance final
+    api_calls:
+      - method: GET
+        endpoint: /api/reporte-caja/
+    auth_required: true
+
+  - name: Gestión de Gastos
+    description: CRUD de gastos varios
+    files:
+      - src/components/ExpensesList.tsx
+      - src/components/GastoFormModal.tsx
+      - src/hooks/useCompras.ts
+    entry_route: /gastos
+    user_interactions:
+      - Ver listado de gastos
+      - Agregar nuevo gasto con descripción y monto
+      - Editar gasto
+      - Eliminar gasto
+    api_calls:
+      - method: GET
+        endpoint: /api/gastos/
+      - method: POST
+        endpoint: /api/gastos/
+      - method: PATCH
+        endpoint: /api/gastos/{id}/
+      - method: DELETE
+        endpoint: /api/gastos/{id}/
+    auth_required: true
+
+  - name: Gestión de Proveedores
+    description: CRUD de proveedores con historial de compras
+    files:
+      - src/components/SuppliersList.tsx
+      - src/components/ProveedorFormModal.tsx
+      - src/components/ProveedorComprasModal.tsx
+      - src/hooks/useCompras.ts
+    entry_route: /proveedores
+    user_interactions:
+      - Ver listado de proveedores
+      - Crear nuevo proveedor
+      - Editar proveedor existente
+      - Ver historial de compras del proveedor
+      - Eliminar proveedor
+    api_calls:
+      - method: GET
+        endpoint: /api/proveedores/
+      - method: POST
+        endpoint: /api/proveedores/
+      - method: PATCH
+        endpoint: /api/proveedores/{id}/
+      - method: DELETE
+        endpoint: /api/proveedores/{id}/
+    auth_required: true
+
+  - name: ABM de Usuarios
+    description: Gestión de usuarios del sistema (solo staff)
+    files:
+      - src/components/UserList.tsx
+      - src/hooks/useUsers.ts
+    entry_route: /usuarios
+    user_interactions:
+      - Ver listado de usuarios del sistema
+      - Crear nuevo usuario con grupos asignados
+      - Editar datos del usuario
+      - Eliminar usuario
+    api_calls:
+      - method: GET
+        endpoint: /api/usuarios/
+      - method: POST
+        endpoint: /api/usuarios/
+      - method: PATCH
+        endpoint: /api/usuarios/{id}/
+      - method: DELETE
+        endpoint: /api/usuarios/{id}/
+    auth_required: true
+
+  - name: ABM de Grupos/Roles
+    description: Gestión de grupos con permisos asignados (solo staff)
+    files:
+      - src/components/GroupList.tsx
+      - src/hooks/useUsers.ts
+    entry_route: /grupos
+    user_interactions:
+      - Ver listado de grupos
+      - Crear nuevo grupo con permisos asignados
+      - Editar grupo existente
+      - Eliminar grupo
+    api_calls:
+      - method: GET
+        endpoint: /api/grupos/
+      - method: POST
+        endpoint: /api/grupos/
+      - method: PATCH
+        endpoint: /api/grupos/{id}/
+      - method: DELETE
+        endpoint: /api/grupos/{id}/
+    auth_required: true
+
+  - name: Menú lateral con permisos
+    description: SideNav que filtra opciones según permisos del usuario autenticado
+    files:
+      - src/components/SideNav.tsx
+      - src/components/SideNavItem.tsx
+      - src/hooks/usePermiso.ts
+    entry_route: /
+    user_interactions:
+      - Ver solo las secciones para las que tiene permiso
+      - Navegar entre secciones desde el menú lateral
+      - En mobile, abrir el menú con el botón hamburguesa
+    api_calls: []
+    auth_required: true
+
+known_limitations:
+  - issue: El build de producción no incluye el backend Django, se necesita el backend corriendo en localhost:8000
+    location: src/services/api.ts
+    impact: Todas las llamadas a API fallarán si el backend no está activo
+  - issue: El silentRefresh al montar la app puede fallar si no hay cookie de refresh válida
+    location: src/App.tsx
+    impact: El usuario verá la pantalla de login aunque haya iniciado sesión recientemente
