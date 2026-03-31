@@ -36,7 +36,10 @@ export default function LoginPage() {
    * @param data - Credenciales validadas por Zod.
    */
   const onSubmit = async (data: LoginFormData): Promise<void> => {
-    await login(data);
+    // mutateAsync lanza si la petición falla; lo capturamos aquí para que
+    // react-hook-form no reciba una promise rechazada sin manejar.
+    // El error ya es visible en la UI vía el estado isError del hook.
+    await login(data).catch(() => {});
   };
 
   return (
@@ -67,7 +70,7 @@ export default function LoginPage() {
 
           {/* Formulario */}
           <Form onSubmit={handleSubmit(onSubmit)} noValidate>
-            <Form.Group className="mb-3">
+            <Form.Group className="mb-3" controlId="username">
               <Form.Label className="fw-semibold">Usuario</Form.Label>
               <Form.Control
                 type="text"
@@ -81,7 +84,7 @@ export default function LoginPage() {
               </Form.Control.Feedback>
             </Form.Group>
 
-            <Form.Group className="mb-4">
+            <Form.Group className="mb-4" controlId="password">
               <Form.Label className="fw-semibold">Contraseña</Form.Label>
               <Form.Control
                 type="password"
