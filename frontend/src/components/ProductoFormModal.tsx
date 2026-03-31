@@ -556,11 +556,7 @@ const ProductoFormModal: React.FC<ProductoFormModalProps> = ({
                           step="0.01"
                           min="0"
                           value={value ?? ""}
-                          onChange={(e) => {
-                            const numValue = (e.target as HTMLInputElement)
-                              .valueAsNumber;
-                            onChange(isNaN(numValue) ? 0 : numValue);
-                          }}
+                          readOnly
                           isInvalid={!!errors.precio_venta}
                           placeholder="0.00"
                         />
@@ -573,7 +569,7 @@ const ProductoFormModal: React.FC<ProductoFormModalProps> = ({
                     )}
                   />
                   <Form.Text className="text-muted">
-                    Se puede ingresar directamente o se calcula con Costo × (1 + % Ganancia)
+                    Calculado automáticamente: Costo × (1 + % Ganancia)
                   </Form.Text>
                 </Form.Group>
               </Col>

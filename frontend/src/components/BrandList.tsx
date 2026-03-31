@@ -46,7 +46,9 @@ function BrandList() {
   const [currentPage, setCurrentPage] = useState(1);
   const [showModal, setShowModal] = useState(false);
   const [editingMarca, setEditingMarca] = useState<Marca | null>(null);
-  const [confirmingDeleteId, setConfirmingDeleteId] = useState<number | null>(null);
+  const [confirmingDeleteId, setConfirmingDeleteId] = useState<number | null>(
+    null,
+  );
 
   // Debounce para el término de búsqueda
   useEffect(() => {
@@ -316,8 +318,8 @@ function BrandList() {
                             <PencilSquare size={14} />
                           </Button>
                         )}
-                        {puedeEliminar && (
-                          confirmingDeleteId === marca.id ? (
+                        {puedeEliminar &&
+                          (confirmingDeleteId === marca.id ? (
                             <>
                               <Button
                                 variant="danger"
@@ -344,8 +346,7 @@ function BrandList() {
                             >
                               <Trash size={14} />
                             </Button>
-                          )
-                        )}
+                          ))}
                       </td>
                     )}
                   </tr>
