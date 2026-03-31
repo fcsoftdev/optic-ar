@@ -1,3 +1,6 @@
 -r common.txt
 xhtml2pdf
-mysqlclient
+gunicorn
+psycopg2-binary
+dj-database-url
+whitenoise

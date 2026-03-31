@@ -1,0 +1,7 @@
+[build]
+builder = "nixpacks"
+buildCommand = "pip install -r requeriments/prod.txt"
+
+[deploy]
+startCommand = "gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 2"
+restartPolicyType = "on_failure"

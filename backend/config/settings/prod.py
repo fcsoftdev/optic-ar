@@ -1,50 +1,44 @@
 """
-Django settings for config project - PRODUCTION ENVIRONMENT
+Django settings for config project - PRODUCTION ENVIRONMENT (Railway)
 
-This file contains only the settings that are specific to the production environment.
-It imports all common settings from base.py and overrides only what's necessary.
+Requiere las siguientes variables de entorno en Railway:
+  SECRET_KEY, ALLOWED_HOSTS, CORS_ALLOWED_ORIGINS, DATABASE_URL
 """
+
+import dj_database_url
 
 from .base import *
 
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ["puntodevista.pythonanywhere.com"]
+SECRET_KEY = os.environ["SECRET_KEY"]
 
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "").split(",")
 
-# Database for production
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
+# Base de datos desde DATABASE_URL (Railway la inyecta automáticamente)
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.mysql",
-        "NAME": "puntodevista$default",
-        "USER": "puntodevista",
-        "PASSWORD": "Opticar.889",
-        "HOST": "puntodevista.mysql.pythonanywhere-services.com",
-        "PORT": "3306",
-        "OPTIONS": {
-            "init_command": "SET sql_mode='STRICT_TRANS_TABLES'",
-        },
-    }
+    "default": dj_database_url.config(
+        conn_max_age=600,
+        ssl_require=True,
+    )
 }
 
-# Static files configuration for production
-STATIC_ROOT = "/home/puntodevista/optic-ar/backend/staticfiles"
+# WhiteNoise para servir archivos estáticos
+MIDDLEWARE.insert(1, "whitenoise.middleware.WhiteNoiseMiddleware")
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
-# Media files configuration for production
-MEDIA_ROOT = "/home/puntodevista/optic-ar/backend/media"
+# CORS desde variable de entorno
+CORS_ALLOWED_ORIGINS = os.environ.get("CORS_ALLOWED_ORIGINS", "").split(",")
+CORS_ALLOW_CREDENTIALS = True
 
-# Security settings for production
-SECURE_BROWSER_XSS_FILTER = True
-SECURE_CONTENT_TYPE_NOSNIFF = True
+# Seguridad HTTPS
+SECURE_SSL_REDIRECT = True
+SECURE_HSTS_SECONDS = 31536000
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
 X_FRAME_OPTIONS = "DENY"
-
-# Additional security settings (uncomment as needed)
-# SECURE_SSL_REDIRECT = True
-# SESSION_COOKIE_SECURE = True
-# CSRF_COOKIE_SECURE = True
-# SECURE_HSTS_SECONDS = 31536000  # 1 year
-# SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-# SECURE_HSTS_PRELOAD = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_BROWSER_XSS_FILTER = True
