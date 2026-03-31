@@ -80,7 +80,7 @@ const ProductoFormModal: React.FC<ProductoFormModalProps> = ({
   const selectedCategoria = watch("categoria");
   // Valores observados reactivamente para los cálculos de precio
   const watchedCosto = watch("precio_costo");
-  const watchedPct = watch("porcentaje_ganancia");
+  watch("porcentaje_ganancia");
   const watchedPrecioVenta = watch("precio_venta");
 
   const { data: marcasData = [], isLoading: loadingMarcas } = useMarcas();
@@ -547,21 +547,22 @@ const ProductoFormModal: React.FC<ProductoFormModalProps> = ({
                   <Controller
                     name="precio_venta"
                     control={control}
-                    render={({ field: { value, ...field } }) => (
+                    render={({ field: { value, onChange, ...field } }) => (
                       <InputGroup>
                         <InputGroup.Text>$</InputGroup.Text>
                         <Form.Control
                           {...field}
                           type="number"
                           step="0.01"
+                          min="0"
                           value={value ?? ""}
-                          readOnly
+                          onChange={(e) => {
+                            const numValue = (e.target as HTMLInputElement)
+                              .valueAsNumber;
+                            onChange(isNaN(numValue) ? 0 : numValue);
+                          }}
                           isInvalid={!!errors.precio_venta}
                           placeholder="0.00"
-                          style={{
-                            backgroundColor: "var(--bs-secondary-bg)",
-                            color: "var(--bs-body-color)",
-                          }}
                         />
                         {errors.precio_venta && (
                           <Form.Control.Feedback type="invalid">
@@ -572,7 +573,7 @@ const ProductoFormModal: React.FC<ProductoFormModalProps> = ({
                     )}
                   />
                   <Form.Text className="text-muted">
-                    Se calcula automáticamente: Precio Costo × (1 + % Ganancia)
+                    Se puede ingresar directamente o se calcula con Costo × (1 + % Ganancia)
                   </Form.Text>
                 </Form.Group>
               </Col>

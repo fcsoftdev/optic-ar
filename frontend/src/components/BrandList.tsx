@@ -46,6 +46,7 @@ function BrandList() {
   const [currentPage, setCurrentPage] = useState(1);
   const [showModal, setShowModal] = useState(false);
   const [editingMarca, setEditingMarca] = useState<Marca | null>(null);
+  const [confirmingDeleteId, setConfirmingDeleteId] = useState<number | null>(null);
 
   // Debounce para el término de búsqueda
   useEffect(() => {
@@ -113,13 +114,26 @@ function BrandList() {
   };
 
   /**
-   * Eliminar una marca con confirmación
+   * Iniciar flujo de eliminación de una marca (confirmación inline)
    */
   const handleDeleteMarca = (marcaId: number) => {
-    if (confirm("¿Está seguro de eliminar esta marca?")) {
-      deleteMarca.mutate(marcaId);
-      setSelectedMarcas(selectedMarcas.filter((id) => id !== marcaId));
-    }
+    setConfirmingDeleteId(marcaId);
+  };
+
+  /**
+   * Confirmar eliminación de la marca seleccionada
+   */
+  const handleConfirmDelete = (marcaId: number) => {
+    deleteMarca.mutate(marcaId);
+    setSelectedMarcas(selectedMarcas.filter((id) => id !== marcaId));
+    setConfirmingDeleteId(null);
+  };
+
+  /**
+   * Cancelar eliminación
+   */
+  const handleCancelDelete = () => {
+    setConfirmingDeleteId(null);
   };
 
   /**
@@ -303,14 +317,34 @@ function BrandList() {
                           </Button>
                         )}
                         {puedeEliminar && (
-                          <Button
-                            variant="outline-danger"
-                            size="sm"
-                            onClick={() => handleDeleteMarca(marca.id)}
-                            title="Eliminar marca"
-                          >
-                            <Trash size={14} />
-                          </Button>
+                          confirmingDeleteId === marca.id ? (
+                            <>
+                              <Button
+                                variant="danger"
+                                size="sm"
+                                className="me-1"
+                                onClick={() => handleConfirmDelete(marca.id)}
+                              >
+                                Confirmar
+                              </Button>
+                              <Button
+                                variant="outline-secondary"
+                                size="sm"
+                                onClick={handleCancelDelete}
+                              >
+                                Cancelar
+                              </Button>
+                            </>
+                          ) : (
+                            <Button
+                              variant="outline-danger"
+                              size="sm"
+                              onClick={() => handleDeleteMarca(marca.id)}
+                              title="Eliminar marca"
+                            >
+                              <Trash size={14} />
+                            </Button>
+                          )
                         )}
                       </td>
                     )}

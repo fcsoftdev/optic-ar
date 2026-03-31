@@ -155,8 +155,9 @@ export const useUpdateProducto = () => {
         updatedProducto,
       );
 
-      // Invalidar la lista de productos para refrescar (necesario por paginación)
+      // Invalidar y refrescar de inmediato la lista de productos
       queryClient.invalidateQueries({ queryKey: ["productos"] });
+      queryClient.refetchQueries({ queryKey: ["productos"] });
     },
   });
 };
