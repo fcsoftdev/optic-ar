@@ -1,0 +1,5 @@
+[build]
+cmds = ["python -m pip install -r ./requeriments/prod.txt"]
+
+[release]
+cmds = ["python manage.py migrate --no-input", "python manage.py collectstatic --no-input"]
