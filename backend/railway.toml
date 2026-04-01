@@ -1,5 +1,6 @@
 [build]
 buildCommand = "python -m pip install -r requeriments/prod.txt"
+aptPackages = ["libcairo2-dev", "libpango1.0-dev", "libffi-dev", "pkg-config"]
 
 [deploy]
 startCommand = "gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 2"
