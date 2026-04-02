@@ -13,7 +13,9 @@ DEBUG = False
 
 SECRET_KEY = os.environ["SECRET_KEY"]
 
-ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "").split(",")
+ALLOWED_HOSTS = [
+    h.strip() for h in os.environ.get("ALLOWED_HOSTS", "").split(",") if h.strip()
+]
 
 # Base de datos desde DATABASE_URL (Railway la inyecta automáticamente)
 DATABASES = {
