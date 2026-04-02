@@ -16,6 +16,8 @@ SECRET_KEY = os.environ["SECRET_KEY"]
 ALLOWED_HOSTS = [
     h.strip() for h in os.environ.get("ALLOWED_HOSTS", "").split(",") if h.strip()
 ]
+# Requerido por Railway para que el healthcheck no sea rechazado con 400
+ALLOWED_HOSTS.append("healthcheck.railway.app")
 
 # Base de datos desde DATABASE_URL (Railway la inyecta automáticamente)
 DATABASES = {
