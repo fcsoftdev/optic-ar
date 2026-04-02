@@ -27,10 +27,7 @@ RUN pip install --upgrade pip && pip install -r requirements.txt
 # Copy application code
 COPY . .
 
-# Recolectar archivos estáticos en tiempo de build
-RUN DJANGO_SETTINGS_MODULE=config.settings.prod \
-    SECRET_KEY=dummy-secret-key-for-collectstatic \
-    DATABASE_URL=sqlite:///tmp/build.db \
-    python manage.py collectstatic --noinput
+# Crear directorio de archivos estáticos para evitar warning de WhiteNoise al iniciar
+RUN mkdir -p staticfiles
 
 CMD gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 2
