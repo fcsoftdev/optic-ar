@@ -1,5 +1,5 @@
 [build]
-buildCommand = "apt-get update && apt-get install -y libcairo2-dev libffi-dev pkg-config && python -m pip install -r ./requirements.txt"
+buildCommand = "apt-get update && apt-get install -y pkg-config libcairo2-dev libpango1.0-dev libglib2.0-dev libffi-dev && python -m pip install -r ./requirements.txt"
 
 [deploy]
 startCommand = "gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 2"
