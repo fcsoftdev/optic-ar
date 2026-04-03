@@ -19,8 +19,17 @@ from django.contrib import admin
 from django.urls import include, path
 from django.conf import settings
 from django.conf.urls.static import static
+from django.http import JsonResponse
+
+
+def health_check(request):
+    """Endpoint público para el healthcheck de Railway."""
+    return JsonResponse({"status": "ok"})
+
 
 urlpatterns = [
+    # Healthcheck público (sin autenticación) para Railway
+    path("health/", health_check, name="health_check"),
     # Admin
     path("admin/", admin.site.urls),
     # Autenticación JWT
