@@ -16,7 +16,10 @@ SECRET_KEY = os.environ["SECRET_KEY"]
 ALLOWED_HOSTS = [
     h.strip() for h in os.environ.get("ALLOWED_HOSTS", "").split(",") if h.strip()
 ]
-# Requerido por Railway para que el healthcheck no sea rechazado con 400
+# Railway inyecta automáticamente estos dominios en el entorno
+for _var in ("RAILWAY_PUBLIC_DOMAIN", "RAILWAY_PRIVATE_DOMAIN"):
+    if _domain := os.environ.get(_var):
+        ALLOWED_HOSTS.append(_domain)
 ALLOWED_HOSTS.append("healthcheck.railway.app")
 
 # Base de datos desde DATABASE_URL (Railway la inyecta automáticamente)
@@ -29,7 +32,15 @@ DATABASES = {
 
 # WhiteNoise para servir archivos estáticos
 MIDDLEWARE.insert(1, "whitenoise.middleware.WhiteNoiseMiddleware")
-STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
+# STATICFILES_STORAGE fue eliminado en Django 5.1; se usa STORAGES
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
+    },
+}
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
 # CORS desde variable de entorno
