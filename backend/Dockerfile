@@ -16,6 +16,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /app
 
+ENV PYTHONUNBUFFERED=1
+
 # Create and activate a virtual environment
 RUN python -m venv /app/.venv
 ENV PATH="/app/.venv/bin:$PATH"
@@ -30,4 +32,4 @@ COPY . .
 # Crear directorio de archivos estáticos para evitar warning de WhiteNoise al iniciar
 RUN mkdir -p staticfiles
 
-CMD gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 2
+CMD gunicorn config.wsgi:application --bind 0.0.0.0:${PORT:-8000} --workers 2 --preload --log-level debug --access-logfile - --error-logfile -
