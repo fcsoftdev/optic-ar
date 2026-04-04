@@ -32,4 +32,4 @@ COPY . .
 # Crear directorio de archivos estáticos para evitar warning de WhiteNoise al iniciar
 RUN mkdir -p staticfiles
 
-CMD gunicorn config.wsgi:application --bind 0.0.0.0:${PORT:-8000} --workers 2 --preload --log-level debug --access-logfile - --error-logfile -
+CMD gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --preload --log-level debug --access-logfile - --error-logfile -
