@@ -1,5 +1,5 @@
 [deploy]
 restartPolicyType = "on_failure"
-startCommand = "python manage.py collectstatic --no-input && gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --preload --log-level debug --access-logfile - --error-logfile -"
+startCommand = "python manage.py collectstatic --no-input && echo \"=== PORT=$PORT ==\" && PYTHONUNBUFFERED=1 gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --preload --log-level debug --access-logfile - --error-logfile -"
 healthcheckPath = "/health/"
 healthcheckTimeout = 300
