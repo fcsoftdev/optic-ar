@@ -20,7 +20,10 @@ ALLOWED_HOSTS = [
 for _var in ("RAILWAY_PUBLIC_DOMAIN", "RAILWAY_PRIVATE_DOMAIN"):
     if _domain := os.environ.get(_var):
         ALLOWED_HOSTS.append(_domain)
+# Dominios usados por Railway para healthcheck interno
 ALLOWED_HOSTS.append("healthcheck.railway.app")
+ALLOWED_HOSTS.append("127.0.0.1")
+ALLOWED_HOSTS.append("localhost")
 
 # Base de datos desde DATABASE_URL (Railway la inyecta automáticamente)
 DATABASES = {
