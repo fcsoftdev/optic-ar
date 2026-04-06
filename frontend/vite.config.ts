@@ -25,6 +25,7 @@ export default defineConfig({
   },
   preview: {
     proxy: proxyConfig,
+    allowedHosts: true,
   },
   build: {
     rollupOptions: {
