@@ -11,6 +11,26 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings.prod')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.prod")
 
-application = get_wsgi_application()
+import json
+
+_django_app = get_wsgi_application()
+
+
+def application(environ, start_response):
+    """
+    Wrapper WSGI que intercepta /health/ antes de que Django valide ALLOWED_HOSTS.
+    Esto permite que el healthcheck de Railway funcione sin importar el Host header.
+    """
+    if environ.get("PATH_INFO") == "/health/":
+        body = json.dumps({"status": "ok"}).encode()
+        start_response(
+            "200 OK",
+            [
+                ("Content-Type", "application/json"),
+                ("Content-Length", str(len(body))),
+            ],
+        )
+        return [body]
+    return _django_app(environ, start_response)
