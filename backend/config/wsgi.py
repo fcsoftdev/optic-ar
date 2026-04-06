@@ -14,15 +14,8 @@ from django.core.wsgi import get_wsgi_application
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.prod")
 
 import json
-import sys
 
 _django_app = get_wsgi_application()
-
-print(
-    f"[WSGI] Django app loaded. PORT={os.environ.get('PORT', 'NOT SET')}",
-    file=sys.stderr,
-    flush=True,
-)
 
 
 def application(environ, start_response):
@@ -31,11 +24,6 @@ def application(environ, start_response):
     Esto permite que el healthcheck de Railway funcione sin importar el Host header.
     """
     path = environ.get("PATH_INFO", "")
-    print(
-        f"[WSGI] Request: {environ.get('REQUEST_METHOD')} {path} host={environ.get('HTTP_HOST')}",
-        file=sys.stderr,
-        flush=True,
-    )
     if path == "/health/":
         body = json.dumps({"status": "ok"}).encode()
         start_response(
