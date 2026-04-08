@@ -8,7 +8,7 @@ python manage.py collectstatic --no-input
 
 exec gunicorn config.wsgi:application \
     --bind "0.0.0.0:$PORT" \
-    --workers 1 \
-    --log-level debug \
+    --workers 2 \
+    --log-level warning \
     --access-logfile - \
     --error-logfile -
