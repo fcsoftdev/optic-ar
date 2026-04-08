@@ -9,7 +9,7 @@
 import { Form, Button, Card, Alert, Container, Spinner } from "react-bootstrap";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Eyeglasses } from "react-bootstrap-icons";
+import logo from "../assets/logo.png";
 import { useAuth } from "../hooks/useAuth";
 import { loginSchema, type LoginFormData } from "../schemas/login.schema";
 
@@ -54,11 +54,12 @@ export default function LoginPage() {
         <Card.Body className="p-5">
           {/* Logo y títulos */}
           <div className="text-center mb-4">
-            <Eyeglasses size={52} className="text-primary mb-3" />
-            <h4 className="fw-bold mb-1">Opticar</h4>
-            <p className="text-muted small mb-0">
-              Sistema de Gestión de Ópticas
-            </p>
+            <img
+              src={logo}
+              alt="Optic-AR"
+              style={{ height: 120, width: "auto" }}
+              className="mb-3"
+            />
           </div>
 
           {/* Alerta de credenciales incorrectas */}

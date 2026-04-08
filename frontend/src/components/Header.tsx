@@ -3,12 +3,12 @@ import { useState } from "react";
 import { Button, Container, Nav, Navbar, NavDropdown } from "react-bootstrap";
 import {
   CircleHalf,
-  Eyeglasses,
   List,
   MoonFill,
   PersonCircle,
   SunFill,
 } from "react-bootstrap-icons";
+import logo from "../assets/logo.png";
 import { useAuthStore } from "../stores/useAuthStore";
 import { useAuth } from "../hooks/useAuth";
 import { useThemeStore, type Theme } from "../stores/useThemeStore";
@@ -88,8 +88,8 @@ function Header({ onToggleSidebar }: HeaderProps) {
             className="d-flex align-items-center"
             style={{ cursor: "pointer" }}
           >
-            <Eyeglasses size={30} className="me-2" />
-            <span>Opticar</span>
+            <img src={logo} alt="Optic-AR" height={36} className="me-2" />
+            <span className="fw-semibold">Optic-AR</span>
           </Navbar.Brand>
 
           <Navbar.Toggle aria-controls="navbar-nav" />
