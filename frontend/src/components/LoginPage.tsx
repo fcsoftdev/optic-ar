@@ -58,8 +58,11 @@ export default function LoginPage() {
               src={logo}
               alt="Optic-AR"
               style={{ height: 120, width: "auto" }}
-              className="mb-3"
+              className="mb-2"
             />
+            <p className="text-muted small mb-0">
+              Sistema de Gestión de Ópticas
+            </p>
           </div>
 
           {/* Alerta de credenciales incorrectas */}
