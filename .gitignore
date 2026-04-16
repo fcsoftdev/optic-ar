@@ -65,6 +65,7 @@ Thumbs.db
 *.mov
 *.wmv
 
+.opencode/
 .gitignore.orig
 .vscode/
 backend/db.sqlite3
