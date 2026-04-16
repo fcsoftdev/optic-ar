@@ -39,6 +39,7 @@ urlpatterns = [
     path("api/", include("compras.urls")),
     path("api/", include("contabilidad.urls")),
     path("api/", include("turnos.api_urls")),
+    path("api/", include("auditoria.urls")),
     # Apps legacy
     path("ventas/", include("ventas.urls")),
     path("turnos/", include("turnos.urls")),

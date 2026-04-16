@@ -14,6 +14,7 @@ import TurnosCalendar from "./TurnosCalendar";
 import ReporteCaja from "./ReporteCaja";
 import UserList from "./UserList";
 import GroupList from "./GroupList";
+import AuditoriaPage from "./AuditoriaPage";
 import ProtectedRoute from "./ProtectedRoute";
 
 /**
@@ -143,6 +144,15 @@ function MainContent() {
           <Route
             path="/grupos"
             element={<ProtectedRoute requiresStaff element={<GroupList />} />}
+          />
+          <Route
+            path="/auditoria"
+            element={
+              <ProtectedRoute
+                perm="authentication.ver_auditoria"
+                element={<AuditoriaPage />}
+              />
+            }
           />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

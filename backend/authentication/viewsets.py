@@ -30,6 +30,7 @@ APPS_RELEVANTES = [
     "contabilidad",
     "turnos",
     "auth",
+    "authentication",  # Incluye permiso custom ver_auditoria
 ]
 
 

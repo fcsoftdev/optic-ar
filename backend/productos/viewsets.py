@@ -6,6 +6,14 @@ from rest_framework import viewsets, filters, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
+
+from auditoria.services import (
+    capturar_estado_producto,
+    diff_producto,
+    registrar,
+    snapshot_producto,
+)
+
 from .models import Marca, Categoria, SubCategoria, Producto
 from .serializers import (
     MarcaSerializer,
@@ -49,6 +57,13 @@ class SubCategoriaViewSet(viewsets.ModelViewSet):
 
 
 class ProductoViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet para gestionar Productos.
+
+    Registra un RegistroAuditoria por cada operación crear/editar/eliminar,
+    incluyendo el aumento masivo de precios.
+    """
+
     queryset = Producto.objects.select_related(
         "marca", "categoria", "sub_categoria"
     ).all()
@@ -67,12 +82,42 @@ class ProductoViewSet(viewsets.ModelViewSet):
             return ProductoListSerializer
         return ProductoSerializer
 
+    def create(self, request, *args, **kwargs):
+        """Crea un Producto y registra el evento de auditoría."""
+        response = super().create(request, *args, **kwargs)
+        instance = Producto.objects.select_related(
+            "marca", "categoria", "sub_categoria"
+        ).get(pk=response.data["id"])
+        registrar(request.user, "crear", "producto", instance.id, snapshot_producto(instance))
+        return response
+
+    def update(self, request, *args, **kwargs):
+        """Actualiza un Producto y registra el diff en auditoría."""
+        instance = self.get_object()
+        estado_antes = capturar_estado_producto(instance)
+        response = super().update(request, *args, **kwargs)
+        instance.refresh_from_db()
+        detalle = diff_producto(estado_antes, instance)
+        registrar(request.user, "editar", "producto", instance.id, detalle)
+        return response
+
+    def destroy(self, request, *args, **kwargs):
+        """Elimina un Producto y registra el snapshot en auditoría."""
+        instance = self.get_object()
+        detalle = snapshot_producto(instance)
+        objeto_id = instance.id
+        response = super().destroy(request, *args, **kwargs)
+        registrar(request.user, "eliminar", "producto", objeto_id, detalle)
+        return response
+
     @action(detail=False, methods=["post"], url_path="aumento_masivo")
     def aumento_masivo(self, request):
         """
         Aplica un porcentaje de aumento al precio_costo de los productos indicados.
 
         Body: { "ids": [1, 2, 3], "porcentaje": 15.5 }
+
+        Registra un RegistroAuditoria de tipo "editar" por cada producto afectado.
         """
         ids = request.data.get("ids", [])
         porcentaje = request.data.get("porcentaje")
@@ -97,12 +142,16 @@ class ProductoViewSet(viewsets.ModelViewSet):
 
         from compras.models import HistorialCostoProducto
 
-        productos = Producto.objects.filter(id__in=ids)
+        productos = Producto.objects.select_related(
+            "marca", "categoria", "sub_categoria"
+        ).filter(id__in=ids)
         actualizados = 0
         hoy = timezone.now().date()
 
         with transaction.atomic():
             for producto in productos:
+                estado_antes = capturar_estado_producto(producto)
+
                 costo_anterior = producto.precio_costo or Decimal("0.00")
                 nuevo_costo = (costo_anterior * (1 + porcentaje / 100)).quantize(
                     Decimal("0.01")
@@ -132,6 +181,10 @@ class ProductoViewSet(viewsets.ModelViewSet):
                     HistorialCostoProducto.objects.filter(
                         id__in=historial_ids[4:]
                     ).delete()
+
+                producto.refresh_from_db()
+                detalle = diff_producto(estado_antes, producto)
+                registrar(request.user, "editar", "producto", producto.id, detalle)
 
                 actualizados += 1
 

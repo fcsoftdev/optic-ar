@@ -12,6 +12,7 @@ import {
   CardHeading,
   PeopleFill,
   ShieldLock,
+  ClockHistory,
 } from "react-bootstrap-icons";
 import SideNavItem, { type SideNavItemProps } from "./SideNavItem";
 import { useAuthStore } from "../stores/useAuthStore";
@@ -144,6 +145,14 @@ function SideNav({ show, onHide }: SideNavProps) {
       href: "#grupos",
       icon: <ShieldLock size={18} className="me-2" />,
       requiresStaff: true,
+    },
+    { type: "header" },
+    {
+      type: "link",
+      label: "Auditoría",
+      href: "#auditoria",
+      icon: <ClockHistory size={18} className="me-2" />,
+      perm: "authentication.ver_auditoria",
     },
   ];
 

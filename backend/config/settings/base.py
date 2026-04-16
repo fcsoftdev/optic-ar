@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "django_filters",
     # Local apps
     "authentication",
+    "auditoria",
     "compras",
     "ventas",
     "productos",

@@ -3,6 +3,14 @@ from rest_framework import viewsets, filters
 from rest_framework import serializers as drf_serializers
 from django_filters import rest_framework as df_filters
 from django_filters.rest_framework import DjangoFilterBackend
+
+from auditoria.services import (
+    capturar_estado_venta,
+    diff_venta,
+    registrar,
+    snapshot_venta,
+)
+
 from .models import ObraSocial, Cliente, Consulta, Venta
 from .serializers import (
     ObraSocialSerializer,
@@ -132,6 +140,8 @@ class VentaViewSet(viewsets.ModelViewSet):
 
     Al eliminar una venta, la señal ``devolver_stock_al_eliminar_venta``
     restaura automáticamente el stock de los productos involucrados.
+
+    Registra un RegistroAuditoria por cada operación crear/editar/eliminar.
     """
 
     queryset = (
@@ -160,3 +170,33 @@ class VentaViewSet(viewsets.ModelViewSet):
         if self.action == "list":
             return VentaListSerializer
         return VentaSerializer
+
+    def create(self, request, *args, **kwargs):
+        """Crea una Venta y registra el evento de auditoría."""
+        response = super().create(request, *args, **kwargs)
+        instance = (
+            Venta.objects.select_related("cliente")
+            .prefetch_related("detalles_ventas__producto")
+            .get(pk=response.data["id"])
+        )
+        registrar(request.user, "crear", "venta", instance.id, snapshot_venta(instance))
+        return response
+
+    def update(self, request, *args, **kwargs):
+        """Actualiza una Venta y registra el diff en auditoría."""
+        instance = self.get_object()
+        estado_antes = capturar_estado_venta(instance)
+        response = super().update(request, *args, **kwargs)
+        instance.refresh_from_db()
+        detalle = diff_venta(estado_antes, instance)
+        registrar(request.user, "editar", "venta", instance.id, detalle)
+        return response
+
+    def destroy(self, request, *args, **kwargs):
+        """Elimina una Venta y registra el snapshot en auditoría."""
+        instance = self.get_object()
+        detalle = snapshot_venta(instance)
+        objeto_id = instance.id
+        response = super().destroy(request, *args, **kwargs)
+        registrar(request.user, "eliminar", "venta", objeto_id, detalle)
+        return response

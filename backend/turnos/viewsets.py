@@ -9,6 +9,13 @@ from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 
+from auditoria.services import (
+    capturar_estado_turno,
+    diff_turno,
+    registrar,
+    snapshot_turno,
+)
+
 from .models import ConfiguracionCalendario, Turno
 from .serializers import ConfiguracionCalendarioSerializer, TurnoSerializer
 
@@ -37,6 +44,8 @@ class TurnoViewSet(viewsets.ModelViewSet):
     para que FullCalendar reciba todos los eventos del rango solicitado
     en una sola respuesta.
 
+    Registra un RegistroAuditoria en editar y eliminar (NO en crear).
+
     Filtros disponibles:
         - ``start``: fecha >= start (FullCalendar dateStr)
         - ``end``: fecha <= end
@@ -56,6 +65,25 @@ class TurnoViewSet(viewsets.ModelViewSet):
     search_fields = ["cliente__nombre_apellido"]
     ordering_fields = ["fecha", "hora_inicio"]
     ordering = ["fecha", "hora_inicio"]
+
+    def update(self, request, *args, **kwargs):
+        """Actualiza un Turno y registra el diff en auditoría."""
+        instance = self.get_object()
+        estado_antes = capturar_estado_turno(instance)
+        response = super().update(request, *args, **kwargs)
+        instance.refresh_from_db()
+        detalle = diff_turno(estado_antes, instance)
+        registrar(request.user, "editar", "turno", instance.id, detalle)
+        return response
+
+    def destroy(self, request, *args, **kwargs):
+        """Elimina un Turno y registra el snapshot en auditoría."""
+        instance = self.get_object()
+        detalle = snapshot_turno(instance)
+        objeto_id = instance.id
+        response = super().destroy(request, *args, **kwargs)
+        registrar(request.user, "eliminar", "turno", objeto_id, detalle)
+        return response
 
 
 class ConfiguracionCalendarioViewSet(viewsets.GenericViewSet):
