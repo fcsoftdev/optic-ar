@@ -34,6 +34,7 @@ interface SideNavProps {
  */
 function SideNav({ show, onHide }: SideNavProps) {
   const { user } = useAuthStore();
+  console.log("[SideNav] user:", JSON.stringify(user));
 
   /**
    * Verifica si el usuario tiene el permiso de Django indicado.
