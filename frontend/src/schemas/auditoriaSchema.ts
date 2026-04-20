@@ -27,7 +27,7 @@ export const registroAuditoriaSchema = z.object({
   /** ID del objeto afectado */
   objeto_id: z.number(),
   /** JSON con el snapshot (crear/eliminar) o diff (editar) de la operación */
-  detalle: z.record(z.unknown()),
+  detalle: z.record(z.string(), z.unknown()),
 });
 
 export type RegistroAuditoria = z.infer<typeof registroAuditoriaSchema>;
