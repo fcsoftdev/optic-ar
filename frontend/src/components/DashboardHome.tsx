@@ -9,7 +9,7 @@ import ComprasCard from "./ComprasCard";
  */
 const DashboardHome = () => (
   <div>
-    <h1>Bienvenido a Opticar</h1>
+    <h1>Bienvenido a Optic-AR</h1>
     <p className="mb-4">Sistema de gestión de óptica</p>
 
     <Row className="g-3">
