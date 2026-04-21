@@ -71,9 +71,9 @@ def _establecer_cookie_refresh(response: Response, refresh_token: str) -> None:
         value=refresh_token,
         httponly=True,
         secure=not settings.DEBUG,
-        samesite="Strict",
+        samesite="Lax",
         max_age=REFRESH_COOKIE_AGE,
-        path="/api/token/",
+        path="/",
     )
 
 
@@ -204,8 +204,8 @@ class LogoutView(APIView):
         )
         response.delete_cookie(
             key=REFRESH_COOKIE_NAME,
-            path="/api/token/",
-            samesite="Strict",
+            path="/",
+            samesite="Lax",
         )
         return response
 
