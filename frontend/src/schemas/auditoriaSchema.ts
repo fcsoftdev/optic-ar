@@ -17,7 +17,7 @@ export const registroAuditoriaSchema = z.object({
   /** Username del usuario que realizó la operación */
   usuario: z.string(),
   /** Clave de la acción realizada: crear | editar | eliminar */
-  accion: z.enum(["crear", "editar", "eliminar"]),
+  accion: z.enum(["crear", "editar", "eliminar"] as const),
   /** Texto legible de la acción */
   accion_display: z.string(),
   /** Clave del modelo auditado: compra | venta | producto | turno */
@@ -49,7 +49,7 @@ export const auditoriaFiltrosSchema = z.object({
   /** Clave del modelo a filtrar: compra | venta | producto | turno */
   modelo: z.string().optional(),
   /** Clave de la acción a filtrar: crear | editar | eliminar */
-  accion: z.enum(["crear", "editar", "eliminar", ""]).optional(),
+  accion: z.enum(["crear", "editar", "eliminar", ""] as const).optional(),
   /** Username (búsqueda parcial) */
   usuario: z.string().optional(),
   /** Fecha desde en formato YYYY-MM-DD */
